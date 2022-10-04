@@ -1,0 +1,145 @@
+import * as React from "react";
+import PropTypes from "prop-types";
+import clsx from "clsx";
+
+// Next Components
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+
+// MUI Components
+import { styled } from "@mui/material/styles";
+import MuiLink from "@mui/material/Link";
+
+interface NextLinkArg {
+  href: any;
+  linkAs: object | string;
+  locale: string;
+  passHref: boolean;
+  prefetch: boolean;
+  replace: boolean;
+  scroll: boolean;
+  shallow: boolean;
+  to: object | string;
+}
+// Add support for the sx prop for consistency with the other branches.
+const Anchor = styled("a")({});
+
+const NextLinkComposed = React.forwardRef(function NextLinkComposed(
+  props: NextLinkArg,
+  ref: any
+) {
+  // eslint-disable-next-line no-unused-vars
+  const { to, linkAs, replace, scroll, shallow, prefetch, locale, ...other } =
+    props;
+
+  return (
+    <NextLink
+      href={to}
+      prefetch={prefetch}
+      as={linkAs}
+      replace={replace}
+      scroll={scroll}
+      shallow={shallow}
+      passHref
+      locale={locale}
+    >
+      <Anchor ref={ref} {...other} />
+    </NextLink>
+  );
+});
+
+/**
+ * Link
+ *
+ * A styled version of the Next.js Link component
+ *
+ * @see https://nextjs.org/docs/api-reference/next/link
+ * @component
+ * @example
+ * render(
+ *   <Link href="/" color="secondary">
+ *     Go to the home page
+ *   </Link>
+ * )
+ */
+const Link = React.forwardRef(function Link(props: any, ref) {
+  const {
+    activeClassName = "active",
+    as: linkAs,
+    className: classNameProps,
+    href,
+    noLinkStyle,
+    // eslint-disable-next-line no-unused-vars
+    role, // Link don't have roles.
+    ...other
+  } = props;
+
+  const router = useRouter();
+  const pathname = typeof href === "string" ? href : href.pathname;
+  const className = clsx(classNameProps, {
+    [activeClassName]: router.pathname === pathname && activeClassName,
+  });
+
+  const isExternal =
+    typeof href === "string" &&
+    (href.indexOf("http") === 0 || href.indexOf("mailto:") === 0);
+
+  if (isExternal) {
+    if (noLinkStyle) {
+      return <Anchor className={className} href={href} ref={ref} {...other} />;
+    }
+
+    return <MuiLink className={className} href={href} ref={ref} {...other} />;
+  }
+
+  if (noLinkStyle) {
+    return (
+      <NextLinkComposed className={className} ref={ref} to={href} {...other} />
+    );
+  }
+
+  return (
+    <MuiLink
+      component={NextLinkComposed}
+      linkAs={linkAs}
+      className={className}
+      ref={ref}
+      to={href}
+      {...other}
+    />
+  );
+});
+
+Link.propTypes = {
+  locale: PropTypes.any,
+  /**
+   * Active Classname
+   */
+  activeClassName: PropTypes.string,
+  /**
+   * As component
+   */
+  as: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  /**
+   * Class name to apply
+   */
+  className: PropTypes.string,
+  /**
+   * Href location
+   */
+  href: PropTypes.any,
+  /**
+   * Link as Component
+   */
+  linkAs: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  /**
+   * Remove link style
+   */
+  noLinkStyle: PropTypes.bool,
+  /**
+   * Element role
+   */
+  role: PropTypes.string,
+};
+
+export default Link;
