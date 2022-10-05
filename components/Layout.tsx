@@ -24,7 +24,6 @@ import { useState } from "react";
  */
 export function Layout({ children, components, componentsProps }: any) {
   const { Toolbar } = components;
-  const drawerWidth = 240;
   // Example for Changing Toolbar Height
   // const toolbarHeight = 200
   const toolbarHeight = undefined;
@@ -32,9 +31,6 @@ export function Layout({ children, components, componentsProps }: any) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   // Example of a Responsive Layout with Fixed Viewport
   return (
@@ -53,14 +49,24 @@ export function Layout({ children, components, componentsProps }: any) {
       >
         <Toolbar
           isMobile={isMobile}
-          toggleDrawer={toggleDrawer}
           height={toolbarHeight}
           {...componentsProps.Toolbar}
         />
       </AppBar>
       <Box sx={{ display: "flex", flex: 1, overflow: "auto" }}>
         {/* Display the Page Component */}
-        <Container>{children}</Container>
+        <Container
+          sx={{
+            "@media (min-width:1200px)": {
+              maxWidth: "95vw !important",
+            },
+            "@media (min-width:1600px)": {
+              maxWidth: "80vw !important",
+            },
+          }}
+        >
+          {children}
+        </Container>
       </Box>
     </Box>
   );

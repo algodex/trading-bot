@@ -12,6 +12,31 @@ const theme = createTheme({
   typography: {
     fontFamily: [fontFamilies.body],
   },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        contained: {
+          backgroundColor: "#579F6E",
+          color: "#FFFFFF",
+          "&:hover": {
+            backgroundColor: "#579F6E",
+          },
+        },
+        outlined: {
+          backgroundColor: "transparent",
+          borderColor: "#000000",
+          color: "#000000",
+          borderWidth: "2px",
+          paddingBlock: "2px",
+          "&:hover": {
+            backgroundColor: "#000000",
+            color: "#D8DEE7",
+            borderWidth: "2px",
+          },
+        },
+      },
+    },
+  },
   palette: {
     primary: {
       main: "#D8DEE7",
@@ -20,14 +45,19 @@ const theme = createTheme({
     },
     secondary: {
       main: "#cc4444",
+      dark: "#4A5568",
+      contrastText: "#000000",
     },
     background: {
       default: "#f5f5f5",
     },
+    grey: {
+      main: "#D9D9D9",
+    },
     accent: {
-      main: '#44C480',
-      dark: '#579F6E',
-      contrastText: '#FFFFFF',
+      main: "#44C480",
+      dark: "#579F6E",
+      contrastText: "#FFFFFF",
     },
     error: {
       main: red.A400,
