@@ -60,15 +60,7 @@ export function Layout({ children, components, componentsProps }: any) {
       </AppBar>
       <Box sx={{ display: "flex", flex: 1, overflow: "auto" }}>
         {/* Display the Page Component */}
-        <Container
-          sx={{
-            padding: "0",
-            width: isMobile ? "100%" : "calc(100% - 240px)",
-            maxWidth: isMobile ? "100%" : "calc(100% - 240px) !important",
-          }}
-        >
-          {children}
-        </Container>
+        <Container>{children}</Container>
       </Box>
     </Box>
   );

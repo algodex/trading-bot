@@ -96,7 +96,7 @@ export const LocaleNavMenu = ({ onClick }: { onClick: Function }) => {
         variant="contained"
         color={"secondary"}
         sx={{
-          backgroundColor: "secondary.dark",
+          backgroundColor: "primary.dark",
         }}
         ref={anchorRef}
         id="composition-button"

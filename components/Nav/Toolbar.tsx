@@ -19,22 +19,20 @@ import { Logo } from "../Logo";
 function Toolbar({
   height,
   onClick,
+  isMobile,
   ...rest
 }: {
   height?: number;
   onClick: Function;
+  isMobile: boolean;
 }) {
   return (
-    <MUIToolbar
-      sx={{ height, backgroundColor: "primary.main" }}
-      {...rest}
-    >
+    <MUIToolbar sx={{ height, backgroundColor: "primary.main" }} {...rest}>
       <Box flex={1} display={"flex"} alignItems={"baseline"}>
-        <Logo />
+        <Logo isMobile={isMobile} />
       </Box>
       <LocaleNavMenu onClick={onClick} />
       {/* TODO: Make Menu Collapsable*/}
-    
     </MUIToolbar>
   );
 }
