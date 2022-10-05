@@ -20,11 +20,9 @@ const CustomTextInput = ({
     <Fragment>
       <TextField
         name={field.name}
-        label={field.name}
         value={field.value}
         onChange={field.onChange}
         onBlur={field.onBlur}
-        placeholder="Description"
         fullWidth
         {...props}
       />

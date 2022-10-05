@@ -16,6 +16,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { Note } from "./Note";
+import CustomRangeSlider from "./CustomRangeSlider";
 
 const MAINNET_LINK = process.env.NEXT_PUBLIC_MAINNET_LINK;
 const TESTNET_LINK = process.env.NEXT_PUBLIC_TESTNET_LINK;
@@ -41,6 +42,7 @@ export const BotForm = () => {
   const initialValues = {
     assetId: "",
     orderAlgoSize: "",
+    orderRange: 25,
     mnemonic: "",
     numOrders: "",
     spreadPercent: "",
@@ -53,11 +55,7 @@ export const BotForm = () => {
       .label("Asset Id")
       .max(32, "Name must be less than 100 characters")
       .required(),
-    orderAlgoSize: yup
-      .string()
-      .label("Email")
-      .email("Email is invalid")
-      .required(),
+    orderAlgoSize: yup.number().label("Order Size").required(),
     mnemonic: yup
       .string()
       .label("Password")
@@ -183,7 +181,9 @@ export const BotForm = () => {
                   </Link>
                 </Grid>
               </Grid>
-              <Typography sx={{ pt: "5px", fontSize: "14px", marginBottom:'40px' }}>
+              <Typography
+                sx={{ pt: "5px", fontSize: "14px", marginBottom: "40px" }}
+              >
                 *This bot currently uses Tinyman as a price oracle.
               </Typography>
 
@@ -208,23 +208,19 @@ export const BotForm = () => {
                 >
                   <Grid item md={9} xs={12}>
                     <Field
-                      component={CustomTextInput}
-                      placeholder="Asset ID"
-                      type="email"
-                      name="assetId"
-                      label="Asset Id"
-                      id="assetId"
+                      component={CustomRangeSlider}
+                      name="orderAlgoSize"
+                      id="orderAlgoSize"
                       required
                     />
                   </Grid>
                   <Grid item md={2} xs={12} marginLeft={"auto"}>
                     <Field
                       component={CustomTextInput}
-                      placeholder="Asset ID"
-                      type="email"
-                      name="assetId"
-                      label="Asset Id"
-                      id="assetId"
+                      type="number"
+                      name="orderRange"
+                      id="orderRange"
+                      min={1}
                       required
                     />
                   </Grid>
