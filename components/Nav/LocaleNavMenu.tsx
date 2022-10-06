@@ -152,7 +152,6 @@ export const LocaleNavMenu = ({ onClick }: { onClick: Function }) => {
                       <MenuItemLink
                         to={asPath}
                         locale={localeCd}
-                        onClick={onClick || handleClose}
                         key={localeCd}
                         primary={localeCd}
                         icon={
