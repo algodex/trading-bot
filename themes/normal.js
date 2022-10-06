@@ -52,7 +52,8 @@ const theme = createTheme({
       default: "#f5f5f5",
     },
     grey: {
-      main: "#D9D9D9",
+      100: "#D9D9D9",
+      200:'#A1AEC0'
     },
     accent: {
       main: "#44C480",
