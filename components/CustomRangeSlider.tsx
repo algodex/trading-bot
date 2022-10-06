@@ -23,6 +23,9 @@ const CustomRangeSlider = ({
         value={field.value}
         onChange={field.onChange}
         onBlur={field.onBlur}
+        sx={{
+          "color": "secondary.dark",
+        }}
         {...props}
       />
       {hasError && (

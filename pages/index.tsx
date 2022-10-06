@@ -1,12 +1,15 @@
-import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
 import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { defaults } from "@/next-i18next.config";
 import Head from "next/head";
 import { BotForm } from "@/components/BotForm";
+
+//MUI components
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 
 export async function getServerSideProps({ locale }: { locale: any }) {
   return {
@@ -36,14 +39,18 @@ const RegisterPage = () => {
           <BotForm />
         </Grid>
         <Grid item xs={12} md={6} lg={6} xl={5}>
-          <Box>
-            <TextField
-              placeholder="MultiLine with rows: 2 and rowsMax: 4"
-              multiline
-              rows={20}
-              // maxRows={20}
-              fullWidth
-            />
+          <TextField
+            placeholder="MultiLine with rows: 2 and rowsMax: 4"
+            multiline
+            rows={20}
+            // maxRows={20}
+            fullWidth
+          />
+
+          <Box sx={{ textAlign: "end" }}>
+            <Button variant="outlined" sx={{ marginTop: "10px" }}>
+              CLEAR LOGS
+            </Button>
           </Box>
         </Grid>
       </Grid>

@@ -38,12 +38,12 @@ export const Note = ({
         <IconComponent />
       ) : (
         <CheckCircleOutlineRoundedIcon
-          sx={{ marginRight: "5px", fontSize: "14px" }}
+          sx={{ marginRight: "5px", fontSize: "15px", marginTop:'3px' }}
         />
       )}
       <Box>
         {note && (
-          <Typography fontSize={"0.7rem"} fontWeight={700} fontStyle="italic">
+          <Typography fontSize={"14px"} fontWeight={700} fontStyle="italic">
             {note}{" "}
             {link && (
               <Link
