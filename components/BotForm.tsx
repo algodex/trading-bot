@@ -67,18 +67,18 @@ export const BotForm = () => {
       .string()
       .label("Asset Id")
       .max(32, "Name must be less than 100 characters")
-      .required(),
-    orderAlgoSize: yup.number().label("Order Size").required(),
+      .required('Required'),
+    orderAlgoSize: yup.number().positive('Invalid').label("Order Size").required('Required'),
     nearestKeep: yup.number().label("Nearest Keep").optional(),
     mnemonic: yup
       .string()
       .label("Password")
       .min(8, "Password must be more than 8 characters")
       .max(32, "Password must be less than 32 characters")
-      .required(),
-    numOrders: yup.number().label("Please confirm your password").required(),
-    spreadPercent: yup.number().label("Please add a spread").required(),
-    terms: yup.boolean().label("Accept Terms").required(),
+      .required('Required'),
+    numOrders: yup.number().label("Please confirm your password").required('Required'),
+    spreadPercent: yup.number().label("Please add a spread").required('Required'),
+    terms: yup.boolean().label("Accept Terms").required('Required'),
   });
 
   const handleStart = (formValues: any) => {

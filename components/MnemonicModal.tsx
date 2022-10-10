@@ -15,6 +15,25 @@ export const MnemonicModal = ({
   open: boolean;
   handleClose: any;
 }) => {
+  const prefillInputs = (mnemonicList: string[]) => {
+    [...Array(25)].forEach((item, index) => {
+      const currentInput: HTMLInputElement | null = document.querySelector(
+        `#input${index}`
+      );
+      if (currentInput && mnemonicList[index]) {
+        currentInput.value = mnemonicList[index];
+      }
+    });
+  };
+  const importWallet = () => {
+    const inputs: NodeListOf<HTMLInputElement> | null =
+      document.querySelectorAll(".input");
+    const phrases: string[] = [];
+    inputs.forEach((input, index) => {
+      phrases.push(input.value);
+    });
+    console.log(phrases);
+  };
   return (
     <Modal
       open={open}
@@ -145,12 +164,27 @@ export const MnemonicModal = ({
                 }}
               >
                 {index + 1}.
-                <input type="text" />
+                <input
+                  type="text"
+                  className="input"
+                  id={`input${index}`}
+                  onChange={({ target: { value } }) => {
+                    const mnemonicList = value.split(",");
+                    if (
+                      mnemonicList.filter((item) => item !== "" && item !== " ")
+                        .length === 25
+                    ) {
+                      prefillInputs(mnemonicList);
+                    }
+                  }}
+                />
               </Box>
             ))}
           </Box>
           <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
-            <Button variant="outlined">IMPORT WALLET</Button>
+            <Button variant="outlined" onClick={importWallet}>
+              IMPORT WALLET
+            </Button>
           </Box>
         </Box>
       </Box>
