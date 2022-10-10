@@ -14,18 +14,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-const initWallet = async (
-  algodexApi: any,
-  walletAddr: string
-): Promise<any> => {
-  await algodexApi.setWallet({
-    type: "sdk",
-    address: walletAddr,
-    connector: require("@algodex/algodex-sdk/lib/wallet/connectors/AlgoSDK"),
-    // eslint-disable-next-line max-len
-    mnemonic: process.env.WALLET_MNEMONIC,
-  });
+export const storageKeys = {
+  wallet: "algodex_tb_wallet_address",
 };
 
-export default initWallet;
+export const getWallet = () => {
+  const wallet =
+    typeof window !== "undefined"
+      ? localStorage.getItem(storageKeys.wallet)
+      : null;
+  if (wallet) {
+    return wallet;
+  } else {
+    return null;
+  }
+};
+
+export const saveWallet = (wallet: string) => {
+  localStorage.setItem(storageKeys.wallet, wallet);
+};

@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import algosdk from "algosdk";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -23,6 +24,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import initWallet from "@/lib/initWallet";
+import { saveWallet } from "@/lib/storage";
 
 export const MnemonicModal = ({
   open,
@@ -41,14 +44,20 @@ export const MnemonicModal = ({
       }
     });
   };
-  const importWallet = () => {
+  const importWallet = async () => {
     const inputs: NodeListOf<HTMLInputElement> | null =
       document.querySelectorAll(".input");
     const phrases: string[] = [];
     inputs.forEach((input, index) => {
-      phrases.push(input.value);
+      if (input.value) {
+        phrases.push(input.value);
+      }
     });
-    console.log(phrases);
+    if (phrases.length === 25) {
+      let account = algosdk.mnemonicToSecretKey(phrases.join(""));
+      saveWallet(account.addr);
+      handleClose()
+    }
   };
   return (
     <Modal

@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import { LoadingButton } from "@mui/lab";
@@ -40,6 +40,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Note } from "./Note";
 import CustomRangeSlider from "./CustomRangeSlider";
 import { MnemonicModal } from "./MnemonicModal";
+import { getWallet } from "@/lib/storage";
+import { shortenAddress } from "@/lib/helper";
 
 const MAINNET_LINK = process.env.NEXT_PUBLIC_MAINNET_LINK;
 const TESTNET_LINK = process.env.NEXT_PUBLIC_TESTNET_LINK;
@@ -68,6 +70,10 @@ export const BotForm = () => {
     environment.toUpperCase()
   );
 
+  const walletAddress = useMemo(() => {
+    return getWallet();
+  }, [openModal]);
+
   const initialValues = {
     assetId: "",
     orderAlgoSize: 0,
@@ -83,18 +89,28 @@ export const BotForm = () => {
       .string()
       .label("Asset Id")
       .max(32, "Name must be less than 100 characters")
-      .required('Required'),
-    orderAlgoSize: yup.number().positive('Invalid').label("Order Size").required('Required'),
+      .required("Required"),
+    orderAlgoSize: yup
+      .number()
+      .positive("Invalid")
+      .label("Order Size")
+      .required("Required"),
     nearestKeep: yup.number().label("Nearest Keep").optional(),
     mnemonic: yup
       .string()
       .label("Password")
       .min(8, "Password must be more than 8 characters")
       .max(32, "Password must be less than 32 characters")
-      .required('Required'),
-    numOrders: yup.number().label("Please confirm your password").required('Required'),
-    spreadPercent: yup.number().label("Please add a spread").required('Required'),
-    terms: yup.boolean().label("Accept Terms").required('Required'),
+      .required("Required"),
+    numOrders: yup
+      .number()
+      .label("Please confirm your password")
+      .required("Required"),
+    spreadPercent: yup
+      .number()
+      .label("Please add a spread")
+      .required("Required"),
+    terms: yup.boolean().label("Accept Terms").required("Required"),
   });
 
   const handleStart = (formValues: any) => {
@@ -180,7 +196,9 @@ export const BotForm = () => {
                         Connected Wallet:
                       </Typography>
                       <Button variant="outlined" onClick={handleOpenModal}>
-                        Input Mnemonic
+                        {walletAddress
+                          ? shortenAddress(walletAddress)
+                          : "Input Mnemonic"}
                       </Button>
                     </Box>
                   </Grid>

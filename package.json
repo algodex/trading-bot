@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@algodex/algodex-sdk": "^2.0.6",
     "@emotion/cache": "^11.10.3",
     "@emotion/react": "^11.10.4",
     "@emotion/server": "^11.10.0",
