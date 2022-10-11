@@ -16,7 +16,6 @@ npm install
 ```
 cp .env.testnet.example .env
 ```
-Edit the .env file to your Algorand node and indexer endpoints, and add in your wallet mnemonic (without commas).
 
 First, run the development server:
 
@@ -29,6 +28,8 @@ yarn dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Run cli
+
+Edit the .env file to your Algorand node and indexer endpoints, and add in your wallet mnemonic (without commas).
 
 ```
 npm run compile-and-start-cli -- --assetId=<assetId>
