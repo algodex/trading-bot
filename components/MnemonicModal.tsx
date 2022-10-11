@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import algosdk from "algosdk";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -23,6 +24,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import initWallet from "@/lib/initWallet";
+import { saveWallet } from "@/lib/storage";
 
 export const MnemonicModal = ({
   open,
@@ -31,6 +34,31 @@ export const MnemonicModal = ({
   open: boolean;
   handleClose: any;
 }) => {
+  const prefillInputs = (mnemonicList: string[]) => {
+    [...Array(25)].forEach((item, index) => {
+      const currentInput: HTMLInputElement | null = document.querySelector(
+        `#input${index}`
+      );
+      if (currentInput && mnemonicList[index]) {
+        currentInput.value = mnemonicList[index];
+      }
+    });
+  };
+  const importWallet = async () => {
+    const inputs: NodeListOf<HTMLInputElement> | null =
+      document.querySelectorAll(".input");
+    const phrases: string[] = [];
+    inputs.forEach((input, index) => {
+      if (input.value) {
+        phrases.push(input.value);
+      }
+    });
+    if (phrases.length === 25) {
+      let account = algosdk.mnemonicToSecretKey(phrases.join(""));
+      saveWallet(account.addr);
+      handleClose()
+    }
+  };
   return (
     <Modal
       open={open}
@@ -161,12 +189,27 @@ export const MnemonicModal = ({
                 }}
               >
                 {index + 1}.
-                <input type="text" />
+                <input
+                  type="text"
+                  className="input"
+                  id={`input${index}`}
+                  onChange={({ target: { value } }) => {
+                    const mnemonicList = value.split(",");
+                    if (
+                      mnemonicList.filter((item) => item !== "" && item !== " ")
+                        .length === 25
+                    ) {
+                      prefillInputs(mnemonicList);
+                    }
+                  }}
+                />
               </Box>
             ))}
           </Box>
           <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
-            <Button variant="outlined">IMPORT WALLET</Button>
+            <Button variant="outlined" onClick={importWallet}>
+              IMPORT WALLET
+            </Button>
           </Box>
         </Box>
       </Box>

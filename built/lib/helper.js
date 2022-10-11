@@ -1,5 +1,6 @@
-/* 
- * Algodex Trading Bot 
+"use strict";
+/*
+ * Algodex Trading Bot
  * Copyright (C) 2022 Algodex VASP (BVI) Corp.
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -13,19 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-const initWallet = async (
-  algodexApi: any,
-  walletAddr: string
-): Promise<any> => {
-  await algodexApi.setWallet({
-    type: "sdk",
-    address: walletAddr,
-    connector: require("@algodex/algodex-sdk/lib/wallet/connectors/AlgoSDK"),
-    // eslint-disable-next-line max-len
-    mnemonic: process.env.WALLET_MNEMONIC,
-  });
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.shortenAddress = void 0;
+const shortenAddress = (address) => {
+    const list = address.split("");
+    const first = list.slice(0, 6);
+    const last = list.slice(list.length - 6, list.length);
+    return `${first.join("")}...${last.join("")}`;
 };
-
-export default initWallet;
+exports.shortenAddress = shortenAddress;
