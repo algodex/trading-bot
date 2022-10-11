@@ -32,6 +32,7 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+// import { BotForm } from "@/components/BotForm";
 
 export async function getServerSideProps({ locale }: { locale: any }) {
   return {
