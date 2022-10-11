@@ -11,7 +11,7 @@
     "start-cli": "node built/bin/bot.js"
   },
   "dependencies": {
-    "@algodex/algodex-sdk": "^2.0.6",
+    "@algodex/algodex-sdk": "^2.1.3",
     "@emotion/cache": "^11.10.3",
     "@emotion/react": "^11.10.4",
     "@emotion/server": "^11.10.0",
