@@ -14,17 +14,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 const initWallet = async (
   algodexApi: any,
-  walletAddr: string
+  walletAddr: string,
+  mnemonic?: string
 ): Promise<any> => {
+  if (!process.env.WALLET_MNEMONIC && !mnemonic) {
+    throw new Error("Mnemonic not set!");
+  }
   await algodexApi.setWallet({
     type: "sdk",
     address: walletAddr,
     connector: require("@algodex/algodex-sdk/lib/wallet/connectors/AlgoSDK"),
     // eslint-disable-next-line max-len
-    mnemonic: process.env.WALLET_MNEMONIC,
+    mnemonic: mnemonic || process.env.WALLET_MNEMONIC,
   });
 };
 

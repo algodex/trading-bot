@@ -14,8 +14,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import algosdk from "algosdk";
+import Image from "next/image";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -24,8 +25,10 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import initWallet from "@/lib/initWallet";
+
+//lib
 import { saveWallet } from "@/lib/storage";
+import { CustomPasswordInput, passPhrase } from "./CustomPasswordInput";
 
 export const MnemonicModal = ({
   open,
@@ -34,6 +37,12 @@ export const MnemonicModal = ({
   open: boolean;
   handleClose: any;
 }) => {
+  const [mnemonic, setMnemonic] = useState<string | undefined>();
+  const [passphrase, setPassphrase] = useState<passPhrase>({
+    password: "",
+    show: false,
+  });
+
   const prefillInputs = (mnemonicList: string[]) => {
     [...Array(25)].forEach((item, index) => {
       const currentInput: HTMLInputElement | null = document.querySelector(
@@ -44,25 +53,41 @@ export const MnemonicModal = ({
       }
     });
   };
+
   const importWallet = async () => {
+    if (mnemonic && passphrase.password) {
+      let account = algosdk.mnemonicToSecretKey(mnemonic);
+      saveWallet(account.addr, mnemonic, passphrase.password);
+      setMnemonic(undefined);
+      setPassphrase({
+        password: "",
+        show: false,
+      });
+      handleClose();
+    }
+  };
+
+  const getPassPhrase = () => {
     const inputs: NodeListOf<HTMLInputElement> | null =
       document.querySelectorAll(".input");
     const phrases: string[] = [];
-    inputs.forEach((input, index) => {
+    inputs.forEach((input) => {
       if (input.value) {
         phrases.push(input.value);
       }
     });
     if (phrases.length === 25) {
-      let account = algosdk.mnemonicToSecretKey(phrases.join(""));
-      saveWallet(account.addr);
-      handleClose()
+      setMnemonic(phrases.join(" "));
     }
   };
+
   return (
     <Modal
       open={open}
-      onClose={handleClose}
+      onClose={() => {
+        handleClose();
+        setMnemonic(undefined);
+      }}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
@@ -92,7 +117,10 @@ export const MnemonicModal = ({
             width: "fit-content",
             marginBottom: "25px",
           }}
-          onClick={handleClose}
+          onClick={() => {
+            handleClose();
+            setMnemonic(undefined);
+          }}
         >
           <ChevronLeftIcon sx={{ fontSize: "30px" }} />
           CANCEL
@@ -105,112 +133,212 @@ export const MnemonicModal = ({
             },
           }}
         >
-          <Box
-            sx={{
-              marginBottom: "30px",
-              display: "flex",
-              columnGap: "10px",
-              "@media(min-width:800px)": {
-                paddingLeft: "4rem",
-              },
-            }}
-          >
-            <FormatListBulletedIcon
+          {mnemonic ? (
+            <Box
               sx={{
-                fontSize: "40px",
-                marginTop: "10px",
-                "@media (max-width: 330px)": {
-                  display: "none",
+                width: "85%",
+                marginX: "auto",
+                "@media (max-width: 800px)": {
+                  width: "90%",
+                },
+                "@media (max-width: 501px)": {
+                  width: "100%",
                 },
               }}
-            />
-            <Box>
-              <Typography
-                sx={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                }}
-              >
-                Import Wallet with Mnemonic Phrase
-              </Typography>
-
-              <Typography
-                sx={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  marginBottom: "10px",
-                  color: "primary.dark",
-                }}
-              >
-                Enter the 25 word seed phrase to connect your wallet.
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  fontStyle: "italic",
-                }}
-              >
-                The entered mnemonic is encrypted only stored locally on this
-                device. Algodex cannot access your mnemonic phrase and is not
-                responsible for any lost funds if you lose your wallet mnemonic.
-              </Typography>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
-              gridRowGap: "30px",
-              gridColumnGap: "30px",
-              "@media (max-width: 501px)": {
-                gridTemplateColumns: "repeat(auto-fit, minmax(60px, 1fr))",
-              },
-            }}
-          >
-            {[...Array(25)].map((item, index) => (
+            >
               <Box
-                key={index}
                 sx={{
-                  background: "transparent",
-                  border: "1px solid",
-                  borderRadius: "3px",
-                  overflow: "hidden",
-                  borderColor: "grey.200",
+                  marginBottom: "30px",
                   display: "flex",
-                  padding: "2px 4px",
-                  input: {
-                    width: "100%",
-                    border: "none",
-                    fontSize: "16px",
-                    "&:focus": {
-                      outline: "none",
-                    },
+                  columnGap: "10px",
+                  "@media(min-width:800px)": {
+                    paddingLeft: "4rem",
                   },
                 }}
               >
-                {index + 1}.
-                <input
-                  type="text"
-                  className="input"
-                  id={`input${index}`}
-                  onChange={({ target: { value } }) => {
-                    const mnemonicList = value.split(",");
-                    if (
-                      mnemonicList.filter((item) => item !== "" && item !== " ")
-                        .length === 25
-                    ) {
-                      prefillInputs(mnemonicList);
-                    }
+                <Box
+                  sx={{
+                    marginTop: "10px",
                   }}
+                >
+                  <Image
+                    src="/password.png"
+                    alt="password"
+                    width="35"
+                    height="35"
+                  />
+                </Box>
+                <Box>
+                  <Typography
+                    sx={{
+                      fontSize: "22px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Create Passphrase
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: 500,
+                      marginBottom: "5px",
+                      color: "primary.dark",
+                    }}
+                  >
+                    Create a passphrase to unlock this wallet in new sessions on
+                    this device
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    The passphrase is only stored locally. If you forget it, you
+                    will need to clear and re-enter the mnemonic.
+                  </Typography>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  width: "50%",
+                  marginX: "auto",
+                  "@media (max-width: 501px)": {
+                    width: "80%",
+                  },
+                }}
+              >
+                <CustomPasswordInput
+                  passphrase={passphrase}
+                  setPassphrase={setPassphrase}
                 />
               </Box>
-            ))}
-          </Box>
-          <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
-            <Button variant="outlined" onClick={importWallet}>
-              IMPORT WALLET
-            </Button>
-          </Box>
+              <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
+                <Button
+                  variant="contained"
+                  disabled={!passphrase.password}
+                  onClick={importWallet}
+                >
+                  Create Passphrase
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            <>
+              <Box
+                sx={{
+                  marginBottom: "30px",
+                  display: "flex",
+                  columnGap: "10px",
+                  "@media(min-width:800px)": {
+                    paddingLeft: "4rem",
+                  },
+                }}
+              >
+                <FormatListBulletedIcon
+                  sx={{
+                    fontSize: "40px",
+                    marginTop: "10px",
+                    "@media (max-width: 330px)": {
+                      display: "none",
+                    },
+                  }}
+                />
+                <Box>
+                  <Typography
+                    sx={{
+                      fontSize: "22px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Import Wallet with Mnemonic Phrase
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: 500,
+                      marginBottom: "5px",
+                      color: "primary.dark",
+                    }}
+                  >
+                    Enter the 25 word seed phrase to connect your wallet.
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    The entered mnemonic is encrypted only stored locally on
+                    this device. Algodex cannot access your mnemonic phrase and
+                    is not responsible for any lost funds if you lose your
+                    wallet mnemonic.
+                  </Typography>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+                  gridRowGap: "30px",
+                  gridColumnGap: "30px",
+                  "@media (max-width: 501px)": {
+                    gridTemplateColumns: "repeat(auto-fit, minmax(60px, 1fr))",
+                  },
+                }}
+              >
+                {[...Array(25)].map((item, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      background: "transparent",
+                      border: "1px solid",
+                      borderRadius: "3px",
+                      overflow: "hidden",
+                      borderColor: "grey.200",
+                      display: "flex",
+                      padding: "2px 4px",
+                      input: {
+                        width: "100%",
+                        border: "none",
+                        fontSize: "16px",
+                        "&:focus": {
+                          outline: "none",
+                        },
+                      },
+                    }}
+                  >
+                    {index + 1}.
+                    <input
+                      type="text"
+                      className="input"
+                      id={`input${index}`}
+                      onChange={({ target: { value } }) => {
+                        const mnemonicList =
+                          value.split(",").length > 1
+                            ? value.split(",")
+                            : value.split(" ");
+                        if (
+                          mnemonicList.filter(
+                            (item) => item !== "" && item !== " "
+                          ).length === 25
+                        ) {
+                          prefillInputs(mnemonicList);
+                        }
+                      }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+              <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
+                <Button variant="outlined" onClick={getPassPhrase}>
+                  IMPORT WALLET
+                </Button>
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
     </Modal>

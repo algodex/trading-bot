@@ -15,13 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-const initWallet = async (algodexApi, walletAddr) => {
+const initWallet = async (algodexApi, walletAddr, mnemonic) => {
+    if (!process.env.WALLET_MNEMONIC && !mnemonic) {
+        throw new Error("Mnemonic not set!");
+    }
     await algodexApi.setWallet({
         type: "sdk",
         address: walletAddr,
         connector: require("@algodex/algodex-sdk/lib/wallet/connectors/AlgoSDK"),
         // eslint-disable-next-line max-len
-        mnemonic: process.env.WALLET_MNEMONIC,
+        mnemonic: mnemonic || process.env.WALLET_MNEMONIC,
     });
 };
 exports.default = initWallet;

@@ -14,19 +14,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
-import { LoadingButton } from "@mui/lab";
 import runLoop from "@/lib/runLoop";
 import PouchDB from "pouchdb";
+import dynamic from "next/dynamic";
 
 //MUI Components
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import LaunchIcon from "@mui/icons-material/Launch";
 import Link from "@mui/material/Link";
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -35,20 +34,27 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LoadingButton from "@mui/lab/LoadingButton";
+import Button from "@mui/material/Button";
 
 // Custom components
 import { Note } from "./Note";
 import CustomRangeSlider from "./CustomRangeSlider";
 import CustomTextInput from "./CustomTextInput";
-import { MnemonicModal } from "./MnemonicModal";
-import { getWallet } from "@/lib/storage";
-import { shortenAddress } from "@/lib/helper";
 import initAPI from "@/lib/initAPI";
-import { Environment } from "@/lib/types/config";
+import { BotConfig, Environment } from "@/lib/types/config";
+import { getMnemonic, getWallet } from "@/lib/storage";
+import { passPhrase } from "./CustomPasswordInput";
+import { ValidateWallet } from "./validateWallet";
 
-const MAINNET_LINK = process.env.NEXT_PUBLIC_MAINNET_LINK;
-const TESTNET_LINK = process.env.NEXT_PUBLIC_TESTNET_LINK;
-const ENABLE_NETWORK_SELECTION = TESTNET_LINK && MAINNET_LINK;
+const WalletButton = dynamic(
+  () =>
+    import("@/components/walletButton").then((mod: any) => mod.WalletButton),
+  {
+    ssr: false,
+  }
+);
+
 const environmentLinks = ["testnet", "mainnet"];
 
 const cardStyles = {
@@ -63,27 +69,26 @@ const cardStyles = {
     display: "none",
   },
 };
+
 export const BotForm = () => {
   const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = React.useState(false);
-  const handleOpenModal = () => setOpenModal(true);
-  const handleCloseModal = () => setOpenModal(false);
   const [environment, setEnvironment] = useState<any | Environment>(
-    process.env.ENVIRONMENT || "testnet"
+    process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
-
-  const walletAddr = useMemo(() => {
-    return getWallet();
-  }, [openModal]);
+  const [config, setConfig] = useState<null | BotConfig>();
+  const [passphrase, setPassphrase] = useState<passPhrase>({
+    password: "",
+    show: false,
+  });
+  const formikRef = useRef<any>();
+  const [openModal, setOpenModal] = useState(false);
 
   const initialValues = {
     assetId: "",
-    orderAlgoDepth: 0,
-    mnemonic: "",
-    ladderTiers: 0,
-    minSpreadPerc: 0,
+    orderAlgoDepth: 3,
+    ladderTiers: 3,
+    minSpreadPerc: 0.0025,
     nearestNeighborKeep: 0,
-    terms: true,
   };
 
   const validationSchema = yup.object().shape({
@@ -100,71 +105,98 @@ export const BotForm = () => {
     nearestNeighborKeep: yup.number().label("Nearest Keep").optional(),
     ladderTiers: yup
       .number()
+      .positive("Invalid")
       .label("Please confirm your password")
       .required("Required"),
     minSpreadPerc: yup
       .number()
+      .positive("Invalid")
       .label("Please add a spread")
       .required("Required"),
-    // terms: yup.boolean().label("Accept Terms").required("Required"),
   });
 
   const handleStart = (formValues: any) => {
-    console.log(formValues);
+    const walletAddr = getWallet();
     if (walletAddr) {
-      const pouchUrl = process.env.POUCHDB_URL
-        ? process.env.POUCHDB_URL + "/"
-        : "";
-      const fullPouchUrl =
-        pouchUrl +
-        "market_maker_" +
-        formValues.assetId +
-        "_" +
-        walletAddr.slice(0, 8).toLowerCase();
-      const escrowDB = new PouchDB(fullPouchUrl);
-      const useTinyMan =
-        (process.env.USE_TINYMAN &&
-          process.env.USE_TINYMAN.toLowerCase() !== "false") ||
-        false;
-      const api = initAPI(environment);
-      const config = {
-        ...formValues,
-        walletAddr,
-        environment,
-        useTinyMan,
-        api,
-        escrowDB,
-      };
-      delete config.mnemonic;
-      delete config.terms;
-      console.log(config)
+      setOpenModal(true);
+    }
+  };
+
+  const stopBot = () => {
+    if (config) {
       runLoop({
         config,
-        assetInfo: formValues.assetId,
+        assetInfo: null,
         lastBlock: 0,
         runState: {
-          isExiting: false,
+          isExiting: true,
           inRunLoop: false,
         },
       });
+      setLoading(false);
     }
   };
 
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     setEnvironment(value);
-    // if (ENABLE_NETWORK_SELECTION) {
-    // setEnvironment(value);
-    //       if (value === "MAINNET") {
-    //         window.location = `${MAINNET_LINK}`;
-    //       } else {
-    //         window.location = `${TESTNET_LINK}`;
-    //       }
-    // }
+  };
+
+  const validateWallet = (mnemonic: string) => {
+    const walletAddr = getWallet();
+    const formValues = formikRef.current.values;
+    if (walletAddr && mnemonic) {
+      try {
+        const pouchUrl = process.env.POUCHDB_URL
+          ? process.env.POUCHDB_URL + "/"
+          : "";
+        const fullPouchUrl =
+          pouchUrl +
+          "market_maker_" +
+          formValues.assetId +
+          "_" +
+          walletAddr.slice(0, 8).toLowerCase();
+        const escrowDB = new PouchDB(fullPouchUrl);
+        const useTinyMan = process.env.NEXT_PUBLIC_USE_TINYMAN || false;
+        const api = initAPI(environment);
+        const _config = {
+          ...formValues,
+          walletAddr,
+          environment,
+          useTinyMan,
+          api,
+          escrowDB,
+          mnemonic,
+        };
+
+        setConfig(_config);
+        setLoading(true);
+        runLoop({
+          config: _config,
+          assetInfo: null,
+          lastBlock: 0,
+          runState: {
+            isExiting: false,
+            inRunLoop: false,
+          },
+        });
+      } catch (error) {
+        setLoading(false);
+        console.log(error);
+      }
+    }
+  };
+
+  const handleClose = (mnemonic?: string) => {
+    setOpenModal(false);
+    if (mnemonic) {
+      validateWallet(mnemonic);
+    }
   };
 
   return (
     <>
       <Formik
+        innerRef={formikRef}
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleStart}
@@ -217,27 +249,7 @@ export const BotForm = () => {
                     </Select>
                   </Grid>
                   <Grid item md={8} xs={12} marginLeft={"auto"}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        columnGap: "9px",
-                        justifyContent: "end",
-                        flexWrap: "wrap",
-                        "@media(max-width:900px)": {
-                          justifyContent: "start",
-                        },
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600, fontSize: "17px" }}>
-                        Connected Wallet:
-                      </Typography>
-                      <Button variant="outlined" onClick={handleOpenModal}>
-                        {walletAddr
-                          ? shortenAddress(walletAddr)
-                          : "Input Mnemonic"}
-                      </Button>
-                    </Box>
+                    <WalletButton />
                   </Grid>
                 </Grid>
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
@@ -541,23 +553,39 @@ export const BotForm = () => {
                     </Grid>
                   </AccordionDetails>
                 </Accordion>
-                <LoadingButton
-                  variant="contained"
-                  fullWidth
-                  type="submit"
-                  loading={loading}
-                  disabled={loading || !isValid}
-                  sx={{ py: "0.8rem", mt: "1rem" }}
-                >
-                  Start Bot
-                </LoadingButton>
+                {!loading ? (
+                  <LoadingButton
+                    variant="contained"
+                    fullWidth
+                    type="submit"
+                    loading={loading}
+                    disabled={loading || !isValid}
+                    sx={{ py: "0.8rem", mt: "1rem" }}
+                  >
+                    Start Bot
+                  </LoadingButton>
+                ) : (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    type="button"
+                    sx={{ py: "0.8rem", mt: "1rem" }}
+                    onClick={stopBot}
+                  >
+                    Stop Bot
+                  </Button>
+                )}
               </>
             </Form>
           );
         }}
       </Formik>
-
-      <MnemonicModal open={openModal} handleClose={handleCloseModal} />
+      <ValidateWallet
+        open={openModal}
+        handleClose={handleClose}
+        passphrase={passphrase}
+        setPassphrase={setPassphrase}
+      />
     </>
   );
 };

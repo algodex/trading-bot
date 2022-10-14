@@ -22,17 +22,17 @@ const initAPI = (environment: Environment): any => {
   return new AlgodexAPI({
     config: {
       algod: {
-        uri: process.env.ALGOD_SERVER,
-        token: process.env.ALGOD_TOKEN || "",
-        port: process.env.ALGOD_PORT
-          ? parseInt(process.env.ALGOD_PORT)
+        uri: process.env.NEXT_PUBLIC_ALGOD_SERVER,
+        token: process.env.NEXT_PUBLIC_ALGOD_TOKEN || "",
+        port: process.env.NEXT_PUBLIC_ALGOD_PORT
+          ? parseInt(process.env.NEXT_PUBLIC_ALGOD_PORT)
           : undefined,
       },
       indexer: {
-        uri: process.env.INDEXER_SERVER,
-        token: process.env.INDEXER_TOKEN || "",
-        port: process.env.INDEXER_PORT
-          ? parseInt(process.env.INDEXER_PORT)
+        uri: process.env.NEXT_PUBLIC_INDEXER_SERVER,
+        token: process.env.NEXT_PUBLIC_INDEXER_TOKEN || "",
+        port: process.env.NEXT_PUBLIC_INDEXER_PORT
+          ? parseInt(process.env.NEXT_PUBLIC_INDEXER_PORT)
           : undefined,
       },
       explorer: {

@@ -36,6 +36,8 @@ const theme = createTheme({
           color: "#FFFFFF",
           "&:hover": {
             backgroundColor: "#579F6E",
+            boxShadow:
+              "0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px rgba(0, 0, 0, 0.14), 0px 1px 5px rgba(0, 0, 0, 0.12)",
           },
         },
         outlined: {
@@ -69,7 +71,7 @@ const theme = createTheme({
     },
     grey: {
       100: "#D9D9D9",
-      200:'#A1AEC0'
+      200: "#A1AEC0",
     },
     accent: {
       main: "#44C480",

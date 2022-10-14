@@ -34,7 +34,7 @@ const getCurrentState = async (
   config: BotConfig,
   assetInfo: any
 ): Promise<CurrentState> => {
-  const { assetId, walletAddr, escrowDB, useTinyMan, api, environment } =
+  const { assetId, walletAddr, escrowDB, useTinyMan, api, environment, mnemonic } =
     config;
 
   const openAccountSet = await getOpenAccountSetFromAlgodex(
@@ -43,7 +43,7 @@ const getCurrentState = async (
     assetId
   );
   if (!api.wallet) {
-    await initWallet(api, walletAddr);
+    await initWallet(api, walletAddr, mnemonic);
   }
   if (!assetInfo) {
     assetInfo = await getAssetInfo({ indexerClient: api.indexer, assetId });

@@ -13,9 +13,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+import CryptoJS from "crypto-js";
 
 export const storageKeys = {
   wallet: "algodex_tb_wallet_address",
+  mnemonic: "ag_m_s_x",
 };
 
 export const getWallet = () => {
@@ -23,13 +25,40 @@ export const getWallet = () => {
     typeof window !== "undefined"
       ? localStorage.getItem(storageKeys.wallet)
       : null;
-  if (wallet) {
-    return wallet;
+  return wallet;
+};
+
+export const getMnemonic = (passphrase: string) => {
+  const ciphertext =
+    typeof window !== "undefined"
+      ? localStorage.getItem(storageKeys.mnemonic)
+      : null;
+  if (ciphertext) {
+    // Decrypt mnemonic
+    try {
+      var bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
+      var mnemonic = bytes.toString(CryptoJS.enc.Utf8);
+      return mnemonic;
+    } catch (error) {
+      return error;
+    }
   } else {
     return null;
   }
 };
 
-export const saveWallet = (wallet: string) => {
+export const saveWallet = (
+  wallet: string,
+  mnemonic: string,
+  passphrase: string
+) => {
   localStorage.setItem(storageKeys.wallet, wallet);
+  // Encrypt mnemonic and save
+  var ciphertext = CryptoJS.AES.encrypt(mnemonic, passphrase).toString();
+  localStorage.setItem(storageKeys.mnemonic, ciphertext);
+};
+
+export const clearWallet = () => {
+  localStorage.removeItem(storageKeys.wallet);
+  localStorage.removeItem(storageKeys.mnemonic);
 };

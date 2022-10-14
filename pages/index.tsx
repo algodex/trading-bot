@@ -18,21 +18,14 @@ import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { defaults } from "@/next-i18next.config";
-import dynamic from "next/dynamic";
 import Head from "next/head";
-const BotForm = dynamic(
-  () => import("@/components/BotForm").then((mod) => mod.BotForm),
-  {
-    ssr: false,
-  }
-);
+import { BotForm } from "@/components/BotForm";
 
 //MUI components
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-// import { BotForm } from "@/components/BotForm";
 
 export async function getServerSideProps({ locale }: { locale: any }) {
   return {

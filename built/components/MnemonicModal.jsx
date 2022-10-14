@@ -28,6 +28,7 @@ const Box_1 = __importDefault(require("@mui/material/Box"));
 const Button_1 = __importDefault(require("@mui/material/Button"));
 const ChevronLeft_1 = __importDefault(require("@mui/icons-material/ChevronLeft"));
 const FormatListBulleted_1 = __importDefault(require("@mui/icons-material/FormatListBulleted"));
+//lib
 const storage_1 = require("@/lib/storage");
 const MnemonicModal = ({ open, handleClose, }) => {
     const prefillInputs = (mnemonicList) => {
@@ -48,7 +49,7 @@ const MnemonicModal = ({ open, handleClose, }) => {
         });
         if (phrases.length === 25) {
             let account = algosdk_1.default.mnemonicToSecretKey(phrases.join(""));
-            (0, storage_1.saveWallet)(account.addr);
+            (0, storage_1.saveWallet)(account.addr, phrases.join(""), "Secret key");
             handleClose();
         }
     };

@@ -55,7 +55,7 @@ export const Logo = ({
           />
         )}
         <Typography fontWeight={700} fontSize={"18px"} marginLeft={"10px"}>
-          Market Making Bot
+        Trading Bot
         </Typography>
       </Link>
     </div>

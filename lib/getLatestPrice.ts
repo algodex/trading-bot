@@ -23,7 +23,7 @@ const getLatestPrice = async (
   environment: Environment,
   useTinyMan: boolean = false
 ): Promise<number> => {
-  if (useTinyMan) {
+  if (String(useTinyMan) === "true") {
     return await getTinymanPrice(assetId, environment);
   }
   const ordersURL =
@@ -38,7 +38,7 @@ const getLatestPrice = async (
     timeout: 10000,
   });
   const assets = assetData.data.data;
-  const latestPrice = assets.find((asset:any) => asset.id === assetId).price;
+  const latestPrice = assets.find((asset: any) => asset.id == assetId).price;
   return latestPrice;
 };
 

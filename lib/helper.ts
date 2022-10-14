@@ -14,9 +14,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const shortenAddress = (address: string) => {
+export const shortenAddress = (address: string, numb?: number) => {
+  const len = numb || 6
   const list = address.split("");
-  const first = list.slice(0, 6);
-  const last = list.slice(list.length - 6, list.length);
+  const first = list.slice(0, len);
+  const last = list.slice(list.length - len, list.length);
   return `${first.join("")}...${last.join("")}`;
 };
