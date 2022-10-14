@@ -24,10 +24,10 @@ const getAssetInfo_1 = __importDefault(require("./getAssetInfo"));
 const getCurrentOrders_1 = __importDefault(require("./getCurrentOrders"));
 const getOpenAccountSetFromAlgodex_1 = __importDefault(require("./getOpenAccountSetFromAlgodex"));
 const getCurrentState = async (config, assetInfo) => {
-    const { assetId, walletAddr, escrowDB, useTinyMan, api, environment } = config;
+    const { assetId, walletAddr, escrowDB, useTinyMan, api, environment, mnemonic } = config;
     const openAccountSet = await (0, getOpenAccountSetFromAlgodex_1.default)(environment, walletAddr, assetId);
     if (!api.wallet) {
-        await (0, initWallet_1.default)(api, walletAddr);
+        await (0, initWallet_1.default)(api, walletAddr, mnemonic);
     }
     if (!assetInfo) {
         assetInfo = await (0, getAssetInfo_1.default)({ indexerClient: api.indexer, assetId });

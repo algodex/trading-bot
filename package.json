@@ -20,6 +20,7 @@
     "@mui/lab": "^5.0.0-alpha.98",
     "@mui/material": "^5.10.4",
     "algosdk": "^1.21.0",
+    "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "formik": "^2.2.9",
     "next": "12.3.0",
@@ -32,6 +33,7 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
     "@types/node": "18.7.16",
     "@types/pouchdb": "^6.4.0",
     "@types/react": "18.0.19",

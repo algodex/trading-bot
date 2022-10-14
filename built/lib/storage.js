@@ -1,4 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.saveWallet = exports.getMnemonic = exports.getWallet = exports.storageKeys = void 0;
 /*
  * Algodex Trading Bot
  * Copyright (C) 2022 Algodex VASP (BVI) Corp.
@@ -14,24 +19,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveWallet = exports.getWallet = exports.storageKeys = void 0;
+const crypto_js_1 = __importDefault(require("crypto-js"));
 exports.storageKeys = {
     wallet: "algodex_tb_wallet_address",
+    mnemonic: "ag_m_s_x",
 };
 const getWallet = () => {
     const wallet = typeof window !== "undefined"
         ? localStorage.getItem(exports.storageKeys.wallet)
         : null;
-    if (wallet) {
-        return wallet;
+    return wallet;
+};
+exports.getWallet = getWallet;
+const getMnemonic = (passphrase) => {
+    const ciphertext = typeof window !== "undefined"
+        ? localStorage.getItem(exports.storageKeys.mnemonic)
+        : null;
+    if (ciphertext) {
+        // Decrypt mnemonic
+        var bytes = crypto_js_1.default.AES.decrypt(ciphertext, passphrase);
+        var mnemonic = bytes.toString(crypto_js_1.default.enc.Utf8);
+        return mnemonic;
     }
     else {
         return null;
     }
 };
-exports.getWallet = getWallet;
-const saveWallet = (wallet) => {
+exports.getMnemonic = getMnemonic;
+const saveWallet = (wallet, mnemonic, passphrase) => {
     localStorage.setItem(exports.storageKeys.wallet, wallet);
+    // Encrypt mnemonic and save
+    var ciphertext = crypto_js_1.default.AES.encrypt(mnemonic, passphrase).toString();
+    localStorage.setItem(exports.storageKeys.mnemonic, ciphertext);
 };
 exports.saveWallet = saveWallet;

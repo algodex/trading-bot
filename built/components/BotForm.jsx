@@ -45,15 +45,14 @@ exports.BotForm = void 0;
 const react_1 = __importStar(require("react"));
 const formik_1 = require("formik");
 const yup = __importStar(require("yup"));
-const lab_1 = require("@mui/lab");
 const runLoop_1 = __importDefault(require("@/lib/runLoop"));
 const pouchdb_1 = __importDefault(require("pouchdb"));
+const dynamic_1 = __importDefault(require("next/dynamic"));
 //MUI Components
 const Typography_1 = __importDefault(require("@mui/material/Typography"));
 const Grid_1 = __importDefault(require("@mui/material/Grid"));
 const Launch_1 = __importDefault(require("@mui/icons-material/Launch"));
 const Link_1 = __importDefault(require("@mui/material/Link"));
-const Button_1 = __importDefault(require("@mui/material/Button"));
 const Box_1 = __importDefault(require("@mui/material/Box"));
 const MenuItem_1 = __importDefault(require("@mui/material/MenuItem"));
 const Select_1 = __importDefault(require("@mui/material/Select"));
@@ -62,14 +61,17 @@ const Accordion_1 = __importDefault(require("@mui/material/Accordion"));
 const AccordionSummary_1 = __importDefault(require("@mui/material/AccordionSummary"));
 const AccordionDetails_1 = __importDefault(require("@mui/material/AccordionDetails"));
 const ExpandMore_1 = __importDefault(require("@mui/icons-material/ExpandMore"));
+const LoadingButton_1 = __importDefault(require("@mui/lab/LoadingButton"));
+const Button_1 = __importDefault(require("@mui/material/Button"));
 // Custom components
 const Note_1 = require("./Note");
 const CustomRangeSlider_1 = __importDefault(require("./CustomRangeSlider"));
 const CustomTextInput_1 = __importDefault(require("./CustomTextInput"));
-const MnemonicModal_1 = require("./MnemonicModal");
-const storage_1 = require("@/lib/storage");
-const helper_1 = require("@/lib/helper");
 const initAPI_1 = __importDefault(require("@/lib/initAPI"));
+const storage_1 = require("@/lib/storage");
+const WalletButton = (0, dynamic_1.default)(() => Promise.resolve().then(() => __importStar(require("@/components/walletButton"))).then((mod) => mod.WalletButton), {
+    ssr: false,
+});
 const MAINNET_LINK = process.env.NEXT_PUBLIC_MAINNET_LINK;
 const TESTNET_LINK = process.env.NEXT_PUBLIC_TESTNET_LINK;
 const ENABLE_NETWORK_SELECTION = TESTNET_LINK && MAINNET_LINK;
@@ -88,21 +90,14 @@ const cardStyles = {
 };
 const BotForm = () => {
     const [loading, setLoading] = (0, react_1.useState)(false);
-    const [openModal, setOpenModal] = react_1.default.useState(false);
-    const handleOpenModal = () => setOpenModal(true);
-    const handleCloseModal = () => setOpenModal(false);
-    const [environment, setEnvironment] = (0, react_1.useState)(process.env.ENVIRONMENT || "testnet");
-    const walletAddr = (0, react_1.useMemo)(() => {
-        return (0, storage_1.getWallet)();
-    }, [openModal]);
+    const [environment, setEnvironment] = (0, react_1.useState)(process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet");
+    const [config, setConfig] = (0, react_1.useState)();
     const initialValues = {
         assetId: "",
-        orderAlgoDepth: 0,
-        mnemonic: "",
-        ladderTiers: 0,
-        minSpreadPerc: 0,
+        orderAlgoDepth: 3,
+        ladderTiers: 3,
+        minSpreadPerc: 0.0025,
         nearestNeighborKeep: 0,
-        terms: true,
     };
     const validationSchema = yup.object().shape({
         assetId: yup
@@ -118,62 +113,79 @@ const BotForm = () => {
         nearestNeighborKeep: yup.number().label("Nearest Keep").optional(),
         ladderTiers: yup
             .number()
+            .positive("Invalid")
             .label("Please confirm your password")
             .required("Required"),
         minSpreadPerc: yup
             .number()
+            .positive("Invalid")
             .label("Please add a spread")
             .required("Required"),
-        // terms: yup.boolean().label("Accept Terms").required("Required"),
     });
     const handleStart = (formValues) => {
         console.log(formValues);
+        const walletAddr = (0, storage_1.getWallet)();
+        const mnemonic = (0, storage_1.getMnemonic)("Secret key");
         if (walletAddr) {
-            const pouchUrl = process.env.POUCHDB_URL
-                ? process.env.POUCHDB_URL + "/"
-                : "";
-            const fullPouchUrl = pouchUrl +
-                "market_maker_" +
-                formValues.assetId +
-                "_" +
-                walletAddr.slice(0, 8).toLowerCase();
-            const escrowDB = new pouchdb_1.default(fullPouchUrl);
-            const useTinyMan = (process.env.USE_TINYMAN &&
-                process.env.USE_TINYMAN.toLowerCase() !== "false") ||
-                false;
-            const api = (0, initAPI_1.default)(environment);
-            const config = {
-                ...formValues,
-                walletAddr,
-                environment,
-                useTinyMan,
-                api,
-                escrowDB,
-            };
-            delete config.mnemonic;
-            delete config.terms;
-            console.log(config);
+            try {
+                const pouchUrl = process.env.POUCHDB_URL
+                    ? process.env.POUCHDB_URL + "/"
+                    : "";
+                const fullPouchUrl = pouchUrl +
+                    "market_maker_" +
+                    formValues.assetId +
+                    "_" +
+                    walletAddr.slice(0, 8).toLowerCase();
+                const escrowDB = new pouchdb_1.default(fullPouchUrl);
+                const useTinyMan = process.env.NEXT_PUBLIC_USE_TINYMAN || false;
+                const api = (0, initAPI_1.default)(environment);
+                console.log({ api });
+                const _config = {
+                    ...formValues,
+                    walletAddr,
+                    environment,
+                    useTinyMan,
+                    api,
+                    escrowDB,
+                    mnemonic,
+                };
+                setConfig(_config);
+                console.log(_config);
+                setLoading(true);
+                (0, runLoop_1.default)({
+                    config: _config,
+                    assetInfo: null,
+                    lastBlock: 0,
+                    runState: {
+                        isExiting: false,
+                        inRunLoop: false,
+                    },
+                });
+            }
+            catch (error) {
+                setLoading(false);
+                console.log(error);
+            }
+        }
+    };
+    const stopBot = () => {
+        console.log("first");
+        if (config) {
+            console.log("first2");
             (0, runLoop_1.default)({
                 config,
-                assetInfo: formValues.assetId,
+                assetInfo: null,
                 lastBlock: 0,
                 runState: {
-                    isExiting: false,
+                    isExiting: true,
                     inRunLoop: false,
                 },
             });
+            setLoading(false);
         }
     };
     const handleChange = ({ target: { value } }) => {
         setEnvironment(value);
-        // if (ENABLE_NETWORK_SELECTION) {
-        // setEnvironment(value);
-        //       if (value === "MAINNET") {
-        //         window.location = `${MAINNET_LINK}`;
-        //       } else {
-        //         window.location = `${TESTNET_LINK}`;
-        //       }
-        // }
     };
     return (<>
       <formik_1.Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleStart} validateOnBlur={false}>
@@ -210,25 +222,7 @@ const BotForm = () => {
                     </Select_1.default>
                   </Grid_1.default>
                   <Grid_1.default item md={8} xs={12} marginLeft={"auto"}>
-                    <Box_1.default sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    columnGap: "9px",
-                    justifyContent: "end",
-                    flexWrap: "wrap",
-                    "@media(max-width:900px)": {
-                        justifyContent: "start",
-                    },
-                }}>
-                      <Typography_1.default sx={{ fontWeight: 600, fontSize: "17px" }}>
-                        Connected Wallet:
-                      </Typography_1.default>
-                      <Button_1.default variant="outlined" onClick={handleOpenModal}>
-                        {walletAddr
-                    ? (0, helper_1.shortenAddress)(walletAddr)
-                    : "Input Mnemonic"}
-                      </Button_1.default>
-                    </Box_1.default>
+                    <WalletButton />
                   </Grid_1.default>
                 </Grid_1.default>
                 <Grid_1.default container sx={{ alignItems: "center", rowGap: "5px" }}>
@@ -424,15 +418,15 @@ const BotForm = () => {
                     </Grid_1.default>
                   </AccordionDetails_1.default>
                 </Accordion_1.default>
-                <lab_1.LoadingButton variant="contained" fullWidth type="submit" loading={loading} disabled={loading || !isValid} sx={{ py: "0.8rem", mt: "1rem" }}>
-                  Start Bot
-                </lab_1.LoadingButton>
+                {!loading ? (<LoadingButton_1.default variant="contained" fullWidth type="submit" loading={loading} disabled={loading || !isValid} sx={{ py: "0.8rem", mt: "1rem" }}>
+                    Start Bot
+                  </LoadingButton_1.default>) : (<Button_1.default variant="contained" fullWidth type="button" sx={{ py: "0.8rem", mt: "1rem" }} onClick={stopBot}>
+                    Stop Bot
+                  </Button_1.default>)}
               </>
             </formik_1.Form>);
         }}
       </formik_1.Formik>
-
-      <MnemonicModal_1.MnemonicModal open={openModal} handleClose={handleCloseModal}/>
     </>);
 };
 exports.BotForm = BotForm;

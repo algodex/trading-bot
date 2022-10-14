@@ -27,4 +27,5 @@ export interface BotConfig {
   environment: Environment;
   orderAlgoDepth: number;
   api: any;
+  mnemonic?: string
 }

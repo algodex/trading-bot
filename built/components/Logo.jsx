@@ -34,7 +34,7 @@ const Logo = ({ styles, isMobile, }) => {
         }}>
         {isMobile ? (<image_1.default src="/algodex-icon.svg" alt="Algodex Icon Logo" width="24" height="24"/>) : (<image_1.default src="/algodex-logo.svg" alt="Algodex Logo" width="160" height="30"/>)}
         <material_1.Typography fontWeight={700} fontSize={"18px"} marginLeft={"10px"}>
-          Market Making Bot
+        Trading Bot
         </material_1.Typography>
       </Link_1.default>
     </div>);

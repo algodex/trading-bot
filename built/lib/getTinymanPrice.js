@@ -17,6 +17,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios = require("axios");
 const getTinymanPrice = async (assetId, environment) => {
+    console.log(assetId);
     const tinymanPriceURL = environment === "mainnet"
         ? "https://mainnet.analytics.tinyman.org/api/v1/current-asset-prices/"
         : "https://testnet.analytics.tinyman.org/api/v1/current-asset-prices/";
@@ -26,6 +27,7 @@ const getTinymanPrice = async (assetId, environment) => {
         responseType: "json",
         timeout: 10000,
     });
+    console.log(assetData.data);
     const algoPrice = assetData.data[0].price;
     const latestPrice = assetData.data[assetId].price / algoPrice;
     return latestPrice;

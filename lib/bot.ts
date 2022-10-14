@@ -17,7 +17,7 @@
 /* Usage:
  *
  * cp .env.testnet.example .env
- * node simple-market-making-bot/simple-market-making-bot.ts --assetId=<assetId>
+ * node lib/bot.ts --assetId=<assetId>
  *
  */
 
@@ -43,12 +43,12 @@ if (args.assetId == undefined ||
   throw new Error('assetId is not set in the args!');
 }
 
-if (process.env.ENVIRONMENT == undefined ||
-  process.env.ENVIRONMENT.length === 0) {
+if (process.env.NEXT_PUBLIC_ENVIRONMENT == undefined ||
+  process.env.NEXT_PUBLIC_ENVIRONMENT.length === 0) {
   throw new Error('ENVIRONMENT is not set in .env!');
 }
-if (!process.env.ALGOD_SERVER) {
-  throw new Error('ALGOD_SERVER not set in .env!');
+if (!process.env.NEXT_PUBLIC_ALGOD_SERVER) {
+  throw new Error('NEXT_PUBLIC_ALGOD_SERVER not set in .env!');
 }
 // if (!process.env.ALGOD_TOKEN) {
 //   throw new Error('ALGOD_TOKEN not set!');
@@ -56,8 +56,8 @@ if (!process.env.ALGOD_SERVER) {
 // if (!process.env.ALGOD_PORT) {
 //   throw new Error('ALGOD_PORT not set!');
 // }
-if (!process.env.INDEXER_SERVER) {
-  throw new Error('INDEXER_SERVER not set in .env!');
+if (!process.env.NEXT_PUBLIC_INDEXER_SERVER) {
+  throw new Error('NEXT_PUBLIC_INDEXER_SERVER not set in .env!');
 }
 if (!process.env.ALGODEX_ALGO_ESCROW_APP) {
   throw new Error('ALGODEX_ALGO_ESCROW_APP not set in .env!');
@@ -65,11 +65,11 @@ if (!process.env.ALGODEX_ALGO_ESCROW_APP) {
 if (!process.env.ALGODEX_ASA_ESCROW_APP) {
   throw new Error('ALGODEX_ASA_ESCROW_APP not set in .env!');
 }
-// if (!process.env.INDEXER_TOKEN) {
-//   throw new Error('INDEXER_TOKEN not set!');
+// if (!process.env.NEXT_PUBLIC_INDEXER_TOKEN) {
+//   throw new Error('NEXT_PUBLIC_INDEXER_TOKEN not set!');
 // }
-// if (!process.env.INDEXER_PORT) {
-//   throw new Error('INDEXER_PORT not set!');
+// if (!process.env.NEXT_PUBLIC_INDEXER_PORT) {
+//   throw new Error('NEXT_PUBLIC_INDEXER_PORT not set!');
 // }
 if (!process.env.ORDER_ALGO_DEPTH) {
   throw new Error('ORDER_ALGO_DEPTH not set in .env!');
@@ -88,9 +88,9 @@ const fullPouchUrl = pouchUrl + 'market_maker_' +
     assetId + '_' + walletAddr.slice(0, 8).toLowerCase();
 const escrowDB = new PouchDB(fullPouchUrl);
 const ladderTiers = parseInt(process.env.LADDER_TIERS!) || 3;
-const useTinyMan = process.env.USE_TINYMAN &&
-    process.env.USE_TINYMAN.toLowerCase() !== 'false' || false;
-const environment = process.env.ENVIRONMENT ===
+const useTinyMan = process.env.NEXT_PUBLIC_USE_TINYMAN &&
+    process.env.NEXT_PUBLIC_USE_TINYMAN.toLowerCase() !== 'false' || false;
+const environment = process.env.NEXT_PUBLIC_ENVIRONMENT ===
     'mainnet' ? 'mainnet' : 'testnet';
 const orderAlgoDepth = parseInt(process.env.ORDER_ALGO_DEPTH!);
 
