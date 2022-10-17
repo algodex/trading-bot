@@ -12,15 +12,16 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     "noEmit": false,
-    "esModuleInterop": true,
+    // "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    // "resolveJsonModule": true,
+    // "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/_document.js"],
-  "exclude": ["node_modules"]
+  // "include": ["next-env.d.ts", "**/*.js", "**/*.ts", "**/*.tsx", "pages/_document.js"],
+  "exclude": ["node_modules", "built/**"]
 }

@@ -49,7 +49,7 @@ export const MnemonicModal = ({
         `#input${index}`
       );
       if (currentInput && mnemonicList[index]) {
-        currentInput.value = mnemonicList[index];
+        currentInput.value = mnemonicList[index].trim();
       }
     });
   };
@@ -320,12 +320,13 @@ export const MnemonicModal = ({
                           value.split(",").length > 1
                             ? value.split(",")
                             : value.split(" ");
-                        if (
-                          mnemonicList.filter(
-                            (item) => item !== "" && item !== " "
-                          ).length === 25
-                        ) {
-                          prefillInputs(mnemonicList);
+                        const formattedList = mnemonicList.filter(
+                          (item) => item !== "" && item !== " "
+                        );
+                        console.log({ mnemonicList });
+                        console.log({ formattedList });
+                        if (formattedList.length === 25) {
+                          prefillInputs(formattedList);
                         }
                       }}
                     />

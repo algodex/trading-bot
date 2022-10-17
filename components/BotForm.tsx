@@ -43,7 +43,7 @@ import CustomRangeSlider from "./CustomRangeSlider";
 import CustomTextInput from "./CustomTextInput";
 import initAPI from "@/lib/initAPI";
 import { BotConfig, Environment } from "@/lib/types/config";
-import { getMnemonic, getWallet } from "@/lib/storage";
+import { getWallet } from "@/lib/storage";
 import { passPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 
@@ -70,6 +70,13 @@ const cardStyles = {
   },
 };
 
+const percentStyles: any = {
+  position: "absolute",
+  right: "16px",
+  top: "9px",
+  fontSize: "12px",
+};
+
 export const BotForm = () => {
   const [loading, setLoading] = useState(false);
   const [environment, setEnvironment] = useState<any | Environment>(
@@ -85,10 +92,10 @@ export const BotForm = () => {
 
   const initialValues = {
     assetId: "",
-    orderAlgoDepth: 3,
-    ladderTiers: 3,
-    minSpreadPerc: 0.0025,
-    nearestNeighborKeep: 0,
+    orderAlgoDepth: 4,
+    ladderTiers: 4,
+    minSpreadPerc: 1,
+    nearestNeighborKeep: 2,
   };
 
   const validationSchema = yup.object().shape({
@@ -388,7 +395,12 @@ export const BotForm = () => {
                         <span>100</span>
                       </Typography>
                     </Grid>
-                    <Grid item md={2} marginLeft={"auto"}>
+                    <Grid
+                      item
+                      md={2}
+                      marginLeft={"auto"}
+                      sx={{ position: "relative" }}
+                    >
                       <Field
                         component={CustomTextInput}
                         type="number"
@@ -399,10 +411,12 @@ export const BotForm = () => {
                         sx={{
                           input: {
                             padding: "6.5px 14px",
+                            paddingRight: "0",
                             width: "55px",
                           },
                         }}
                       />
+                      <span style={percentStyles}>%</span>
                     </Grid>
                   </Grid>
                   <Note
