@@ -92,10 +92,10 @@ export const BotForm = () => {
 
   const initialValues = {
     assetId: "",
-    orderAlgoDepth: 4,
-    ladderTiers: 4,
-    minSpreadPerc: 1,
-    nearestNeighborKeep: 2,
+    orderAlgoDepth: 25000,
+    ladderTiers: 3,
+    minSpreadPerc: 0.25,
+    nearestNeighborKeep: 0.125,
   };
 
   const validationSchema = yup.object().shape({
@@ -107,17 +107,23 @@ export const BotForm = () => {
     orderAlgoDepth: yup
       .number()
       .positive("Invalid")
+      .max(10000000)
+      .min(1)
       .label("Order Size")
       .required("Required"),
     nearestNeighborKeep: yup.number().label("Nearest Keep").optional(),
     ladderTiers: yup
       .number()
       .positive("Invalid")
-      .label("Please confirm your password")
+      .min(1)
+      .max(15)
+      .label("Order")
       .required("Required"),
     minSpreadPerc: yup
       .number()
       .positive("Invalid")
+      .min(0.01)
+      .max(4)
       .label("Please add a spread")
       .required("Required"),
   });
@@ -126,6 +132,9 @@ export const BotForm = () => {
     const walletAddr = getWallet();
     if (walletAddr) {
       setOpenModal(true);
+    } else {
+      console.log("sec");
+      window.scrollTo(0, 0);
     }
   };
 
@@ -209,7 +218,7 @@ export const BotForm = () => {
         onSubmit={handleStart}
         validateOnBlur={false}
       >
-        {({ handleSubmit, isValid }) => {
+        {({ handleSubmit, isValid, values, setFieldValue }) => {
           return (
             <Form onSubmit={handleSubmit}>
               <>
@@ -319,7 +328,8 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="orderAlgoDepth"
                         id="orderAlgoDepth"
-                        max={1000}
+                        min={1}
+                        max={10000000}
                       />
                       <Typography
                         sx={{
@@ -328,8 +338,8 @@ export const BotForm = () => {
                           fontSize: "13px",
                         }}
                       >
-                        <span>0</span>
-                        <span>1000</span>
+                        <span>1</span>
+                        <span>10M</span>
                       </Typography>
                     </Grid>
                     <Grid item md={2} marginLeft={"auto"}>
@@ -338,12 +348,12 @@ export const BotForm = () => {
                         type="number"
                         name="orderAlgoDepth"
                         id="orderAlgoDepth"
-                        max={1000}
+                        max={10000000}
                         required
                         sx={{
                           input: {
-                            padding: "6.5px 14px",
-                            width: "55px",
+                            padding: "6.5px 0px 6.5px 14px",
+                            width: "94px",
                           },
                         }}
                       />
@@ -382,7 +392,12 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="minSpreadPerc"
                         id="minSpreadPerc"
-                        max={100}
+                        max={4}
+                        min={0.01}
+                        onChange={({ target: { value } }: { target: HTMLInputElement }) => {
+                          setFieldValue("minSpreadPerc", parseInt(value));
+                          setFieldValue("nearestNeighborKeep", parseInt(value) / 2);
+                        }}
                       />
                       <Typography
                         sx={{
@@ -391,8 +406,8 @@ export const BotForm = () => {
                           fontSize: "13px",
                         }}
                       >
-                        <span>0</span>
-                        <span>100</span>
+                        <span>0.01</span>
+                        <span>4</span>
                       </Typography>
                     </Grid>
                     <Grid
@@ -406,14 +421,17 @@ export const BotForm = () => {
                         type="number"
                         name="minSpreadPerc"
                         id="minSpreadPerc"
-                        max={100}
+                        max={4}
                         required
                         sx={{
                           input: {
-                            padding: "6.5px 14px",
-                            paddingRight: "0",
+                            padding: "6.5px 0px 6.5px 14px",
                             width: "55px",
                           },
+                        }}
+                        onChange={({ target: { value } }: { target: HTMLInputElement }) => {
+                          setFieldValue("minSpreadPerc", parseInt(value));
+                          setFieldValue("nearestNeighborKeep", parseInt(value) / 2);
                         }}
                       />
                       <span style={percentStyles}>%</span>
@@ -451,7 +469,8 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="ladderTiers"
                         id="ladderTiers"
-                        max={10}
+                        max={15}
+                        min={1}
                       />
                       <Typography
                         sx={{
@@ -460,8 +479,8 @@ export const BotForm = () => {
                           fontSize: "13px",
                         }}
                       >
-                        <span>0</span>
-                        <span>10</span>
+                        <span>1</span>
+                        <span>15</span>
                       </Typography>
                     </Grid>
                     <Grid item md={2} marginLeft={"auto"}>
@@ -470,11 +489,11 @@ export const BotForm = () => {
                         type="number"
                         name="ladderTiers"
                         id="ladderTiers"
-                        max={10}
+                        max={15}
                         required
                         sx={{
                           input: {
-                            padding: "6.5px 14px",
+                            padding: "6.5px 0px 6.5px 14px",
                             width: "55px",
                           },
                         }}
@@ -535,7 +554,7 @@ export const BotForm = () => {
                           component={CustomRangeSlider}
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
-                          max={10}
+                          max={values.minSpreadPerc}
                         />
                         <Typography
                           sx={{
@@ -545,7 +564,7 @@ export const BotForm = () => {
                           }}
                         >
                           <span>0</span>
-                          <span>10</span>
+                          <span>{values.minSpreadPerc}</span>
                         </Typography>
                       </Grid>
                       <Grid item md={2} marginLeft={"auto"}>
@@ -554,11 +573,11 @@ export const BotForm = () => {
                           type="number"
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
-                          max={10}
+                          max={values.minSpreadPerc}
                           required
                           sx={{
                             input: {
-                              padding: "6.5px 14px",
+                              padding: "6.5px 0px 6.5px 14px",
                               width: "55px",
                             },
                           }}
