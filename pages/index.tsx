@@ -51,10 +51,10 @@ const RegisterPage = () => {
           paddingBlock: "40px",
         }}
       >
-        <Grid item xs={12} md={6} lg={5} xl={4}>
+        <Grid item xs={12} sm={10} marginX='auto' md={6} lg={6} xl={6}>
           <BotForm />
         </Grid>
-        <Grid item xs={12} md={6} lg={6} xl={5}>
+        <Grid item xs={12} sm={10} marginX='auto' md={6} lg={6} xl={5}>
           <TextField
             placeholder="MultiLine with rows: 2 and rowsMax: 4"
             multiline
