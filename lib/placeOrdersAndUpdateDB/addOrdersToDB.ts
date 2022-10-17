@@ -13,30 +13,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import convertToDBObject from "../convertToDBObject";
-import { Order } from "../types/order";
 
 interface ValidResult {
-  contract: Order;
+  contract: {
+    amount: number;
+  };
 }
 
-const addOrdersToDB = async (escrowDB: any, validResults: ValidResult[]) => {
+const addOrdersToDB = async (escrowDB: any, validResults: any[][]) => {
   const ordersAddToDB = validResults
-    .filter((order) => order.contract.amount > 0)
+    .filter((order) => order[0].contract.amount > 0)
     .map((order) => {
       return escrowDB.put({
-        _id: order.contract.escrowAddr,
-        order: convertToDBObject(order.contract),
+        _id: order[0].contract.escrow,
+        order: convertToDBObject(order[0]),
       });
     });
-  //     .filter((order) => order[0].contract.amount > 0)
-  //     .map((order) => {
-  //       return escrowDB.put({
-  //         _id: order[0].contract.escrow,
-  //         order: convertToDBObject(order[0]),
-  //       });
-  //     });
   return await Promise.all(ordersAddToDB).catch((e) => {
     console.error(e);
   });
