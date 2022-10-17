@@ -16,10 +16,11 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.shortenAddress = void 0;
-const shortenAddress = (address) => {
+const shortenAddress = (address, numb) => {
+    const len = numb || 6;
     const list = address.split("");
-    const first = list.slice(0, 6);
-    const last = list.slice(list.length - 6, list.length);
+    const first = list.slice(0, len);
+    const last = list.slice(list.length - len, list.length);
     return `${first.join("")}...${last.join("")}`;
 };
 exports.shortenAddress = shortenAddress;

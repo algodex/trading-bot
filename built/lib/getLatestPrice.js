@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const getTinymanPrice_1 = __importDefault(require("./getTinymanPrice"));
 const axios = require("axios");
 const getLatestPrice = async (assetId, environment, useTinyMan = false) => {
-    if (useTinyMan) {
+    if (String(useTinyMan) === "true") {
         return await (0, getTinymanPrice_1.default)(assetId, environment);
     }
     const ordersURL = environment === "testnet"
@@ -34,7 +34,7 @@ const getLatestPrice = async (assetId, environment, useTinyMan = false) => {
         timeout: 10000,
     });
     const assets = assetData.data.data;
-    const latestPrice = assets.find((asset) => asset.id === assetId).price;
+    const latestPrice = assets.find((asset) => asset.id == assetId).price;
     return latestPrice;
 };
 exports.default = getLatestPrice;

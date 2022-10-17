@@ -51,10 +51,18 @@ const Box_1 = __importDefault(require("@mui/material/Box"));
 const MnemonicModal_1 = require("./MnemonicModal");
 const helper_1 = require("@/lib/helper");
 const storage_1 = require("@/lib/storage");
+const disconnectWallet_1 = require("./disconnectWallet");
 const WalletButton = () => {
-    const [openModal, setOpenModal] = (0, react_1.useState)(false);
-    const handleOpenModal = () => setOpenModal(true);
-    const handleCloseModal = () => setOpenModal(false);
+    const [openModal, setOpenModal] = (0, react_1.useState)(null);
+    const handleOpenModal = () => {
+        if ((0, storage_1.getWallet)()) {
+            setOpenModal("disconnect");
+        }
+        else {
+            setOpenModal("mnemonic");
+        }
+    };
+    const handleCloseModal = () => setOpenModal(null);
     const walletAddr = (0, react_1.useMemo)(() => {
         return (0, storage_1.getWallet)();
     }, [openModal]);
@@ -73,10 +81,11 @@ const WalletButton = () => {
           Connected Wallet:
         </Typography_1.default>
         <Button_1.default variant="outlined" onClick={handleOpenModal}>
-          {walletAddr ? (0, helper_1.shortenAddress)(walletAddr) : "Input Mnemonic"}
+          {(0, storage_1.getWallet)() ? (0, helper_1.shortenAddress)(walletAddr || '') : "Input Mnemonic"}
         </Button_1.default>
       </Box_1.default>
-      <MnemonicModal_1.MnemonicModal open={openModal} handleClose={handleCloseModal}/>
+      <MnemonicModal_1.MnemonicModal open={openModal === "mnemonic"} handleClose={handleCloseModal}/>
+      <disconnectWallet_1.DisconnectWallet open={openModal === "disconnect"} handleClose={handleCloseModal}/>
     </>);
 };
 exports.WalletButton = WalletButton;

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveWallet = exports.getMnemonic = exports.getWallet = exports.storageKeys = void 0;
+exports.clearWallet = exports.saveWallet = exports.getMnemonic = exports.getWallet = exports.storageKeys = void 0;
 /*
  * Algodex Trading Bot
  * Copyright (C) 2022 Algodex VASP (BVI) Corp.
@@ -37,9 +37,14 @@ const getMnemonic = (passphrase) => {
         : null;
     if (ciphertext) {
         // Decrypt mnemonic
-        var bytes = crypto_js_1.default.AES.decrypt(ciphertext, passphrase);
-        var mnemonic = bytes.toString(crypto_js_1.default.enc.Utf8);
-        return mnemonic;
+        try {
+            var bytes = crypto_js_1.default.AES.decrypt(ciphertext, passphrase);
+            var mnemonic = bytes.toString(crypto_js_1.default.enc.Utf8);
+            return mnemonic;
+        }
+        catch (error) {
+            return error;
+        }
     }
     else {
         return null;
@@ -53,3 +58,8 @@ const saveWallet = (wallet, mnemonic, passphrase) => {
     localStorage.setItem(exports.storageKeys.mnemonic, ciphertext);
 };
 exports.saveWallet = saveWallet;
+const clearWallet = () => {
+    localStorage.removeItem(exports.storageKeys.wallet);
+    localStorage.removeItem(exports.storageKeys.mnemonic);
+};
+exports.clearWallet = clearWallet;

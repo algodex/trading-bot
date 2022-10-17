@@ -69,12 +69,10 @@ const CustomRangeSlider_1 = __importDefault(require("./CustomRangeSlider"));
 const CustomTextInput_1 = __importDefault(require("./CustomTextInput"));
 const initAPI_1 = __importDefault(require("@/lib/initAPI"));
 const storage_1 = require("@/lib/storage");
+const validateWallet_1 = require("./validateWallet");
 const WalletButton = (0, dynamic_1.default)(() => Promise.resolve().then(() => __importStar(require("@/components/walletButton"))).then((mod) => mod.WalletButton), {
     ssr: false,
 });
-const MAINNET_LINK = process.env.NEXT_PUBLIC_MAINNET_LINK;
-const TESTNET_LINK = process.env.NEXT_PUBLIC_TESTNET_LINK;
-const ENABLE_NETWORK_SELECTION = TESTNET_LINK && MAINNET_LINK;
 const environmentLinks = ["testnet", "mainnet"];
 const cardStyles = {
     border: "1px solid",
@@ -92,6 +90,12 @@ const BotForm = () => {
     const [loading, setLoading] = (0, react_1.useState)(false);
     const [environment, setEnvironment] = (0, react_1.useState)(process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet");
     const [config, setConfig] = (0, react_1.useState)();
+    const [passphrase, setPassphrase] = (0, react_1.useState)({
+        password: "",
+        show: false,
+    });
+    const formikRef = (0, react_1.useRef)();
+    const [openModal, setOpenModal] = (0, react_1.useState)(false);
     const initialValues = {
         assetId: "",
         orderAlgoDepth: 3,
@@ -123,10 +127,32 @@ const BotForm = () => {
             .required("Required"),
     });
     const handleStart = (formValues) => {
-        console.log(formValues);
         const walletAddr = (0, storage_1.getWallet)();
-        const mnemonic = (0, storage_1.getMnemonic)("Secret key");
         if (walletAddr) {
+            setOpenModal(true);
+        }
+    };
+    const stopBot = () => {
+        if (config) {
+            (0, runLoop_1.default)({
+                config,
+                assetInfo: null,
+                lastBlock: 0,
+                runState: {
+                    isExiting: true,
+                    inRunLoop: false,
+                },
+            });
+            setLoading(false);
+        }
+    };
+    const handleChange = ({ target: { value } }) => {
+        setEnvironment(value);
+    };
+    const validateWallet = (mnemonic) => {
+        const walletAddr = (0, storage_1.getWallet)();
+        const formValues = formikRef.current.values;
+        if (walletAddr && mnemonic) {
             try {
                 const pouchUrl = process.env.POUCHDB_URL
                     ? process.env.POUCHDB_URL + "/"
@@ -139,7 +165,6 @@ const BotForm = () => {
                 const escrowDB = new pouchdb_1.default(fullPouchUrl);
                 const useTinyMan = process.env.NEXT_PUBLIC_USE_TINYMAN || false;
                 const api = (0, initAPI_1.default)(environment);
-                console.log({ api });
                 const _config = {
                     ...formValues,
                     walletAddr,
@@ -150,7 +175,6 @@ const BotForm = () => {
                     mnemonic,
                 };
                 setConfig(_config);
-                console.log(_config);
                 setLoading(true);
                 (0, runLoop_1.default)({
                     config: _config,
@@ -168,27 +192,14 @@ const BotForm = () => {
             }
         }
     };
-    const stopBot = () => {
-        console.log("first");
-        if (config) {
-            console.log("first2");
-            (0, runLoop_1.default)({
-                config,
-                assetInfo: null,
-                lastBlock: 0,
-                runState: {
-                    isExiting: true,
-                    inRunLoop: false,
-                },
-            });
-            setLoading(false);
+    const handleClose = (mnemonic) => {
+        setOpenModal(false);
+        if (mnemonic) {
+            validateWallet(mnemonic);
         }
     };
-    const handleChange = ({ target: { value } }) => {
-        setEnvironment(value);
-    };
     return (<>
-      <formik_1.Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleStart} validateOnBlur={false}>
+      <formik_1.Formik innerRef={formikRef} initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleStart} validateOnBlur={false}>
         {({ handleSubmit, isValid }) => {
             return (<formik_1.Form onSubmit={handleSubmit}>
               <>
@@ -427,6 +438,7 @@ const BotForm = () => {
             </formik_1.Form>);
         }}
       </formik_1.Formik>
+      <validateWallet_1.ValidateWallet open={openModal} handleClose={handleClose} passphrase={passphrase} setPassphrase={setPassphrase}/>
     </>);
 };
 exports.BotForm = BotForm;
