@@ -36,5 +36,5 @@ yarn run compile-and-start-cli -- --assetId=<assetId>
 ## Testing
 
 ```
-yarn run test
+yarn run test-jest
 ```
