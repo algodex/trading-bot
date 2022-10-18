@@ -10,7 +10,7 @@
     "plugin:@typescript-eslint/recommended"
   ],
   
-  "plugins": ["react", "@typescript-eslint"],
+  "plugins": ["react", "@typescript-eslint", "jest"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off"
