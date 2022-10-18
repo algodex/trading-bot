@@ -133,7 +133,6 @@ export const BotForm = () => {
     if (walletAddr) {
       setOpenModal(true);
     } else {
-      console.log("sec");
       window.scrollTo(0, 0);
     }
   };
