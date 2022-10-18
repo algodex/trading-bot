@@ -28,7 +28,7 @@ import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
 //lib
 import { saveWallet } from "@/lib/storage";
-import { CustomPasswordInput, passPhrase } from "./CustomPasswordInput";
+import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
 
 export const MnemonicModal = ({
   open,
@@ -38,7 +38,7 @@ export const MnemonicModal = ({
   handleClose: any;
 }) => {
   const [mnemonic, setMnemonic] = useState<string | undefined>();
-  const [passphrase, setPassphrase] = useState<passPhrase>({
+  const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
   });
@@ -56,7 +56,7 @@ export const MnemonicModal = ({
 
   const importWallet = useCallback(async () => {
     if (mnemonic && passphrase.password) {
-      let account = algosdk.mnemonicToSecretKey(mnemonic);
+      const account = algosdk.mnemonicToSecretKey(mnemonic);
       saveWallet(account.addr, mnemonic, passphrase.password);
       setMnemonic(undefined);
       setPassphrase({
@@ -93,7 +93,7 @@ export const MnemonicModal = ({
     >
       <Box
         sx={{
-          position: "absolute" as "absolute",
+          position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",

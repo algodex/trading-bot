@@ -40,6 +40,7 @@ export const WalletButton = () => {
 
   const walletAddr = useMemo(() => {
     return getWallet();
+    // I want this value to update everytime the modal opens or closes
   }, [openModal]);
 
   return (

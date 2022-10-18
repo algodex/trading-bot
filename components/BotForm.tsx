@@ -44,7 +44,7 @@ import CustomTextInput from "./CustomTextInput";
 import initAPI from "@/lib/initAPI";
 import { BotConfig, Environment } from "@/lib/types/config";
 import { getWallet } from "@/lib/storage";
-import { passPhrase } from "./CustomPasswordInput";
+import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 
 const WalletButton = dynamic(
@@ -83,7 +83,7 @@ export const BotForm = () => {
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
   const [config, setConfig] = useState<null | BotConfig>();
-  const [passphrase, setPassphrase] = useState<passPhrase>({
+  const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
   });
