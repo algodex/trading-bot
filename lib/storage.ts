@@ -36,8 +36,8 @@ export const getMnemonic = (passphrase: string) => {
   if (ciphertext) {
     // Decrypt mnemonic
     try {
-      var bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
-      var mnemonic = bytes.toString(CryptoJS.enc.Utf8);
+      const bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
+      const mnemonic = bytes.toString(CryptoJS.enc.Utf8);
       return mnemonic;
     } catch (error) {
       return error;
@@ -54,7 +54,7 @@ export const saveWallet = (
 ) => {
   localStorage.setItem(storageKeys.wallet, wallet);
   // Encrypt mnemonic and save
-  var ciphertext = CryptoJS.AES.encrypt(mnemonic, passphrase).toString();
+  const ciphertext = CryptoJS.AES.encrypt(mnemonic, passphrase).toString();
   localStorage.setItem(storageKeys.mnemonic, ciphertext);
 };
 

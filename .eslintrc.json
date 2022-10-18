@@ -1,5 +1,10 @@
 {
-  // "extends": "next/core-web-vitals",
+  "env": {
+    "jest/globals": true,
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
   "extends": [
     "next/core-web-vitals",
     "eslint:recommended",
@@ -13,7 +18,8 @@
   "plugins": ["react", "@typescript-eslint", "jest"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-var-requires": "off"
+    "@typescript-eslint/no-var-requires": 0,
+    "@typescript-eslint/no-inferrable-types": "off"
   },
   "settings": {
     "react": {
