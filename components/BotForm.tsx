@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import runLoop from "@/lib/runLoop";
@@ -44,7 +44,7 @@ import CustomTextInput from "./CustomTextInput";
 import initAPI from "@/lib/initAPI";
 import { BotConfig, Environment } from "@/lib/types/config";
 import { getWallet } from "@/lib/storage";
-import { passPhrase } from "./CustomPasswordInput";
+import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 
 const WalletButton = dynamic(
@@ -83,7 +83,7 @@ export const BotForm = () => {
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
   const [config, setConfig] = useState<null | BotConfig>();
-  const [passphrase, setPassphrase] = useState<passPhrase>({
+  const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
   });
@@ -128,12 +128,11 @@ export const BotForm = () => {
       .required("Required"),
   });
 
-  const handleStart = (formValues: any) => {
+  const handleStart = () => {
     const walletAddr = getWallet();
     if (walletAddr) {
       setOpenModal(true);
     } else {
-      console.log("sec");
       window.scrollTo(0, 0);
     }
   };
@@ -202,12 +201,15 @@ export const BotForm = () => {
     }
   };
 
-  const handleClose = (mnemonic?: string) => {
-    setOpenModal(false);
-    if (mnemonic) {
-      validateWallet(mnemonic);
-    }
-  };
+  const handleClose = useCallback(
+    (mnemonic?: string) => {
+      setOpenModal(false);
+      if (mnemonic) {
+        validateWallet(mnemonic);
+      }
+    },
+    []
+  );
 
   return (
     <>
@@ -394,9 +396,16 @@ export const BotForm = () => {
                         id="minSpreadPerc"
                         max={4}
                         min={0.01}
-                        onChange={({ target: { value } }: { target: HTMLInputElement }) => {
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
                           setFieldValue("minSpreadPerc", parseInt(value));
-                          setFieldValue("nearestNeighborKeep", parseInt(value) / 2);
+                          setFieldValue(
+                            "nearestNeighborKeep",
+                            parseInt(value) / 2
+                          );
                         }}
                       />
                       <Typography
@@ -429,9 +438,16 @@ export const BotForm = () => {
                             width: "55px",
                           },
                         }}
-                        onChange={({ target: { value } }: { target: HTMLInputElement }) => {
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
                           setFieldValue("minSpreadPerc", parseInt(value));
-                          setFieldValue("nearestNeighborKeep", parseInt(value) / 2);
+                          setFieldValue(
+                            "nearestNeighborKeep",
+                            parseInt(value) / 2
+                          );
                         }}
                       />
                       <span style={percentStyles}>%</span>

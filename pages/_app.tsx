@@ -14,8 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { AppProps } from "next/app";
-
+import React from "react";
 import "@/styles/globals.css";
 import PropTypes from "prop-types";
 import Head from "next/head";

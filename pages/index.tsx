@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState } from "react";
+import React from "react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { defaults } from "@/next-i18next.config";
@@ -37,7 +37,6 @@ export async function getServerSideProps({ locale }: { locale: any }) {
 
 const RegisterPage = () => {
   const { t } = useTranslation("index");
-  const [loading, setLoading] = useState(false);
 
   return (
     <>
@@ -51,10 +50,10 @@ const RegisterPage = () => {
           paddingBlock: "40px",
         }}
       >
-        <Grid item xs={12} sm={10} marginX='auto' md={6} lg={6} xl={6}>
+        <Grid item xs={12} sm={10} marginX="auto" md={6} lg={6} xl={6}>
           <BotForm />
         </Grid>
-        <Grid item xs={12} sm={10} marginX='auto' md={6} lg={6} xl={5}>
+        <Grid item xs={12} sm={10} marginX="auto" md={6} lg={6} xl={5}>
           <TextField
             placeholder="MultiLine with rows: 2 and rowsMax: 4"
             multiline

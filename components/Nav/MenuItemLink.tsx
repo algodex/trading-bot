@@ -14,9 +14,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { forwardRef, MouseEventHandler, ReactNode, useMemo } from "react";
+import React, { forwardRef, ReactNode, useMemo } from "react";
 import { useRouter } from "next/router";
-import PropTypes from "prop-types";
 
 // MUI Components
 import MenuItem from "@mui/material/MenuItem";
@@ -63,7 +62,7 @@ function MenuItemLink({
           />
         );
       }),
-    [to]
+    [to, locale]
   );
 
   return (

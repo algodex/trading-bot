@@ -15,7 +15,6 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import algosdk from "algosdk";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -23,14 +22,13 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Tooltip from "@mui/material/Tooltip";
 
 //lib
 import { clearWallet, getMnemonic, getWallet } from "@/lib/storage";
 import Image from "next/image";
-import { CustomPasswordInput, passPhrase } from "./CustomPasswordInput";
+import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
 import { shortenAddress } from "@/lib/helper";
 
 export const ValidateWallet = ({
@@ -40,9 +38,9 @@ export const ValidateWallet = ({
   setPassphrase,
 }: {
   open: boolean;
-  handleClose: any;
-  passphrase: passPhrase;
-  setPassphrase: Function;
+  handleClose: (arg?: string) => void;
+  passphrase: PassPhrase;
+  setPassphrase: (arg: any) => void;
 }) => {
   const [forgotPassphrase, setForgotPassphrase] = useState<boolean>(false);
   const [tooltiptext, setTooltiptext] = useState("Click to Copy");
@@ -50,6 +48,8 @@ export const ValidateWallet = ({
 
   const walletAddr = useMemo(() => {
     return getWallet();
+    // I want this value to update everytime the modal opens or closes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const validate = () => {
@@ -67,7 +67,7 @@ export const ValidateWallet = ({
 
   const clearPassprase = () => {
     setForgotPassphrase(false);
-    setPassphrase((prev: any) => ({ ...prev, password: "" }));
+    setPassphrase((prev: PassPhrase) => ({ ...prev, password: "" }));
   };
 
   const clearSession = () => {
@@ -103,7 +103,7 @@ export const ValidateWallet = ({
     >
       <Box
         sx={{
-          position: "absolute" as "absolute",
+          position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",

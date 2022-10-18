@@ -34,7 +34,11 @@ const placeOrders = ({
   const { assetId, orderAlgoDepth, api } = config;
 
   const placedOrders = createEscrowPrices.map((priceObj) => {
-    const orderDepth = orderDepthAmounts.hasOwnProperty("" + assetId)
+    //const orderDepth = orderDepthAmounts.hasOwnProperty("" + assetId)
+    const orderDepth = Object.prototype.hasOwnProperty.call(
+      orderDepthAmounts,
+      "" + assetId
+    )
       ? orderDepthAmounts["" + assetId]
       : orderAlgoDepth;
     const orderToPlace = {

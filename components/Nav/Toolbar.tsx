@@ -39,7 +39,7 @@ function Toolbar({
   ...rest
 }: {
   height?: number;
-  onClick: Function;
+  onClick: () => void;
   isMobile: boolean;
 }) {
   return (

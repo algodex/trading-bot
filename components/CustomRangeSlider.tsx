@@ -21,7 +21,6 @@ import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
 
 const CustomRangeSlider = ({
-  className,
   field,
   form: { touched, errors },
   ...props

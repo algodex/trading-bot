@@ -9,7 +9,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 
-export interface passPhrase {
+export interface PassPhrase {
   password: string;
   show: boolean;
 }
@@ -18,8 +18,8 @@ export const CustomPasswordInput = ({
   passphrase,
   setPassphrase,
 }: {
-  passphrase: passPhrase;
-  setPassphrase: Function;
+  passphrase: PassPhrase;
+  setPassphrase: (arg: any) => void;
 }) => {
   return (
     <>
@@ -52,7 +52,7 @@ export const CustomPasswordInput = ({
           type={passphrase.show ? "text" : "password"}
           value={passphrase.password}
           onChange={({ target: { value } }) => {
-            setPassphrase((prev: passPhrase) => ({
+            setPassphrase((prev: PassPhrase) => ({
               ...prev,
               password: value,
             }));
@@ -62,7 +62,7 @@ export const CustomPasswordInput = ({
               <IconButton
                 aria-label="toggle password visibility"
                 onClick={() => {
-                  setPassphrase((prev: passPhrase) => ({
+                  setPassphrase((prev: PassPhrase) => ({
                     ...prev,
                     show: !prev.show,
                   }));
