@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import runLoop from "@/lib/runLoop";
@@ -202,12 +202,15 @@ export const BotForm = () => {
     }
   };
 
-  const handleClose = (mnemonic?: string) => {
-    setOpenModal(false);
-    if (mnemonic) {
-      validateWallet(mnemonic);
-    }
-  };
+  const handleClose = useCallback(
+    (mnemonic?: string) => {
+      setOpenModal(false);
+      if (mnemonic) {
+        validateWallet(mnemonic);
+      }
+    },
+    [openModal]
+  );
 
   return (
     <>
@@ -394,9 +397,16 @@ export const BotForm = () => {
                         id="minSpreadPerc"
                         max={4}
                         min={0.01}
-                        onChange={({ target: { value } }: { target: HTMLInputElement }) => {
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
                           setFieldValue("minSpreadPerc", parseInt(value));
-                          setFieldValue("nearestNeighborKeep", parseInt(value) / 2);
+                          setFieldValue(
+                            "nearestNeighborKeep",
+                            parseInt(value) / 2
+                          );
                         }}
                       />
                       <Typography
@@ -429,9 +439,16 @@ export const BotForm = () => {
                             width: "55px",
                           },
                         }}
-                        onChange={({ target: { value } }: { target: HTMLInputElement }) => {
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
                           setFieldValue("minSpreadPerc", parseInt(value));
-                          setFieldValue("nearestNeighborKeep", parseInt(value) / 2);
+                          setFieldValue(
+                            "nearestNeighborKeep",
+                            parseInt(value) / 2
+                          );
                         }}
                       />
                       <span style={percentStyles}>%</span>

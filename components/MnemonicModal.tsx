@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import algosdk from "algosdk";
 import Image from "next/image";
 
@@ -43,7 +43,7 @@ export const MnemonicModal = ({
     show: false,
   });
 
-  const prefillInputs = (mnemonicList: string[]) => {
+  const prefillInputs = useCallback((mnemonicList: string[]) => {
     [...Array(25)].forEach((item, index) => {
       const currentInput: HTMLInputElement | null = document.querySelector(
         `#input${index}`
@@ -52,9 +52,9 @@ export const MnemonicModal = ({
         currentInput.value = mnemonicList[index].trim();
       }
     });
-  };
+  }, []);
 
-  const importWallet = async () => {
+  const importWallet = useCallback(async () => {
     if (mnemonic && passphrase.password) {
       let account = algosdk.mnemonicToSecretKey(mnemonic);
       saveWallet(account.addr, mnemonic, passphrase.password);
@@ -65,9 +65,9 @@ export const MnemonicModal = ({
       });
       handleClose();
     }
-  };
+  }, [mnemonic, passphrase]);
 
-  const getPassPhrase = () => {
+  const getPassPhrase = useCallback(() => {
     const inputs: NodeListOf<HTMLInputElement> | null =
       document.querySelectorAll(".input");
     const phrases: string[] = [];
@@ -79,7 +79,7 @@ export const MnemonicModal = ({
     if (phrases.length === 25) {
       setMnemonic(phrases.join(" "));
     }
-  };
+  }, []);
 
   return (
     <Modal
@@ -323,8 +323,6 @@ export const MnemonicModal = ({
                         const formattedList = mnemonicList.filter(
                           (item) => item !== "" && item !== " "
                         );
-                        console.log({ mnemonicList });
-                        console.log({ formattedList });
                         if (formattedList.length === 25) {
                           prefillInputs(formattedList);
                         }

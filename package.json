@@ -21,6 +21,7 @@
     "@mui/icons-material": "^5.10.6",
     "@mui/lab": "^5.0.0-alpha.98",
     "@mui/material": "^5.10.4",
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
     "algosdk": "^1.21.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
