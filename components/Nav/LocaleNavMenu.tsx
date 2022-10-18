@@ -35,7 +35,7 @@ import MenuItemLink from "@/components/Nav/MenuItemLink";
 import { Typography } from "@mui/material";
 
 // Map locale code to the flag used in 'react-country-flag'
-const localeToFlags:any = {
+const localeToFlags: any = {
   ca: "CA",
   en: "US",
   es: "MX",
@@ -70,7 +70,7 @@ const localeToFlags:any = {
  * @returns {JSX.Element}
  * @constructor
  */
-export const LocaleNavMenu = ({ onClick }: { onClick: Function }) => {
+export const LocaleNavMenu = () => {
   const { asPath, locale }: { asPath: any; locale?: any } = useRouter();
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<any>(null);

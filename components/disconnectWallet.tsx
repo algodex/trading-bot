@@ -15,7 +15,6 @@
  */
 
 import React, { useMemo, useState } from "react";
-import algosdk from "algosdk";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -29,7 +28,6 @@ import Tooltip from "@mui/material/Tooltip";
 //lib
 import { clearWallet, getWallet } from "@/lib/storage";
 import Image from "next/image";
-import { passPhrase } from "./CustomPasswordInput";
 import { shortenAddress } from "@/lib/helper";
 
 export const DisconnectWallet = ({
@@ -57,6 +55,9 @@ export const DisconnectWallet = ({
 
   const walletAddr = useMemo(() => {
     return getWallet();
+    // I want this value to update everytime the modal opens or closes
+    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (
@@ -68,7 +69,7 @@ export const DisconnectWallet = ({
     >
       <Box
         sx={{
-          position: "absolute" as "absolute",
+          position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",

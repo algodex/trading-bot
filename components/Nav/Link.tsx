@@ -85,8 +85,6 @@ const Link = React.forwardRef(function Link(props: any, ref) {
     className: classNameProps,
     href,
     noLinkStyle,
-    // eslint-disable-next-line no-unused-vars
-    role, // Link don't have roles.
     ...other
   } = props;
 

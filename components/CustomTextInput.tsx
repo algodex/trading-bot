@@ -21,7 +21,6 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 const CustomTextInput = ({
-  className,
   field,
   form: { touched, errors },
   ...props

@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import runLoop from "@/lib/runLoop";
@@ -128,7 +128,7 @@ export const BotForm = () => {
       .required("Required"),
   });
 
-  const handleStart = (formValues: any) => {
+  const handleStart = () => {
     const walletAddr = getWallet();
     if (walletAddr) {
       setOpenModal(true);
@@ -208,7 +208,7 @@ export const BotForm = () => {
         validateWallet(mnemonic);
       }
     },
-    [openModal]
+    []
   );
 
   return (

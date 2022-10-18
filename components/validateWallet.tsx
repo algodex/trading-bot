@@ -48,6 +48,8 @@ export const ValidateWallet = ({
 
   const walletAddr = useMemo(() => {
     return getWallet();
+    // I want this value to update everytime the modal opens or closes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const validate = () => {

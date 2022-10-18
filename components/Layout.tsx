@@ -14,17 +14,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import React from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
-import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import PropTypes from "prop-types";
 
 // Defaults
 import DefaultToolbar from "@/components/Nav/Toolbar";
-import { useState } from "react";
 
 /**
  * Layout Component
@@ -45,8 +44,6 @@ export function Layout({ children, components, componentsProps }: any) {
   const toolbarHeight = undefined;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Example of a Responsive Layout with Fixed Viewport
   return (
