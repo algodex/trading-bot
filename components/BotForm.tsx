@@ -17,7 +17,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
-import runLoop from "@/lib/runLoop";
+import runLoop, { stopLoop } from "@/lib/runLoop";
 import PouchDB from "pouchdb";
 import dynamic from "next/dynamic";
 
@@ -100,9 +100,9 @@ export const BotForm = () => {
 
   const validationSchema = yup.object().shape({
     assetId: yup
-      .string()
+      .number()
+      .positive("Invalid")
       .label("Asset Id")
-      .max(32, "Name must be less than 100 characters")
       .required("Required"),
     orderAlgoDepth: yup
       .number()
@@ -139,10 +139,18 @@ export const BotForm = () => {
 
   const stopBot = () => {
     if (config) {
-      runLoop({
+      // runLoop({
+      //   config,
+      //   assetInfo: null,
+      //   lastBlock: 0,
+      //   runState: {
+      //     isExiting: true,
+      //     inRunLoop: false,
+      //   },
+      // });
+
+      stopLoop({
         config,
-        assetInfo: null,
-        lastBlock: 0,
         runState: {
           isExiting: true,
           inRunLoop: false,
@@ -175,6 +183,7 @@ export const BotForm = () => {
         const api = initAPI(environment);
         const _config = {
           ...formValues,
+          assetId: parseInt(formValues.assetId),
           walletAddr,
           environment,
           useTinyMan,
@@ -201,15 +210,12 @@ export const BotForm = () => {
     }
   };
 
-  const handleClose = useCallback(
-    (mnemonic?: string) => {
-      setOpenModal(false);
-      if (mnemonic) {
-        validateWallet(mnemonic);
-      }
-    },
-    []
-  );
+  const handleClose = useCallback((mnemonic?: string) => {
+    setOpenModal(false);
+    if (mnemonic) {
+      validateWallet(mnemonic);
+    }
+  }, []);
 
   return (
     <>

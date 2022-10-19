@@ -21,21 +21,31 @@ import getPlannedOrderChanges from "./getPlannedOrderChanges";
 import cancelOrdersAndUpdateDB from "./cancelOrdersAndUpdateDB";
 import { BotConfig } from "./types/config";
 import { RunState } from "./types/order";
+import getOpenAccountSetFromAlgodex from "./getOpenAccountSetFromAlgodex";
+import getCurrentOrders from "./getCurrentOrders";
+import getCancelPromises from "./getCancelPromises";
+import { cancelOrders } from "./cancelOrders";
 
+let exitLoop = false;
 export interface RunLoopInput {
   assetInfo: any;
   config: BotConfig;
   lastBlock: number;
   runState: RunState;
-//   runState: CurrentState;
+  //   runState: CurrentState;
 }
-const runLoop = async ({ assetInfo, config, lastBlock, runState }:RunLoopInput) => {
+const runLoop = async ({
+  assetInfo,
+  config,
+  lastBlock,
+  runState,
+}: RunLoopInput) => {
   // const {assetId, walletAddr, minSpreadPerc, nearestNeighborKeep,
   //   escrowDB, ladderTiers, useTinyMan, api,
   // environment, orderAlgoDepth} = config;
 
   // Note - during jest testing, runState is a Proxy
-  if (runState.isExiting) {
+  if (runState.isExiting || exitLoop) {
     console.log("Exiting!");
     return;
   }
@@ -80,3 +90,31 @@ const runLoop = async ({ assetInfo, config, lastBlock, runState }:RunLoopInput) 
 };
 
 export default runLoop;
+
+export const stopLoop = async ({
+  runState,
+  config,
+}: {
+  config: BotConfig;
+  runState: RunState;
+}) => {
+  const { assetId, walletAddr, escrowDB, api, environment } = config;
+
+  console.log("Canceling all orders");
+  const openAccountSet = await getOpenAccountSetFromAlgodex(
+    environment,
+    walletAddr,
+    assetId
+  );
+  const escrows = await getCurrentOrders(escrowDB, api.indexer, openAccountSet);
+  const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
+  const cancelSet = new Set(cancelArr);
+  const cancelPromises = await getCancelPromises({
+    escrows,
+    cancelSet,
+    api,
+    latestPrice: 0,
+  });
+  await cancelOrders(escrowDB, escrows, cancelPromises);
+  exitLoop = true;
+};
