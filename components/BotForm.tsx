@@ -139,23 +139,7 @@ export const BotForm = () => {
 
   const stopBot = () => {
     if (config) {
-      // runLoop({
-      //   config,
-      //   assetInfo: null,
-      //   lastBlock: 0,
-      //   runState: {
-      //     isExiting: true,
-      //     inRunLoop: false,
-      //   },
-      // });
-
-      stopLoop({
-        config,
-        runState: {
-          isExiting: true,
-          inRunLoop: false,
-        },
-      });
+      stopLoop({ config });
       setLoading(false);
     }
   };
@@ -192,6 +176,7 @@ export const BotForm = () => {
           mnemonic,
         };
 
+        stopLoop({ updateExit: true });
         setConfig(_config);
         setLoading(true);
         runLoop({
@@ -441,7 +426,7 @@ export const BotForm = () => {
                         sx={{
                           input: {
                             padding: "6.5px 0px 6.5px 14px",
-                            width: "55px",
+                            width: "63px",
                           },
                         }}
                         onChange={({
@@ -516,7 +501,7 @@ export const BotForm = () => {
                         sx={{
                           input: {
                             padding: "6.5px 0px 6.5px 14px",
-                            width: "55px",
+                            width: "63px",
                           },
                         }}
                       />
@@ -600,7 +585,7 @@ export const BotForm = () => {
                           sx={{
                             input: {
                               padding: "6.5px 0px 6.5px 14px",
-                              width: "55px",
+                              width: "63px",
                             },
                           }}
                         />
