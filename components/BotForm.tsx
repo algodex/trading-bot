@@ -17,7 +17,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
-import runLoop from "@/lib/runLoop";
+import runLoop, { stopLoop } from "@/lib/runLoop";
 import PouchDB from "pouchdb";
 import dynamic from "next/dynamic";
 
@@ -139,10 +139,18 @@ export const BotForm = () => {
 
   const stopBot = () => {
     if (config) {
-      runLoop({
+      // runLoop({
+      //   config,
+      //   assetInfo: null,
+      //   lastBlock: 0,
+      //   runState: {
+      //     isExiting: true,
+      //     inRunLoop: false,
+      //   },
+      // });
+
+      stopLoop({
         config,
-        assetInfo: null,
-        lastBlock: 0,
         runState: {
           isExiting: true,
           inRunLoop: false,
