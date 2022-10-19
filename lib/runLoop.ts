@@ -92,29 +92,39 @@ const runLoop = async ({
 export default runLoop;
 
 export const stopLoop = async ({
-  runState,
   config,
+  updateExit,
 }: {
-  config: BotConfig;
-  runState: RunState;
+  config?: BotConfig;
+  updateExit?: boolean;
 }) => {
-  const { assetId, walletAddr, escrowDB, api, environment } = config;
+  if (updateExit) {
+    exitLoop = false;
+    return;
+  }
+  if (config) {
+    const { assetId, walletAddr, escrowDB, api, environment } = config;
 
-  console.log("Canceling all orders");
-  const openAccountSet = await getOpenAccountSetFromAlgodex(
-    environment,
-    walletAddr,
-    assetId
-  );
-  const escrows = await getCurrentOrders(escrowDB, api.indexer, openAccountSet);
-  const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
-  const cancelSet = new Set(cancelArr);
-  const cancelPromises = await getCancelPromises({
-    escrows,
-    cancelSet,
-    api,
-    latestPrice: 0,
-  });
-  await cancelOrders(escrowDB, escrows, cancelPromises);
-  exitLoop = true;
+    console.log("Canceling all orders");
+    const openAccountSet = await getOpenAccountSetFromAlgodex(
+      environment,
+      walletAddr,
+      assetId
+    );
+    const escrows = await getCurrentOrders(
+      escrowDB,
+      api.indexer,
+      openAccountSet
+    );
+    const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
+    const cancelSet = new Set(cancelArr);
+    const cancelPromises = await getCancelPromises({
+      escrows,
+      cancelSet,
+      api,
+      latestPrice: 0,
+    });
+    await cancelOrders(escrowDB, escrows, cancelPromises);
+    exitLoop = true;
+  }
 };
