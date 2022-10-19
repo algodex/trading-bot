@@ -100,9 +100,9 @@ export const BotForm = () => {
 
   const validationSchema = yup.object().shape({
     assetId: yup
-      .string()
+      .number()
+      .positive("Invalid")
       .label("Asset Id")
-      .max(32, "Name must be less than 100 characters")
       .required("Required"),
     orderAlgoDepth: yup
       .number()
@@ -175,6 +175,7 @@ export const BotForm = () => {
         const api = initAPI(environment);
         const _config = {
           ...formValues,
+          assetId: parseInt(formValues.assetId),
           walletAddr,
           environment,
           useTinyMan,
@@ -201,15 +202,12 @@ export const BotForm = () => {
     }
   };
 
-  const handleClose = useCallback(
-    (mnemonic?: string) => {
-      setOpenModal(false);
-      if (mnemonic) {
-        validateWallet(mnemonic);
-      }
-    },
-    []
-  );
+  const handleClose = useCallback((mnemonic?: string) => {
+    setOpenModal(false);
+    if (mnemonic) {
+      validateWallet(mnemonic);
+    }
+  }, []);
 
   return (
     <>

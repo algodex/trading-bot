@@ -39,6 +39,7 @@ const placeOrdersAndUpdateDB = async ({
     latestPrice,
   });
   const { validResults } = await waitForOrders(ordersToPlace);
+  console.log('here', validResults)
 
   await addOrdersToDB(config.escrowDB, validResults);
 };
