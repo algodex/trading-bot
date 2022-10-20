@@ -73,6 +73,9 @@ const theme = createTheme({
       100: "#D9D9D9",
       200: "#A1AEC0",
     },
+    blue: {
+      300: "#2d75d6",
+    },
     accent: {
       main: "#44C480",
       dark: "#579F6E",

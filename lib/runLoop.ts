@@ -25,7 +25,7 @@ import getOpenAccountSetFromAlgodex from "./getOpenAccountSetFromAlgodex";
 import getCurrentOrders from "./getCurrentOrders";
 import getCancelPromises from "./getCancelPromises";
 import { cancelOrders } from "./cancelOrders";
-import events from "./events";
+import * as events from "./events";
 
 let exitLoop = false;
 export interface RunLoopInput {

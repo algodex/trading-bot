@@ -17,7 +17,7 @@
 import orderDepthAmounts from "./order-depth-amounts";
 import { BotConfig } from ".././types/config";
 import { EscrowToMake } from "../getEscrowsToCancelAndMake";
-import events from "../events";
+import * as events from "../events";
 
 export interface PlaceOrderInput {
   config: BotConfig;
