@@ -17,6 +17,7 @@
 import orderDepthAmounts from "./order-depth-amounts";
 import { BotConfig } from ".././types/config";
 import { EscrowToMake } from "../getEscrowsToCancelAndMake";
+import events from "../events";
 
 export interface PlaceOrderInput {
   config: BotConfig;
@@ -34,7 +35,6 @@ const placeOrders = ({
   const { assetId, orderAlgoDepth, api } = config;
 
   const placedOrders = createEscrowPrices.map((priceObj) => {
-    //const orderDepth = orderDepthAmounts.hasOwnProperty("" + assetId)
     const orderDepth = Object.prototype.hasOwnProperty.call(
       orderDepthAmounts,
       "" + assetId
@@ -57,6 +57,12 @@ const placeOrders = ({
       JSON.stringify(orderToPlace),
       ` Latest Price: ${latestPrice}`
     );
+    events.emit("running-bot", {
+      status: "PLACING ORDER",
+      content: `Placing Buy Order (Maker) for asset: ${JSON.stringify(
+        orderToPlace
+      )},\n Latest Price: ${latestPrice}`,
+    });
     const orderPromise = api.placeOrder(orderToPlace);
     return orderPromise;
   });
