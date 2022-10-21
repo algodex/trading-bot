@@ -74,7 +74,8 @@ const theme = createTheme({
       200: "#A1AEC0",
     },
     blue: {
-      300: "#2d75d6",
+      main: "#2d75d6",
+      dark:'#2D3748'
     },
     accent: {
       main: "#44C480",
