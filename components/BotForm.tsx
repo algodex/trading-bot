@@ -47,6 +47,7 @@ import { BotConfig, Environment } from "@/lib/types/config";
 import { getWallet } from "@/lib/storage";
 import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
+import { AssetSearchInput } from "./AssetSearchInput";
 
 const WalletButton = dynamic(
   () =>
@@ -263,6 +264,10 @@ export const BotForm = () => {
                 </Grid>
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
                   <Grid item md={7} xs={12}>
+                    <AssetSearchInput
+                      setFieldValue={setFieldValue}
+                      name="assetId"
+                    />
                     <Field
                       component={CustomTextInput}
                       placeholder="Asset ID"

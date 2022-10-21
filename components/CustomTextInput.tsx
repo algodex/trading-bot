@@ -33,14 +33,16 @@ const CustomTextInput = ({
 
   return (
     <Fragment>
-      <TextField
-        name={field.name}
-        value={field.value}
-        onChange={field.onChange}
-        onBlur={field.onBlur}
-        fullWidth
-        {...props}
-      />
+      {field.name !== "assetId" && (
+        <TextField
+          name={field.name}
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          fullWidth
+          {...props}
+        />
+      )}
       {hasError && (
         <Typography sx={{ pt: "5px", color: "error.main", fontSize: "12px" }}>
           {errors[field.name]}
