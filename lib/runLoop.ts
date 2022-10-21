@@ -25,6 +25,7 @@ import getOpenAccountSetFromAlgodex from "./getOpenAccountSetFromAlgodex";
 import getCurrentOrders from "./getCurrentOrders";
 import getCancelPromises from "./getCancelPromises";
 import { cancelOrders } from "./cancelOrders";
+import * as events from "./events";
 
 let exitLoop = false;
 export interface RunLoopInput {
@@ -47,6 +48,10 @@ const runLoop = async ({
   // Note - during jest testing, runState is a Proxy
   if (runState.isExiting || exitLoop) {
     console.log("Exiting!");
+    events.emit("running-bot", {
+      status: "Stop bot",
+      content: "Exiting!",
+    });
     return;
   }
   runState.inRunLoop = true;
@@ -75,6 +80,11 @@ const runLoop = async ({
     cancelSet,
     latestPrice,
     currentEscrows,
+  });
+
+  events.emit("running-bot", {
+    status: "Place order and update DB",
+    content: "",
   });
 
   await placeOrdersAndUpdateDB({
@@ -106,6 +116,10 @@ export const stopLoop = async ({
     const { assetId, walletAddr, escrowDB, api, environment } = config;
 
     console.log("Canceling all orders");
+    events.emit("running-bot", {
+      status: "Stop bot",
+      content: "Will cancel all orders",
+    });
     const openAccountSet = await getOpenAccountSetFromAlgodex(
       environment,
       walletAddr,
@@ -116,6 +130,10 @@ export const stopLoop = async ({
       api.indexer,
       openAccountSet
     );
+    events.emit("running-bot", {
+      status: "Stop bot",
+      content: "Getting current orders",
+    });
     const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
     const cancelSet = new Set(cancelArr);
     const cancelPromises = await getCancelPromises({
@@ -123,6 +141,10 @@ export const stopLoop = async ({
       cancelSet,
       api,
       latestPrice: 0,
+    });
+    events.emit("running-bot", {
+      status: "Stop bot",
+      content: "Cancelling promises and orders!",
     });
     await cancelOrders(escrowDB, escrows, cancelPromises);
     exitLoop = true;

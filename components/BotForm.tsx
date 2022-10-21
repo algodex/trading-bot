@@ -235,7 +235,7 @@ export const BotForm = () => {
                         color:
                           environment === "testnet"
                             ? "accent.main"
-                            : "error.main",
+                            : "blue.300",
                         border: "none",
                         ".MuiOutlinedInput-input": {
                           padding: "0.4rem 1.7rem",
@@ -246,7 +246,7 @@ export const BotForm = () => {
                           borderColor:
                             environment === "testnet"
                               ? "accent.main"
-                              : "error.main",
+                              : "blue.300",
                         },
                       }}
                     >
