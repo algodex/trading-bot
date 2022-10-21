@@ -49,7 +49,7 @@ export const ValidateWallet = ({
   const walletAddr = useMemo(() => {
     return getWallet();
     // I want this value to update everytime the modal opens or closes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const validate = () => {
@@ -114,7 +114,6 @@ export const ValidateWallet = ({
           borderRadius: "6px",
           padding: "40px 20px",
           maxHeight: "100%",
-          overflow: "scroll",
         }}
       >
         {forgotPassphrase && (
@@ -147,6 +146,7 @@ export const ValidateWallet = ({
             },
             "@media (max-width: 501px)": {
               width: "100%",
+              padding: 0,
             },
           }}
         >
@@ -164,7 +164,7 @@ export const ValidateWallet = ({
               >
                 <Box
                   sx={{
-                    marginTop: "10px",
+                    marginTop: "20px",
                   }}
                 >
                   <Image
@@ -275,7 +275,7 @@ export const ValidateWallet = ({
               >
                 <Box
                   sx={{
-                    marginTop: "10px",
+                    marginTop: "20px",
                   }}
                 >
                   <Image

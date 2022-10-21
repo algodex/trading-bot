@@ -36,6 +36,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
 
 // Custom components
 import { Note } from "./Note";
@@ -299,13 +300,24 @@ export const BotForm = () => {
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Order Size (in ALGOs)
-                    <InfoRoundedIcon
+                    <Tooltip
+                      title={""}
+                      placement="top"
+                      arrow
                       sx={{
-                        marginLeft: "5px",
-                        fontSize: "16px",
-                        color: "secondary.dark",
+                        cursor: "pointer",
+                        marginLeft: "0.5rem",
                       }}
-                    />
+                    >
+                      <InfoRoundedIcon
+                        sx={{
+                          marginLeft: "5px",
+                          fontSize: "16px",
+                          color: "secondary.dark",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
                   </Typography>
                   <Grid
                     container
@@ -363,13 +375,24 @@ export const BotForm = () => {
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Spread Percentage
-                    <InfoRoundedIcon
+                    <Tooltip
+                      title={""}
+                      placement="top"
+                      arrow
                       sx={{
-                        marginLeft: "5px",
-                        fontSize: "16px",
-                        color: "secondary.dark",
+                        cursor: "pointer",
+                        marginLeft: "0.5rem",
                       }}
-                    />
+                    >
+                      <InfoRoundedIcon
+                        sx={{
+                          marginLeft: "5px",
+                          fontSize: "16px",
+                          color: "secondary.dark",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
                   </Typography>
                   <Grid
                     container
@@ -454,13 +477,23 @@ export const BotForm = () => {
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Number of Orders
-                    <InfoRoundedIcon
+                    <Tooltip
+                      title={""}
+                      placement="top"
+                      arrow
                       sx={{
-                        marginLeft: "5px",
-                        fontSize: "16px",
-                        color: "secondary.dark",
+                        marginLeft: "0.5rem",
                       }}
-                    />
+                    >
+                      <InfoRoundedIcon
+                        sx={{
+                          marginLeft: "5px",
+                          fontSize: "16px",
+                          color: "secondary.dark",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
                   </Typography>
                   <Grid
                     container
@@ -539,13 +572,26 @@ export const BotForm = () => {
                   <AccordionDetails>
                     <Typography marginBottom={"20px"}>
                       Nearest Neighbor Keep
-                      <InfoRoundedIcon
+                      <Tooltip
+                        title={
+                          "Nearest Neighbor Keep sets highest amount to what spread percentage is set at - it defaults to half if user does not set it. (eg if spread percentage is set to .5% then NNK sets to .25% by default unless user changes it)"
+                        }
+                        placement="top"
+                        arrow
                         sx={{
-                          marginLeft: "5px",
-                          fontSize: "16px",
-                          color: "secondary.dark",
+                          cursor: "pointer",
+                          marginLeft: "0.5rem",
                         }}
-                      />
+                      >
+                        <InfoRoundedIcon
+                          sx={{
+                            marginLeft: "5px",
+                            fontSize: "16px",
+                            cursor: "pointer",
+                            color: "secondary.dark",
+                          }}
+                        />
+                      </Tooltip>
                     </Typography>
                     <Grid
                       container

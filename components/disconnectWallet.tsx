@@ -80,7 +80,6 @@ export const DisconnectWallet = ({
           borderRadius: "6px",
           padding: "40px 20px",
           maxHeight: "100%",
-          overflow: "scroll",
         }}
       >
         <Box
@@ -94,6 +93,7 @@ export const DisconnectWallet = ({
             },
             "@media (max-width: 501px)": {
               width: "100%",
+              padding: 0,
             },
           }}
         >
