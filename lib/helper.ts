@@ -14,10 +14,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import axios from "axios";
+
 export const shortenAddress = (address: string, numb?: number) => {
-  const len = numb || 6
+  const len = numb || 6;
   const list = address.split("");
   const first = list.slice(0, len);
   const last = list.slice(list.length - len, list.length);
   return `${first.join("")}...${last.join("")}`;
+};
+
+export const searchAlgoAssets = async (keywords: string) => {
+  const url =
+    process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet"
+      ? "https://indexer.algoexplorerapi.io/rl/v1/search"
+      : "https://indexer.testnet.algoexplorerapi.io/rl/v1/search";
+  try {
+    const response = await axios.get(url, {
+      params: { keywords },
+    });
+    return response;
+  } catch (error) {
+    return error;
+  }
 };
