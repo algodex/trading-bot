@@ -104,7 +104,9 @@ export const MnemonicModal = ({
           borderRadius: "6px",
           padding: "20px 20px",
           maxHeight: "100%",
-          overflow: "scroll",
+          "@media (max-width: 750px)": {
+            overflow: "scroll",
+          },
         }}
       >
         <Typography
