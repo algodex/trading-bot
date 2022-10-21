@@ -163,14 +163,13 @@ export const BotForm = () => {
           "_" +
           walletAddr.slice(0, 8).toLowerCase();
         const escrowDB = new PouchDB(fullPouchUrl);
-        const useTinyMan = process.env.NEXT_PUBLIC_USE_TINYMAN || false;
         const api = initAPI(environment);
         const _config = {
           ...formValues,
           assetId: parseInt(formValues.assetId),
           walletAddr,
           environment,
-          useTinyMan,
+          useTinyMan: true,
           api,
           escrowDB,
           mnemonic,

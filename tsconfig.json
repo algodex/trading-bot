@@ -26,9 +26,9 @@
     "moduleResolution": "node",
     "jsx": "preserve",
     "incremental": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "resolveJsonModule": true,
-    "isolatedModules": false
+    "isolatedModules": true
   },
   "include": [
     "next-env.d.ts",
