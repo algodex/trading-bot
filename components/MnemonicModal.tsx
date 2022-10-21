@@ -314,6 +314,7 @@ export const MnemonicModal = ({
                     <input
                       type="text"
                       className="input"
+                      style={{ marginLeft: "2px" }}
                       id={`input${index}`}
                       onChange={({ target: { value } }) => {
                         const mnemonicList =
