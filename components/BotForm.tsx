@@ -235,7 +235,7 @@ export const BotForm = () => {
                         color:
                           environment === "testnet"
                             ? "accent.main"
-                            : "blue.300",
+                            : "blue.main",
                         border: "none",
                         ".MuiOutlinedInput-input": {
                           padding: "0.4rem 1.7rem",
@@ -246,7 +246,7 @@ export const BotForm = () => {
                           borderColor:
                             environment === "testnet"
                               ? "accent.main"
-                              : "blue.300",
+                              : "blue.main",
                         },
                       }}
                     >
@@ -654,7 +654,14 @@ export const BotForm = () => {
                     variant="contained"
                     fullWidth
                     type="button"
-                    sx={{ py: "0.8rem", mt: "1rem" }}
+                    sx={{
+                      py: "0.8rem",
+                      mt: "1rem",
+                      backgroundColor: "blue.dark",
+                      "&:hover": {
+                        backgroundColor: "blue.dark",
+                      },
+                    }}
                     onClick={stopBot}
                   >
                     Stop Bot

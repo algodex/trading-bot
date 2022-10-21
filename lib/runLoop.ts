@@ -118,7 +118,7 @@ export const stopLoop = async ({
     console.log("Canceling all orders");
     events.emit("running-bot", {
       status: "Stop bot",
-      content: "Will cancel all orders",
+      content: "Will cancel current orders",
     });
     const openAccountSet = await getOpenAccountSetFromAlgodex(
       environment,
