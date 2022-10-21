@@ -32,8 +32,6 @@ const getTinymanPrice = async (
     timeout: 10000,
   });
   const algoPrice = assetData.data[0].price;
-  console.log(assetData.data[assetId])
-  console.log(assetData.data)
   const latestPrice = assetData.data[assetId].price / algoPrice;
   return latestPrice;
 };
