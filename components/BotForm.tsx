@@ -277,24 +277,30 @@ export const BotForm = () => {
                       required
                     />
                   </Grid>
-                  <Grid item md={4} marginLeft={"auto"}>
-                    <Link
-                      href="https://algodex.com"
-                      target={"_blank"}
-                      rel="noreferrer"
-                      sx={{
-                        color: "secondary.contrastText",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                        textDecoration: "underline",
-                        fontWeight: 500,
-                      }}
-                    >
-                      View in Algodex
-                      <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
-                    </Link>
-                  </Grid>
+                  {formikRef.current?.values?.assetId && (
+                    <Grid item md={4} marginLeft={"auto"}>
+                      <Link
+                        href={`https://${
+                          environment === "mainnet" ? "app" : "testnet"
+                        }.algodex.com/trade/${
+                          formikRef.current.values.assetId
+                        }`}
+                        target={"_blank"}
+                        rel="noreferrer"
+                        sx={{
+                          color: "secondary.contrastText",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "end",
+                          textDecoration: "underline",
+                          fontWeight: 500,
+                        }}
+                      >
+                        View in Algodex
+                        <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
+                      </Link>
+                    </Grid>
+                  )}
                 </Grid>
                 <Typography
                   sx={{ pt: "5px", fontSize: "14px", marginBottom: "40px" }}
