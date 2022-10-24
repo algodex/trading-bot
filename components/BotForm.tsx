@@ -375,7 +375,9 @@ export const BotForm = () => {
                     </Grid>
                   </Grid>
                   <Note
-                    note="These settings qualify for ALGX Rewards."
+                    note={`These settings ${
+                      values.orderAlgoDepth < 25000 ? "DO NOT " : ""
+                    }qualify for ALGX Rewards.`}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
                       title: "Read about Rewards Calcuations",
@@ -482,7 +484,9 @@ export const BotForm = () => {
                     </Grid>
                   </Grid>
                   <Note
-                    note="These settings qualify for ALGX Rewards."
+                    note={`These settings ${
+                      values.minSpreadPerc > 0.25 ? "DO NOT " : ""
+                    }qualify for ALGX Rewards.`}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
                       title: "Read about Rewards Calcuations",
@@ -619,8 +623,7 @@ export const BotForm = () => {
                       <Grid item lg={9} md={8} xs={12}>
                         <Field
                           component={CustomRangeSlider}
-                          step={0.1}
-                          marks
+                          // step={0.1}
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc}
@@ -655,6 +658,7 @@ export const BotForm = () => {
                     </Grid>
                   </AccordionDetails>
                 </Accordion>
+
                 {!loading ? (
                   <LoadingButton
                     variant="contained"
