@@ -418,6 +418,8 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="minSpreadPerc"
                         id="minSpreadPerc"
+                        marks
+                        step={0.1}
                         max={4}
                         min={0.01}
                         onChange={({
@@ -425,10 +427,11 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          setFieldValue("minSpreadPerc", parseInt(value));
+                          console.log(parseFloat(value));
+                          setFieldValue("minSpreadPerc", parseFloat(value));
                           setFieldValue(
                             "nearestNeighborKeep",
-                            parseInt(value) / 2
+                            parseFloat(value) / 2
                           );
                         }}
                       />
@@ -455,6 +458,7 @@ export const BotForm = () => {
                         name="minSpreadPerc"
                         id="minSpreadPerc"
                         max={4}
+                        min={0.01}
                         required
                         sx={{
                           input: {
@@ -467,10 +471,10 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          setFieldValue("minSpreadPerc", parseInt(value));
+                          setFieldValue("minSpreadPerc", parseFloat(value));
                           setFieldValue(
                             "nearestNeighborKeep",
-                            parseInt(value) / 2
+                            parseFloat(value) / 2
                           );
                         }}
                       />
@@ -615,6 +619,8 @@ export const BotForm = () => {
                       <Grid item lg={9} md={8} xs={12}>
                         <Field
                           component={CustomRangeSlider}
+                          step={0.1}
+                          marks
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc}
