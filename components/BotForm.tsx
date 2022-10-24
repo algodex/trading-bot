@@ -277,24 +277,30 @@ export const BotForm = () => {
                       required
                     />
                   </Grid>
-                  <Grid item md={4} marginLeft={"auto"}>
-                    <Link
-                      href="https://algodex.com"
-                      target={"_blank"}
-                      rel="noreferrer"
-                      sx={{
-                        color: "secondary.contrastText",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                        textDecoration: "underline",
-                        fontWeight: 500,
-                      }}
-                    >
-                      View in Algodex
-                      <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
-                    </Link>
-                  </Grid>
+                  {formikRef.current?.values?.assetId && (
+                    <Grid item md={4} marginLeft={"auto"}>
+                      <Link
+                        href={`https://${
+                          environment === "mainnet" ? "app" : "testnet"
+                        }.algodex.com/trade/${
+                          formikRef.current.values.assetId
+                        }`}
+                        target={"_blank"}
+                        rel="noreferrer"
+                        sx={{
+                          color: "secondary.contrastText",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "end",
+                          textDecoration: "underline",
+                          fontWeight: 500,
+                        }}
+                      >
+                        View in Algodex
+                        <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
+                      </Link>
+                    </Grid>
+                  )}
                 </Grid>
                 <Typography
                   sx={{ pt: "5px", fontSize: "14px", marginBottom: "40px" }}
@@ -412,6 +418,8 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="minSpreadPerc"
                         id="minSpreadPerc"
+                        marks
+                        step={0.1}
                         max={4}
                         min={0.01}
                         onChange={({
@@ -419,10 +427,11 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          setFieldValue("minSpreadPerc", parseInt(value));
+                          console.log(parseFloat(value));
+                          setFieldValue("minSpreadPerc", parseFloat(value));
                           setFieldValue(
                             "nearestNeighborKeep",
-                            parseInt(value) / 2
+                            parseFloat(value) / 2
                           );
                         }}
                       />
@@ -449,6 +458,7 @@ export const BotForm = () => {
                         name="minSpreadPerc"
                         id="minSpreadPerc"
                         max={4}
+                        min={0.01}
                         required
                         sx={{
                           input: {
@@ -461,10 +471,10 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          setFieldValue("minSpreadPerc", parseInt(value));
+                          setFieldValue("minSpreadPerc", parseFloat(value));
                           setFieldValue(
                             "nearestNeighborKeep",
-                            parseInt(value) / 2
+                            parseFloat(value) / 2
                           );
                         }}
                       />
@@ -609,6 +619,8 @@ export const BotForm = () => {
                       <Grid item lg={9} md={8} xs={12}>
                         <Field
                           component={CustomRangeSlider}
+                          step={0.1}
+                          marks
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc}
