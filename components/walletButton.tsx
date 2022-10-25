@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 //MUI Components
 import Button from "@mui/material/Button";
@@ -24,25 +24,24 @@ import Box from "@mui/material/Box";
 // Custom components
 import { MnemonicModal } from "./MnemonicModal";
 import { shortenAddress } from "@/lib/helper";
-import { getWallet } from "@/lib/storage";
 import { DisconnectWallet } from "./disconnectWallet";
 
-export const WalletButton = () => {
+export const WalletButton = ({
+  walletAddr,
+  setWalletAddr,
+}: {
+  walletAddr: string;
+  setWalletAddr: any;
+}) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const handleOpenModal = () => {
-    if (getWallet()) {
+    if (walletAddr) {
       setOpenModal("disconnect");
     } else {
       setOpenModal("mnemonic");
     }
   };
   const handleCloseModal = () => setOpenModal(null);
-
-  const walletAddr = useMemo(() => {
-    return getWallet();
-    // I want this value to update everytime the modal opens or closes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openModal]);
 
   return (
     <>
@@ -62,16 +61,19 @@ export const WalletButton = () => {
           Connected Wallet:
         </Typography>
         <Button variant="outlined" onClick={handleOpenModal}>
-          {getWallet() ? shortenAddress(walletAddr || '') : "Input Mnemonic"}
+          {walletAddr ? shortenAddress(walletAddr || "") : "Input Mnemonic"}
         </Button>
       </Box>
       <MnemonicModal
         open={openModal === "mnemonic"}
         handleClose={handleCloseModal}
+        setWalletAddr={setWalletAddr}
       />
       <DisconnectWallet
         open={openModal === "disconnect"}
         handleClose={handleCloseModal}
+        walletAddr={walletAddr}
+        setWalletAddr={setWalletAddr}
       />
     </>
   );

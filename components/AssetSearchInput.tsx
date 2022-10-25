@@ -23,7 +23,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import Typography from "@mui/material/Typography";
 
 //Lib files
 import { searchAlgoAssets } from "@/lib/helper";

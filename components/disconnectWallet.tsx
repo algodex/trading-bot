@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -26,22 +26,27 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Tooltip from "@mui/material/Tooltip";
 
 //lib
-import { clearWallet, getWallet } from "@/lib/storage";
+import { clearWallet } from "@/lib/storage";
 import Image from "next/image";
 import { shortenAddress } from "@/lib/helper";
 
 export const DisconnectWallet = ({
   open,
   handleClose,
+  walletAddr,
+  setWalletAddr
 }: {
   open: boolean;
   handleClose: any;
+  walletAddr: string | null;
+  setWalletAddr: any
 }) => {
   const [tooltiptext, setTooltiptext] = useState("Click to Copy");
 
   const clearSession = () => {
     clearWallet();
     handleClose();
+    setWalletAddr(null)
   };
 
   const copyAddress = (address: string) => {
@@ -52,13 +57,6 @@ export const DisconnectWallet = ({
       setTooltiptext("Click to Copy");
     }, 500);
   };
-
-  const walletAddr = useMemo(() => {
-    return getWallet();
-    // I want this value to update everytime the modal opens or closes
-    
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   return (
     <Modal

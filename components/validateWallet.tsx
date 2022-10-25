@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 //MUI Components
 import Modal from "@mui/material/Modal";
@@ -26,7 +26,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Tooltip from "@mui/material/Tooltip";
 
 //lib
-import { clearWallet, getMnemonic, getWallet } from "@/lib/storage";
+import { clearWallet, getMnemonic } from "@/lib/storage";
 import Image from "next/image";
 import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
 import { shortenAddress } from "@/lib/helper";
@@ -36,21 +36,19 @@ export const ValidateWallet = ({
   handleClose,
   passphrase,
   setPassphrase,
+  walletAddr,
+  setWalletAddr,
 }: {
   open: boolean;
   handleClose: (arg?: string) => void;
   passphrase: PassPhrase;
   setPassphrase: (arg: any) => void;
+  walletAddr: string | null;
+  setWalletAddr: any;
 }) => {
   const [forgotPassphrase, setForgotPassphrase] = useState<boolean>(false);
   const [tooltiptext, setTooltiptext] = useState("Click to Copy");
   const [errorMessage, setErrorMessage] = useState("");
-
-  const walletAddr = useMemo(() => {
-    return getWallet();
-    // I want this value to update everytime the modal opens or closes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const validate = () => {
     if (passphrase) {
@@ -74,6 +72,7 @@ export const ValidateWallet = ({
     clearWallet();
     clearPassprase();
     handleClose();
+    setWalletAddr(null);
   };
 
   const copyAddress = (address: string) => {

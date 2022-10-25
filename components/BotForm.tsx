@@ -14,7 +14,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -44,12 +49,22 @@ import CustomRangeSlider from "./CustomRangeSlider";
 import CustomTextInput from "./CustomTextInput";
 import initAPI from "@/lib/initAPI";
 import { BotConfig, Environment } from "@/lib/types/config";
-import { getWallet } from "@/lib/storage";
 import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 import { AssetSearchInput } from "./AssetSearchInput";
+import { getAccountInfo } from "@/lib/helper";
+import getAssetInfo from "@/lib/getAssetInfo";
+import algosdk from "algosdk";
+import { getWallet } from "@/lib/storage";
 
-const WalletButton = dynamic(
+interface AssetSchema {
+  "asset-id": number;
+  amount: number;
+  "is-frozen": boolean;
+  name?: string;
+}
+
+const WalletButton: any = dynamic(
   () =>
     import("@/components/walletButton").then((mod: any) => mod.WalletButton),
   {
@@ -91,6 +106,8 @@ export const BotForm = () => {
   });
   const formikRef = useRef<any>();
   const [openModal, setOpenModal] = useState(false);
+  const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
+  const [walletAddr, setWalletAddr] = useState(getWallet());
 
   const initialValues = {
     assetId: "",
@@ -131,7 +148,6 @@ export const BotForm = () => {
   });
 
   const handleStart = () => {
-    const walletAddr = getWallet();
     if (walletAddr) {
       setOpenModal(true);
     } else {
@@ -148,10 +164,10 @@ export const BotForm = () => {
 
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     setEnvironment(value);
+    setAvailableBalance([]);
   };
 
   const validateWallet = (mnemonic: string) => {
-    const walletAddr = getWallet();
     const formValues = formikRef.current.values;
     if (walletAddr && mnemonic) {
       try {
@@ -191,17 +207,66 @@ export const BotForm = () => {
         });
       } catch (error) {
         setLoading(false);
-        console.log(error);
+        console.error(error);
       }
     }
   };
 
   const handleClose = useCallback((mnemonic?: string) => {
     setOpenModal(false);
+    console.log({ mnemonic, walletAddr });
     if (mnemonic) {
       validateWallet(mnemonic);
     }
   }, []);
+
+  const updateASAInfo = async (ASAs: AssetSchema[]) => {
+    const url =
+      environment === "testnet"
+        ? "https://algoindexer.testnet.algoexplorerapi.io"
+        : "https://algoindexer.algoexplorerapi.io";
+    const indexerClient = new algosdk.Indexer("", url, 443);
+
+    const result: any = await Promise.all(
+      ASAs.map(async (asset) => {
+        try {
+          const res = await getAssetInfo({
+            indexerClient,
+            assetId: asset["asset-id"],
+          });
+          return { ...asset, name: res.asset.params.name };
+        } catch (error) {
+          console.error(error);
+        }
+      })
+    );
+    setAvailableBalance(result);
+  };
+
+  const getAccount = useCallback(async () => {
+    if (walletAddr) {
+      try {
+        const res = await getAccountInfo(walletAddr, environment);
+        const ASAs = res.data.assets;
+        setAvailableBalance(ASAs);
+        // setAllAssets(values[0].data.assets);
+        updateASAInfo(ASAs);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setAvailableBalance([]);
+    }
+  }, [walletAddr, environment]);
+
+  useEffect(() => {
+    console.log({ walletAddr });
+    if (walletAddr) {
+      getAccount();
+    } else {
+      setAvailableBalance([]);
+    }
+  }, [getAccount, walletAddr, environment]);
 
   return (
     <>
@@ -259,7 +324,10 @@ export const BotForm = () => {
                     </Select>
                   </Grid>
                   <Grid item md={8} xs={12} marginLeft={"auto"}>
-                    <WalletButton />
+                    <WalletButton
+                      walletAddr={walletAddr}
+                      setWalletAddr={setWalletAddr}
+                    />
                   </Grid>
                 </Grid>
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
@@ -308,6 +376,70 @@ export const BotForm = () => {
                   *This bot currently uses Tinyman as a price oracle.
                 </Typography>
 
+                {availableBalance.length > 0 && (
+                  <Box
+                    sx={{
+                      border: "2px solid",
+                      borderColor: "secondary.contrastText",
+                      padding: "15px 20px",
+                      borderRadius: "3px",
+                      marginBlock: "20px",
+                      background: "transparent",
+                    }}
+                  >
+                    <Typography
+                      marginBottom={"10px"}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
+                      Available Balance
+                      <Tooltip
+                        title={""}
+                        placement="top"
+                        arrow
+                        sx={{
+                          cursor: "pointer",
+                          marginLeft: "0.5rem",
+                        }}
+                      >
+                        <InfoRoundedIcon
+                          sx={{
+                            marginLeft: "5px",
+                            fontSize: "16px",
+                            color: "secondary.dark",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </Tooltip>
+                    </Typography>
+                    {availableBalance.map((asset) => (
+                      <Box
+                        key={asset["asset-id"]}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: "2px",
+                          paddingInline: "30px",
+                        }}
+                      >
+                        <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
+                          {asset.name || asset["asset-id"]}:
+                        </Typography>
+                        <Typography
+                          sx={{
+                            textAlign: "end",
+                            fontSize: "18px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {(asset.amount / 1000000).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Order Size (in ALGOs)
@@ -429,7 +561,6 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          console.log(parseFloat(value));
                           setFieldValue("minSpreadPerc", parseFloat(value));
                           setFieldValue(
                             "nearestNeighborKeep",
@@ -698,6 +829,8 @@ export const BotForm = () => {
         handleClose={handleClose}
         passphrase={passphrase}
         setPassphrase={setPassphrase}
+        walletAddr={walletAddr}
+        setWalletAddr={setWalletAddr}
       />
     </>
   );
