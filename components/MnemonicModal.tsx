@@ -33,9 +33,11 @@ import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
 export const MnemonicModal = ({
   open,
   handleClose,
+  setWalletAddr,
 }: {
   open: boolean;
   handleClose: any;
+  setWalletAddr: any;
 }) => {
   const [mnemonic, setMnemonic] = useState<string | undefined>();
   const [passphrase, setPassphrase] = useState<PassPhrase>({
@@ -57,6 +59,7 @@ export const MnemonicModal = ({
   const importWallet = useCallback(async () => {
     if (mnemonic && passphrase.password) {
       const account = algosdk.mnemonicToSecretKey(mnemonic);
+      setWalletAddr(account.addr);
       saveWallet(account.addr, mnemonic, passphrase.password);
       setMnemonic(undefined);
       setPassphrase({

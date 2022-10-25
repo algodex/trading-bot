@@ -18,10 +18,12 @@ import axios from "axios";
 
 export const shortenAddress = (address: string, numb?: number) => {
   const len = numb || 6;
-  const list = address.split("");
-  const first = list.slice(0, len);
-  const last = list.slice(list.length - len, list.length);
-  return `${first.join("")}...${last.join("")}`;
+  if (address) {
+    const list = address.split("");
+    const first = list.slice(0, len);
+    const last = list.slice(list.length - len, list.length);
+    return `${first.join("")}...${last.join("")}`;
+  }
 };
 
 export const searchAlgoAssets = async (keywords: string) => {
@@ -37,4 +39,17 @@ export const searchAlgoAssets = async (keywords: string) => {
   } catch (error) {
     return error;
   }
+};
+
+export const getAccountInfo = async (address: string, env: string) => {
+  const baseUrl =
+    env === "testnet"
+      ? "https://node.testnet.algoexplorerapi.io"
+      : "https://node.algoexplorerapi.io";
+  const res = await axios({
+    method: "get",
+    url: `${baseUrl}/v2/accounts/${address}`,
+    timeout: 3000,
+  });
+  return res;
 };
