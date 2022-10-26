@@ -214,10 +214,12 @@ export const MnemonicModal = ({
                   },
                 }}
               >
-                <CustomPasswordInput
-                  passphrase={passphrase}
-                  setPassphrase={setPassphrase}
-                />
+                <form>
+                  <CustomPasswordInput
+                    passphrase={passphrase}
+                    setPassphrase={setPassphrase}
+                  />
+                </form>
               </Box>
               <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
                 <Button

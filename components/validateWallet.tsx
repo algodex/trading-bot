@@ -324,10 +324,12 @@ export const ValidateWallet = ({
                   },
                 }}
               >
-                <CustomPasswordInput
-                  passphrase={passphrase}
-                  setPassphrase={setPassphrase}
-                />
+                <form>
+                  <CustomPasswordInput
+                    passphrase={passphrase}
+                    setPassphrase={setPassphrase}
+                  />
+                </form>
                 {errorMessage && (
                   <Typography
                     sx={{
