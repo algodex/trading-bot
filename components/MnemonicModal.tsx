@@ -34,12 +34,15 @@ export const MnemonicModal = ({
   open,
   handleClose,
   setWalletAddr,
+  mnemonic,
+  setMnemonic,
 }: {
   open: boolean;
   handleClose: any;
   setWalletAddr: any;
+  mnemonic: string | undefined;
+  setMnemonic: any;
 }) => {
-  const [mnemonic, setMnemonic] = useState<string | undefined>();
   const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
@@ -61,7 +64,6 @@ export const MnemonicModal = ({
       const account = algosdk.mnemonicToSecretKey(mnemonic);
       setWalletAddr(account.addr);
       saveWallet(account.addr, mnemonic, passphrase.password);
-      setMnemonic(undefined);
       setPassphrase({
         password: "",
         show: false,

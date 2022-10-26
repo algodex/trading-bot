@@ -34,19 +34,22 @@ export const DisconnectWallet = ({
   open,
   handleClose,
   walletAddr,
-  setWalletAddr
+  setWalletAddr,
+  setMnemonic,
 }: {
   open: boolean;
   handleClose: any;
   walletAddr: string | null;
-  setWalletAddr: any
+  setWalletAddr: any;
+  setMnemonic: any;
 }) => {
   const [tooltiptext, setTooltiptext] = useState("Click to Copy");
 
   const clearSession = () => {
     clearWallet();
     handleClose();
-    setWalletAddr(null)
+    setWalletAddr(null);
+    setMnemonic();
   };
 
   const copyAddress = (address: string) => {

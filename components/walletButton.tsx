@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 //MUI Components
 import Button from "@mui/material/Button";
@@ -29,9 +29,17 @@ import { DisconnectWallet } from "./disconnectWallet";
 export const WalletButton = ({
   walletAddr,
   setWalletAddr,
+  openMnemonic,
+  setOpenMnemonic,
+  mnemonic,
+  setMnemonic,
 }: {
   walletAddr: string;
   setWalletAddr: any;
+  openMnemonic: string | null;
+  setOpenMnemonic: any;
+  mnemonic: string | undefined;
+  setMnemonic: any;
 }) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const handleOpenModal = () => {
@@ -42,6 +50,15 @@ export const WalletButton = ({
     }
   };
   const handleCloseModal = () => setOpenModal(null);
+
+  useEffect(() => {
+    setOpenMnemonic(openModal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openModal]);
+
+  useEffect(() => {
+    setOpenModal(openMnemonic);
+  }, [openMnemonic]);
 
   return (
     <>
@@ -68,12 +85,15 @@ export const WalletButton = ({
         open={openModal === "mnemonic"}
         handleClose={handleCloseModal}
         setWalletAddr={setWalletAddr}
+        mnemonic={mnemonic}
+        setMnemonic={setMnemonic}
       />
       <DisconnectWallet
         open={openModal === "disconnect"}
         handleClose={handleCloseModal}
         walletAddr={walletAddr}
         setWalletAddr={setWalletAddr}
+        setMnemonic={setMnemonic}
       />
     </>
   );

@@ -61,7 +61,7 @@ const WalletButton: any = dynamic(
 );
 
 interface AssetSchema {
-  "asset-id": number;
+  "asset-id": number | string;
   amount: number;
   "is-frozen": boolean;
   name?: string;
@@ -109,8 +109,10 @@ export const BotForm = () => {
   });
   const formikRef = useRef<any>();
   const [openModal, setOpenModal] = useState(false);
+  const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
   const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
   const [walletAddr, setWalletAddr] = useState(getWallet());
+  const [mnemonic, setMnemonic] = useState("");
 
   const initialValues = {
     assetId: "",
@@ -151,28 +153,12 @@ export const BotForm = () => {
   });
 
   const handleStart = () => {
-    if (walletAddr) {
-      setOpenModal(true);
-    } else {
-      window.scrollTo(0, 0);
-    }
-  };
-
-  const stopBot = () => {
-    if (config) {
-      stopLoop({ config });
-      setLoading(false);
-    }
-  };
-
-  const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
-    setEnvironment(value);
-    setAvailableBalance([]);
-  };
-
-  const validateWallet = (mnemonic: string) => {
     const formValues = formikRef.current.values;
-    if (walletAddr && mnemonic) {
+    if (!walletAddr) {
+      setOpenMnemonic("mnemonic");
+    } else if (walletAddr && !mnemonic) {
+      validateWallet();
+    } else if (walletAddr && mnemonic) {
       try {
         const pouchUrl = process.env.POUCHDB_URL
           ? process.env.POUCHDB_URL + "/"
@@ -215,36 +201,64 @@ export const BotForm = () => {
     }
   };
 
+  const stopBot = () => {
+    if (config) {
+      stopLoop({ config });
+      setLoading(false);
+    }
+  };
+
+  const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
+    setEnvironment(value);
+    setAvailableBalance([]);
+  };
+
+  const validateWallet = useCallback(() => {
+    if (walletAddr && !mnemonic) {
+      setOpenModal(true);
+    }
+  }, [walletAddr, mnemonic]);
+
   const handleClose = useCallback((mnemonic?: string) => {
     setOpenModal(false);
-    console.log({ mnemonic, walletAddr });
     if (mnemonic) {
-      validateWallet(mnemonic);
+      setMnemonic(mnemonic);
     }
   }, []);
 
-  const updateASAInfo = async (ASAs: AssetSchema[]) => {
-    const url =
-      environment === "testnet"
-        ? "https://algoindexer.testnet.algoexplorerapi.io"
-        : "https://algoindexer.algoexplorerapi.io";
-    const indexerClient = new algosdk.Indexer("", url, 443);
+  useEffect(() => {
+    validateWallet();
+  }, [validateWallet]);
 
-    const result: any = await Promise.all(
-      ASAs.map(async (asset) => {
-        try {
-          const res = await getAssetInfo({
-            indexerClient,
-            assetId: asset["asset-id"],
-          });
-          return { ...asset, name: res.asset.params.name };
-        } catch (error) {
-          console.error(error);
-        }
-      })
-    );
-    setAvailableBalance(result);
-  };
+  const updateASAInfo = useCallback(
+    async (ASAs: AssetSchema[]) => {
+      const url =
+        environment === "testnet"
+          ? "https://algoindexer.testnet.algoexplorerapi.io"
+          : "https://algoindexer.algoexplorerapi.io";
+      const indexerClient = new algosdk.Indexer("", url, 443);
+
+      const result: any = await Promise.all(
+        ASAs.map(async (asset) => {
+          try {
+            if (asset["asset-id"] === "ALGO") {
+              return { ...asset, name: asset["asset-id"] };
+            }
+            const res = await getAssetInfo({
+              indexerClient,
+              assetId: asset["asset-id"] as number,
+            });
+
+            return { ...asset, name: res.asset.params.name };
+          } catch (error) {
+            console.error(error);
+          }
+        })
+      );
+      setAvailableBalance(result);
+    },
+    [environment]
+  );
 
   const getAccount = useCallback(async () => {
     if (walletAddr) {
@@ -252,18 +266,23 @@ export const BotForm = () => {
         const res = await getAccountInfo(walletAddr, environment);
         const ASAs = res.data.assets;
         setAvailableBalance(ASAs);
-        // setAllAssets(values[0].data.assets);
-        updateASAInfo(ASAs);
+        updateASAInfo([
+          {
+            amount: res.data.amount,
+            "asset-id": "ALGO",
+            "is-frozen": false,
+          },
+          ...ASAs,
+        ]);
       } catch (error) {
         console.error(error);
       }
     } else {
       setAvailableBalance([]);
     }
-  }, [walletAddr, environment]);
+  }, [walletAddr, environment, updateASAInfo]);
 
   useEffect(() => {
-    console.log({ walletAddr });
     if (walletAddr) {
       getAccount();
     } else {
@@ -330,6 +349,10 @@ export const BotForm = () => {
                     <WalletButton
                       walletAddr={walletAddr}
                       setWalletAddr={setWalletAddr}
+                      openMnemonic={openMnemonic}
+                      setOpenMnemonic={setOpenMnemonic}
+                      mnemonic={mnemonic}
+                      setMnemonic={setMnemonic}
                     />
                   </Grid>
                 </Grid>
