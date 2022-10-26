@@ -51,6 +51,7 @@ export const CustomPasswordInput = ({
           id="outlined-adornment-password"
           type={passphrase.show ? "text" : "password"}
           value={passphrase.password}
+          autoComplete="current-password"
           onChange={({ target: { value } }) => {
             setPassphrase((prev: PassPhrase) => ({
               ...prev,
