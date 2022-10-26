@@ -898,9 +898,9 @@ export const BotForm = () => {
                     sx={{
                       py: "0.8rem",
                       mt: "1rem",
-                      backgroundColor: "blue.dark",
+                      backgroundColor: "error.dark",
                       "&:hover": {
-                        backgroundColor: "blue.dark",
+                        backgroundColor: "error.dark",
                       },
                     }}
                     onClick={stopBot}
