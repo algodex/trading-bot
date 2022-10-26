@@ -103,12 +103,12 @@ export default runLoop;
 
 export const stopLoop = async ({
   config,
-  updateExit,
+  resetExit,
 }: {
   config?: BotConfig;
-  updateExit?: boolean;
+  resetExit?: boolean;
 }) => {
-  if (updateExit) {
+  if (resetExit) {
     exitLoop = false;
     return;
   }

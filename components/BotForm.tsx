@@ -182,7 +182,7 @@ export const BotForm = () => {
           mnemonic,
         };
 
-        stopLoop({ updateExit: true });
+        stopLoop({ resetExit: true });
         setConfig(_config);
         setLoading(true);
         runLoop({
@@ -209,8 +209,10 @@ export const BotForm = () => {
   };
 
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
-    setEnvironment(value);
-    setAvailableBalance([]);
+    if (!loading) {
+      setEnvironment(value);
+      setAvailableBalance([]);
+    }
   };
 
   const validateWallet = useCallback(() => {
