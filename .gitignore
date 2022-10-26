@@ -39,3 +39,5 @@ next-env.d.ts
 
 # NPM Config for Algodex private repo
 .npmrc
+
+**krs
