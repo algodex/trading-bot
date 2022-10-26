@@ -84,6 +84,7 @@ const theme = createTheme({
     },
     error: {
       main: red.A400,
+      dark: '#EB5757'
     },
   },
 });

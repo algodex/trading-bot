@@ -14,12 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -41,7 +36,8 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
+import styled from "@emotion/styled";
 
 // Custom components
 import { Note } from "./Note";
@@ -56,6 +52,13 @@ import { getAccountInfo } from "@/lib/helper";
 import getAssetInfo from "@/lib/getAssetInfo";
 import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
+const WalletButton: any = dynamic(
+  () =>
+    import("@/components/walletButton").then((mod: any) => mod.WalletButton),
+  {
+    ssr: false,
+  }
+);
 
 interface AssetSchema {
   "asset-id": number;
@@ -64,13 +67,13 @@ interface AssetSchema {
   name?: string;
 }
 
-const WalletButton: any = dynamic(
-  () =>
-    import("@/components/walletButton").then((mod: any) => mod.WalletButton),
-  {
-    ssr: false,
-  }
-);
+const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }}></Tooltip>
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: (theme as any).palette.secondary.dark,
+  },
+}));
 
 const environmentLinks = ["testnet", "mainnet"];
 
@@ -443,8 +446,31 @@ export const BotForm = () => {
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Order Size (in ALGOs)
-                    <Tooltip
-                      title={""}
+                    <HtmlTooltip
+                      title={
+                        <Box
+                          sx={{
+                            width: "300px",
+                            maxWidth: "100%",
+                            padding: ".3rem",
+                          }}
+                        >
+                          <Typography
+                            fontWeight={700}
+                            marginBottom={"6px"}
+                            fontSize={"12px"}
+                          >
+                            Order Size is the amount of each asset per order on
+                            each side. This is listed in ALGOs.
+                            <br />
+                            <br />
+                            For example, if you’re trading an ASA worth .5 ALGOs
+                            and you set the order size to 50. Each order will be
+                            100 of the ASA on one side and 50 ALGOs on the other
+                            side and will adjust as the price changes.
+                          </Typography>
+                        </Box>
+                      }
                       placement="top"
                       arrow
                       sx={{
@@ -460,7 +486,7 @@ export const BotForm = () => {
                           cursor: "pointer",
                         }}
                       />
-                    </Tooltip>
+                    </HtmlTooltip>
                   </Typography>
                   <Grid
                     container
@@ -520,8 +546,27 @@ export const BotForm = () => {
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Spread Percentage
-                    <Tooltip
-                      title={""}
+                    <HtmlTooltip
+                      title={
+                        <Box
+                          sx={{
+                            width: "300px",
+                            maxWidth: "100%",
+                            padding: ".3rem",
+                          }}
+                        >
+                          <Typography
+                            fontWeight={700}
+                            marginBottom={"6px"}
+                            fontSize={"12px"}
+                          >
+                            Spread Percentage is the percent difference between
+                            your bid and ask orders. A smaller percentage will
+                            result in orders more likely to fill and will
+                            qualify for more ALGX rewards.
+                          </Typography>
+                        </Box>
+                      }
                       placement="top"
                       arrow
                       sx={{
@@ -537,7 +582,7 @@ export const BotForm = () => {
                           cursor: "pointer",
                         }}
                       />
-                    </Tooltip>
+                    </HtmlTooltip>
                   </Typography>
                   <Grid
                     container
@@ -616,7 +661,7 @@ export const BotForm = () => {
                   </Grid>
                   <Note
                     note={`These settings ${
-                      values.minSpreadPerc > 0.25 ? "DO NOT " : ""
+                      values.minSpreadPerc > 1 ? "DO NOT " : ""
                     }qualify for ALGX Rewards.`}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
@@ -627,11 +672,35 @@ export const BotForm = () => {
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"20px"}>
                     Number of Orders
-                    <Tooltip
-                      title={""}
+                    <HtmlTooltip
+                      title={
+                        <Box
+                          sx={{
+                            width: "300px",
+                            maxWidth: "100%",
+                            padding: ".3rem",
+                          }}
+                        >
+                          <Typography
+                            fontWeight={700}
+                            marginBottom={"6px"}
+                            fontSize={"12px"}
+                          >
+                            Number of Orders is the number of orders that will
+                            be placed on each side. This number is the same for
+                            both the bid and ask sides.
+                            <br />
+                            <br />
+                            For example, if you set this number to “3” then 3
+                            buy orders will be placed and 3 sell orders will be
+                            placed following the parameters set above.
+                          </Typography>
+                        </Box>
+                      }
                       placement="top"
                       arrow
                       sx={{
+                        cursor: "pointer",
                         marginLeft: "0.5rem",
                       }}
                     >
@@ -643,7 +712,7 @@ export const BotForm = () => {
                           cursor: "pointer",
                         }}
                       />
-                    </Tooltip>
+                    </HtmlTooltip>
                   </Typography>
                   <Grid
                     container
@@ -722,9 +791,29 @@ export const BotForm = () => {
                   <AccordionDetails>
                     <Typography marginBottom={"20px"}>
                       Nearest Neighbor Keep
-                      <Tooltip
+                      <HtmlTooltip
                         title={
-                          "Nearest Neighbor Keep sets highest amount to what spread percentage is set at - it defaults to half if user does not set it. (eg if spread percentage is set to .5% then NNK sets to .25% by default unless user changes it)"
+                          <Box
+                            sx={{
+                              width: "300px",
+                              maxWidth: "100%",
+                              padding: ".3rem",
+                            }}
+                          >
+                            <Typography
+                              fontWeight={700}
+                              marginBottom={"6px"}
+                              fontSize={"12px"}
+                            >
+                              Nearest Neighbor Keep is the tolerance for the bot
+                              to cancel and replace orders as the price is
+                              changing. If your current orders are within the
+                              percentage set here, the bot will not cancel and
+                              replace until they go above this tolerance. This
+                              setting defaults to half of the set spread
+                              percentage.
+                            </Typography>
+                          </Box>
                         }
                         placement="top"
                         arrow
@@ -737,11 +826,11 @@ export const BotForm = () => {
                           sx={{
                             marginLeft: "5px",
                             fontSize: "16px",
-                            cursor: "pointer",
                             color: "secondary.dark",
+                            cursor: "pointer",
                           }}
                         />
-                      </Tooltip>
+                      </HtmlTooltip>
                     </Typography>
                     <Grid
                       container
@@ -809,9 +898,9 @@ export const BotForm = () => {
                     sx={{
                       py: "0.8rem",
                       mt: "1rem",
-                      backgroundColor: "blue.dark",
+                      backgroundColor: "error.dark",
                       "&:hover": {
-                        backgroundColor: "blue.dark",
+                        backgroundColor: "error.dark",
                       },
                     }}
                     onClick={stopBot}
