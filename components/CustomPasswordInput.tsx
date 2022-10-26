@@ -48,11 +48,12 @@ export const CustomPasswordInput = ({
           Passphrase
         </InputLabel>
         <OutlinedInput
-          id="outlined-adornment-password"
           type={passphrase.show ? "text" : "password"}
           value={passphrase.password}
-          name="password"
           autoComplete="current-password"
+          name="current-password"
+          id="current-password"
+          required
           onChange={({ target: { value } }) => {
             setPassphrase((prev: PassPhrase) => ({
               ...prev,
