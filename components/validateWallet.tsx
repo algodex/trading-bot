@@ -343,6 +343,7 @@ export const ValidateWallet = ({
               </Box>
               <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
                 <Button
+                  type="submit"
                   variant="contained"
                   disabled={!passphrase.password}
                   onClick={validate}
