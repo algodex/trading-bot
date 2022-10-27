@@ -302,7 +302,8 @@ export const ValidateWallet = ({
                       color: "primary.dark",
                     }}
                   >
-                    Enter the passphrase to unlock this wallet
+                    Enter the passphrase to unlock this wallet - Wallet needs to
+                    be unlocked every time page is refreshed.
                   </Typography>
                   <Typography
                     sx={{
@@ -362,7 +363,7 @@ export const ValidateWallet = ({
                 }}
                 onClick={() => setForgotPassphrase(true)}
               >
-                Clear Mnemonic and Disconnect Wallet
+                Forgot Passphrase? Clear Mnemonic
               </Typography>
             </>
           )}

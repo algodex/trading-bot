@@ -52,6 +52,7 @@ import { getAccountInfo } from "@/lib/helper";
 import getAssetInfo from "@/lib/getAssetInfo";
 import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
+import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 const WalletButton: any = dynamic(
   () =>
     import("@/components/walletButton").then((mod: any) => mod.WalletButton),
@@ -114,6 +115,7 @@ export const BotForm = () => {
   const [walletAddr, setWalletAddr] = useState(getWallet());
   const [mnemonic, setMnemonic] = useState("");
   const [formError, setFormError] = useState("");
+  const { conversionRate } = usePriceConversionHook({ env: environment });
 
   const initialValues = {
     assetId: "",
@@ -620,7 +622,9 @@ export const BotForm = () => {
                   </Grid>
                   <Note
                     note={`These settings ${
-                      values.orderAlgoDepth < 25000 ? "DO NOT " : ""
+                      values.orderAlgoDepth / conversionRate < 100
+                        ? "DO NOT "
+                        : ""
                     }qualify for ALGX Rewards.`}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
