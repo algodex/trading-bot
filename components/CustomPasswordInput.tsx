@@ -54,6 +54,7 @@ export const CustomPasswordInput = ({
           name="current-password"
           id="current-password"
           required
+          // autoFocus
           onChange={({ target: { value } }) => {
             setPassphrase((prev: PassPhrase) => ({
               ...prev,

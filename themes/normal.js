@@ -75,7 +75,7 @@ const theme = createTheme({
     },
     blue: {
       main: "#2d75d6",
-      dark:'#2D3748'
+      dark: "#2D3748",
     },
     accent: {
       main: "#44C480",
@@ -83,8 +83,8 @@ const theme = createTheme({
       contrastText: "#FFFFFF",
     },
     error: {
-      main: red.A400,
-      dark: '#EB5757'
+      main: "#B82828",
+      dark: "#EB5757",
     },
   },
 });

@@ -15,7 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Field, Form, Formik } from "formik";
+import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
 import PouchDB from "pouchdb";
@@ -113,6 +113,7 @@ export const BotForm = () => {
   const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
   const [walletAddr, setWalletAddr] = useState(getWallet());
   const [mnemonic, setMnemonic] = useState("");
+  const [formError, setFormError] = useState("");
 
   const initialValues = {
     assetId: "",
@@ -152,51 +153,53 @@ export const BotForm = () => {
       .required("Required"),
   });
 
-  const handleStart = () => {
-    const formValues = formikRef.current.values;
-    if (!walletAddr) {
-      setOpenMnemonic("mnemonic");
-    } else if (walletAddr && !mnemonic) {
-      validateWallet();
-    } else if (walletAddr && mnemonic) {
-      try {
-        const pouchUrl = process.env.POUCHDB_URL
-          ? process.env.POUCHDB_URL + "/"
-          : "";
-        const fullPouchUrl =
-          pouchUrl +
-          "market_maker_" +
-          formValues.assetId +
-          "_" +
-          walletAddr.slice(0, 8).toLowerCase();
-        const escrowDB = new PouchDB(fullPouchUrl);
-        const api = initAPI(environment);
-        const _config = {
-          ...formValues,
-          assetId: parseInt(formValues.assetId),
-          walletAddr,
-          environment,
-          useTinyMan: true,
-          api,
-          escrowDB,
-          mnemonic,
-        };
+  const handleStart = (formValues: FormikValues) => {
+    const assetId = parseInt(formValues.assetId);
+    if (!lowBalance(assetId)) {
+      if (!walletAddr) {
+        setOpenMnemonic("mnemonic");
+      } else if (walletAddr && !mnemonic) {
+        validateWallet();
+      } else if (walletAddr && mnemonic) {
+        try {
+          const pouchUrl = process.env.POUCHDB_URL
+            ? process.env.POUCHDB_URL + "/"
+            : "";
+          const fullPouchUrl =
+            pouchUrl +
+            "market_maker_" +
+            formValues.assetId +
+            "_" +
+            walletAddr.slice(0, 8).toLowerCase();
+          const escrowDB = new PouchDB(fullPouchUrl);
+          const api = initAPI(environment);
+          const _config = {
+            ...(formValues as any),
+            assetId,
+            walletAddr,
+            environment,
+            useTinyMan: true,
+            api,
+            escrowDB,
+            mnemonic,
+          };
 
-        stopLoop({ resetExit: true });
-        setConfig(_config);
-        setLoading(true);
-        runLoop({
-          config: _config,
-          assetInfo: null,
-          lastBlock: 0,
-          runState: {
-            isExiting: false,
-            inRunLoop: false,
-          },
-        });
-      } catch (error) {
-        setLoading(false);
-        console.error(error);
+          stopLoop({ resetExit: true });
+          setConfig(_config);
+          setLoading(true);
+          runLoop({
+            config: _config,
+            assetInfo: null,
+            lastBlock: 0,
+            runState: {
+              isExiting: false,
+              inRunLoop: false,
+            },
+          });
+        } catch (error) {
+          setLoading(false);
+          console.error(error);
+        }
       }
     }
   };
@@ -270,11 +273,14 @@ export const BotForm = () => {
         setAvailableBalance(ASAs);
         updateASAInfo([
           {
-            amount: res.data.amount,
+            amount: res.data.amount / 1000000,
             "asset-id": "ALGO",
             "is-frozen": false,
           },
-          ...ASAs,
+          ...ASAs.map((asa: AssetSchema) => ({
+            ...asa,
+            amount: asa.amount / 1000000,
+          })),
         ]);
       } catch (error) {
         console.error(error);
@@ -292,6 +298,31 @@ export const BotForm = () => {
     }
   }, [getAccount, walletAddr, environment]);
 
+  const lowBalance = (assetId: number) => {
+    if (assetId && availableBalance.length > 0) {
+      const found = availableBalance.find(
+        (asset) => asset["asset-id"] === assetId
+      );
+      const algoBal = availableBalance.find(
+        (asset) => asset["asset-id"] === "ALGO"
+      );
+      if (found) {
+        if (found.amount > 20 && algoBal && algoBal?.amount > 20) {
+          return false;
+        } else {
+          setFormError(
+            "This ASA‘s liquidity is too low on Tinyman to use this bot"
+          );
+          return true;
+        }
+      } else {
+        setFormError("You need to have this asset in your wallet holdings");
+        return true;
+      }
+    }
+    return false;
+  };
+
   return (
     <>
       <Formik
@@ -301,7 +332,14 @@ export const BotForm = () => {
         onSubmit={handleStart}
         validateOnBlur={false}
       >
-        {({ handleSubmit, isValid, values, setFieldValue }) => {
+        {({
+          handleSubmit,
+          isValid,
+          values,
+          setFieldValue,
+          errors,
+          touched,
+        }) => {
           return (
             <Form onSubmit={handleSubmit}>
               <>
@@ -361,17 +399,23 @@ export const BotForm = () => {
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
                   <Grid item md={7} xs={12}>
                     <AssetSearchInput
-                      setFieldValue={setFieldValue}
+                      setFieldValue={(name: string, val: string) => {
+                        setFieldValue(name, val);
+                        setFormError("");
+                      }}
                       name="assetId"
                     />
-                    <Field
-                      component={CustomTextInput}
-                      placeholder="Asset ID"
-                      name="assetId"
-                      label="Asset Id"
-                      id="assetId"
-                      required
-                    />
+                    {touched["assetId"] && errors["assetId"] && (
+                      <Typography
+                        sx={{
+                          pt: "5px",
+                          color: "error.main",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {errors["assetId"]}
+                      </Typography>
+                    )}
                   </Grid>
                   {formikRef.current?.values?.assetId && (
                     <Grid item md={4} marginLeft={"auto"}>
@@ -398,12 +442,28 @@ export const BotForm = () => {
                     </Grid>
                   )}
                 </Grid>
-                <Typography
-                  sx={{ pt: "5px", fontSize: "14px", marginBottom: "40px" }}
-                >
+                <Typography sx={{ pt: "5px", fontSize: "14px" }}>
                   *This bot currently uses Tinyman as a price oracle.
                 </Typography>
-
+                {formError && (
+                  <Typography
+                    sx={{
+                      pt: "5px",
+                      color: "error.main",
+                      fontSize: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      columnGap: "5px",
+                    }}
+                  >
+                    <InfoRoundedIcon
+                      sx={{
+                        fontSize: "12px",
+                      }}
+                    />
+                    {formError}
+                  </Typography>
+                )}
                 {availableBalance.length > 0 && (
                   <Box
                     sx={{
@@ -411,7 +471,8 @@ export const BotForm = () => {
                       borderColor: "secondary.contrastText",
                       padding: "15px 20px",
                       borderRadius: "3px",
-                      marginBlock: "20px",
+                      marginTop: "40px",
+                      marginBottom: "20px",
                       background: "transparent",
                     }}
                   >
@@ -459,7 +520,7 @@ export const BotForm = () => {
                             fontWeight: 700,
                           }}
                         >
-                          {(asset.amount / 1000000).toLocaleString(undefined, {
+                          {asset.amount.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
@@ -910,7 +971,7 @@ export const BotForm = () => {
                     fullWidth
                     type="submit"
                     loading={loading}
-                    disabled={loading || !isValid}
+                    disabled={loading || !isValid || formError !== ""}
                     sx={{ py: "0.8rem", mt: "1rem" }}
                   >
                     Start Bot
