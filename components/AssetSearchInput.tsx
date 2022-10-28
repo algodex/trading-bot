@@ -157,6 +157,7 @@ export const AssetSearchInput = ({
                 </>
               ),
             }}
+            placeholder="Asset ID"
             value={query.trim()}
             onChange={({ target: { value } }) => {
               setQuery(value);
