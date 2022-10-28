@@ -670,7 +670,7 @@ export const BotForm = () => {
                         id="minSpreadPerc"
                         marks
                         step={0.1}
-                        max={4}
+                        max={5}
                         min={0.01}
                         onChange={({
                           target: { value },
@@ -679,7 +679,7 @@ export const BotForm = () => {
                         }) => {
                           if (
                             parseFloat(value) >= 0.01 &&
-                            parseFloat(value) <= 4
+                            parseFloat(value) <= 5
                           ) {
                             setFieldValue("minSpreadPerc", parseFloat(value));
                             setFieldValue(
@@ -697,7 +697,7 @@ export const BotForm = () => {
                         }}
                       >
                         <span>0.01</span>
-                        <span>4</span>
+                        <span>5</span>
                       </Typography>
                     </Grid>
                     <Grid
@@ -711,7 +711,7 @@ export const BotForm = () => {
                         type="number"
                         name="minSpreadPerc"
                         id="minSpreadPerc"
-                        max={4}
+                        max={5}
                         min={0.01}
                         required
                         sx={{
@@ -728,11 +728,10 @@ export const BotForm = () => {
                           const _value =
                             parseFloat(value) <= 0
                               ? 0.01
-                              : parseFloat(value) > 4
-                              ? 4
+                              : parseFloat(value) > 5
+                              ? 5
                               : parseFloat(value);
-                          console.log(_value);
-                          if (_value >= 0.01 && _value <= 4) {
+                          if (_value >= 0.01 && _value <= 5) {
                             setFieldValue("minSpreadPerc", _value);
                             setFieldValue("nearestNeighborKeep", _value / 2);
                           }
