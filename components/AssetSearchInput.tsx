@@ -26,6 +26,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 //Lib files
 import { searchAlgoAssets } from "@/lib/helper";
+import { Environment } from "@/lib/types/config";
 
 interface AssetSchema {
   verification: {
@@ -39,9 +40,11 @@ interface AssetSchema {
 export const AssetSearchInput = ({
   setFieldValue,
   name,
+  environment,
 }: {
   setFieldValue: any;
   name: string;
+  environment: Environment;
 }) => {
   const [query, setQuery] = useState("");
   const [suggestedAssets, setSuggestedAssets] = useState<any[]>([]);
@@ -54,7 +57,7 @@ export const AssetSearchInput = ({
     const newTimer = setTimeout(async () => {
       setAssetValue(null);
       setLoading(true);
-      const res: any = await searchAlgoAssets(query.trim());
+      const res: any = await searchAlgoAssets(query.trim(), environment);
       setLoading(false);
       if (res.data?.assets) {
         const assets: AssetSchema[] = res.data.assets;

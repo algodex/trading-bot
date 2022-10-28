@@ -29,9 +29,9 @@ export const shortenAddress = (address: string, numb?: number) => {
   }
 };
 
-export const searchAlgoAssets = async (keywords: string) => {
+export const searchAlgoAssets = async (keywords: string, env: Environment) => {
   const url =
-    process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet"
+    env === "mainnet"
       ? "https://indexer.algoexplorerapi.io/rl/v1/search"
       : "https://indexer.testnet.algoexplorerapi.io/rl/v1/search";
   try {
@@ -44,7 +44,7 @@ export const searchAlgoAssets = async (keywords: string) => {
   }
 };
 
-export const getAccountInfo = async (address: string, env: string) => {
+export const getAccountInfo = async (address: string, env: Environment) => {
   const baseUrl =
     env === "testnet"
       ? "https://node.testnet.algoexplorerapi.io"
