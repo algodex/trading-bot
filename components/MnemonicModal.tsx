@@ -25,10 +25,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 
 //lib
 import { saveWallet } from "@/lib/storage";
 import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
+import { isMnemonicValid } from "@/lib/helper";
 
 export const MnemonicModal = ({
   open,
@@ -43,6 +45,7 @@ export const MnemonicModal = ({
   mnemonic: string | undefined;
   setMnemonic: any;
 }) => {
+  const [error, setError] = useState<string>("");
   const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
@@ -82,7 +85,11 @@ export const MnemonicModal = ({
       }
     });
     if (phrases.length === 25) {
-      setMnemonic(phrases.join(" "));
+      if (isMnemonicValid(phrases.join(" "))) {
+        setMnemonic(phrases.join(" "));
+      } else {
+        setError("Invalid Mnemonic. Check phrase and try again.");
+      }
     }
   }, []);
 
@@ -326,6 +333,7 @@ export const MnemonicModal = ({
                       style={{ marginLeft: "2px" }}
                       id={`input${index}`}
                       onChange={({ target: { value } }) => {
+                        setError("");
                         const mnemonicList =
                           value.split(",").length > 1
                             ? value.split(",")
@@ -341,6 +349,26 @@ export const MnemonicModal = ({
                   </Box>
                 ))}
               </Box>
+              {error && (
+                <Typography
+                  sx={{
+                    mt: "15px",
+                    color: "error.main",
+                    fontSize: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent:'center',
+                    columnGap: "5px",
+                  }}
+                >
+                  <InfoRoundedIcon
+                    sx={{
+                      fontSize: "12px",
+                    }}
+                  />
+                  {error}
+                </Typography>
+              )}
               <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
                 <Button variant="outlined" onClick={getPassPhrase}>
                   IMPORT WALLET
