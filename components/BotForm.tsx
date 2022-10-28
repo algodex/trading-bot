@@ -406,6 +406,7 @@ export const BotForm = () => {
                         setFormError("");
                       }}
                       name="assetId"
+                      environment={environment}
                     />
                     {touched["assetId"] && errors["assetId"] && (
                       <Typography
