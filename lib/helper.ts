@@ -14,6 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import algosdk from "algosdk";
 import axios from "axios";
 import getTinymanPrice from "./getTinymanPrice";
 import { Environment } from "./types/config";
@@ -63,5 +64,13 @@ export const getAlgoPrice = async (
   if (assetId) {
     const latestPrice = await getTinymanPrice(assetId, environment);
     return latestPrice;
+  }
+};
+
+export const isMnemonicValid = (mnemonic: string) => {
+  try {
+    return algosdk.mnemonicToSecretKey(mnemonic).sk;
+  } catch (error) {
+    return false;
   }
 };

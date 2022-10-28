@@ -478,29 +478,8 @@ export const BotForm = () => {
                       background: "transparent",
                     }}
                   >
-                    <Typography
-                      marginBottom={"10px"}
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
+                    <Typography marginBottom={"10px"}>
                       Available Balance
-                      <Tooltip
-                        title={""}
-                        placement="top"
-                        arrow
-                        sx={{
-                          cursor: "pointer",
-                          marginLeft: "0.5rem",
-                        }}
-                      >
-                        <InfoRoundedIcon
-                          sx={{
-                            marginLeft: "5px",
-                            fontSize: "16px",
-                            color: "secondary.dark",
-                            cursor: "pointer",
-                          }}
-                        />
-                      </Tooltip>
                     </Typography>
                     {availableBalance.map((asset) => (
                       <Box
@@ -548,14 +527,15 @@ export const BotForm = () => {
                             marginBottom={"6px"}
                             fontSize={"12px"}
                           >
-                            Order Size is the amount of each asset per order on
-                            each side. This is listed in ALGOs.
+                            Order Size is the size of your orders listed in
+                            ALGOs.
                             <br />
                             <br />
-                            For example, if you’re trading an ASA worth .5 ALGOs
-                            and you set the order size to 50. Each order will be
-                            100 of the ASA on one side and 50 ALGOs on the other
-                            side and will adjust as the price changes.
+                            For example, if you are trading an ASA worth 0.5
+                            ALGOs and set the Order Size to 50, you will have to
+                            place orders with 100 of the ASA on one side and 50
+                            ALGOs on the other side. These amounts will be
+                            adjusted as the price changes.
                           </Typography>
                         </Box>
                       }
@@ -651,9 +631,10 @@ export const BotForm = () => {
                             fontSize={"12px"}
                           >
                             Spread Percentage is the percent difference between
-                            your bid and ask orders. A smaller percentage will
-                            result in orders more likely to fill and will
-                            qualify for more ALGX rewards.
+                            users&apos; Bid/Ask orders with the mid-market
+                            price. A smaller percentage will result in orders
+                            more likely to fill and will qualify for more ALGX
+                            rewards.
                           </Typography>
                         </Box>
                       }
@@ -696,11 +677,16 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          setFieldValue("minSpreadPerc", parseFloat(value));
-                          setFieldValue(
-                            "nearestNeighborKeep",
-                            parseFloat(value) / 2
-                          );
+                          if (
+                            parseFloat(value) >= 0.01 &&
+                            parseFloat(value) <= 4
+                          ) {
+                            setFieldValue("minSpreadPerc", parseFloat(value));
+                            setFieldValue(
+                              "nearestNeighborKeep",
+                              parseFloat(value) / 2
+                            );
+                          }
                         }}
                       />
                       <Typography
@@ -739,11 +725,17 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          setFieldValue("minSpreadPerc", parseFloat(value));
-                          setFieldValue(
-                            "nearestNeighborKeep",
-                            parseFloat(value) / 2
-                          );
+                          const _value =
+                            parseFloat(value) <= 0
+                              ? 0.01
+                              : parseFloat(value) > 4
+                              ? 4
+                              : parseFloat(value);
+                          console.log(_value);
+                          if (_value >= 0.01 && _value <= 4) {
+                            setFieldValue("minSpreadPerc", _value);
+                            setFieldValue("nearestNeighborKeep", _value / 2);
+                          }
                         }}
                       />
                       <span style={percentStyles}>%</span>
