@@ -27,22 +27,10 @@ export const LogOutput = () => {
     <>
       <TextareaAutosize
         ref={textareaRef}
-        minRows={30}
-        maxRows={30}
         value={logs}
-        style={{ width: "100%" }}
+        style={{ width: "100%", height:'85vh' }}
         readOnly
       />
-
-      {/* <textarea
-        ref={textareaRef}
-        //         multiline
-        rows={20}
-        value={logs}
-        // maxRows={20}
-        //         fullWidth
-        //         focused
-      ></textarea> */}
       <Box sx={{ textAlign: "end" }}>
         <Button
           variant="outlined"
