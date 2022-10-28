@@ -15,7 +15,7 @@ export const LogOutput = () => {
         setLogs((prev) => `${prev} \n ${status} \n ${content}`);
         if (textareaRef.current) {
           textareaRef.current.focus();
-          textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+          textareaRef.current.scrollTop = textareaRef.current.scrollHeight + 200;
         }
       }
     );
@@ -28,7 +28,7 @@ export const LogOutput = () => {
       <TextareaAutosize
         ref={textareaRef}
         value={logs}
-        style={{ width: "100%", height:'85vh' }}
+        style={{ width: "100%", height:'85vh', overflow:'scroll' }}
         readOnly
       />
       <Box sx={{ textAlign: "end" }}>
