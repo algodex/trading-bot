@@ -111,7 +111,7 @@ export const BotForm = () => {
   const formikRef = useRef<any>();
   const [openModal, setOpenModal] = useState(false);
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
-  const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
+  const [visibleBalance, setVisibleBalance] = useState<AssetSchema[]>([]);
   const [walletAddr, setWalletAddr] = useState(getWallet());
   const [mnemonic, setMnemonic] = useState("");
   const [formError, setFormError] = useState("");
@@ -156,7 +156,7 @@ export const BotForm = () => {
   });
 
   const handleStart = (formValues: FormikValues) => {
-    const assetId = parseInt(formValues.assetId);
+    const assetId = formValues.assetId;
     if (!lowBalance(assetId)) {
       if (!walletAddr) {
         setOpenMnemonic("mnemonic");
@@ -216,7 +216,7 @@ export const BotForm = () => {
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     if (!loading) {
       setEnvironment(value);
-      setAvailableBalance([]);
+      setVisibleBalance([]);
     }
   };
 
@@ -262,50 +262,62 @@ export const BotForm = () => {
           }
         })
       );
-      setAvailableBalance(result);
+      setVisibleBalance(result);
     },
     [environment]
   );
 
-  const getAccount = useCallback(async () => {
-    if (walletAddr) {
-      try {
-        const res = await getAccountInfo(walletAddr, environment);
-        const ASAs = res.data.assets;
-        setAvailableBalance(ASAs);
-        updateASAInfo([
-          {
+  const getAccount = useCallback(
+    async (assetId: number) => {
+      if (walletAddr && assetId) {
+        try {
+          const res = await getAccountInfo(walletAddr, environment);
+          const ASAs = res.data.assets;
+          const currentASA = ASAs.find(
+            (asset: AssetSchema) => asset["asset-id"] === assetId
+          );
+          const algoBalance = {
             amount: res.data.amount / 1000000,
             "asset-id": "ALGO",
             "is-frozen": false,
-          },
-          ...ASAs.map((asa: AssetSchema) => ({
-            ...asa,
-            amount: asa.amount / 1000000,
-          })),
-        ]);
-      } catch (error) {
-        console.error(error);
+          };
+          if (currentASA) {
+            const val = [
+              algoBalance,
+              {
+                ...currentASA,
+                amount: currentASA.amount / 1000000,
+              },
+            ];
+            setVisibleBalance(val);
+            updateASAInfo(val);
+          } else {
+            setVisibleBalance([algoBalance]);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        setVisibleBalance([]);
       }
-    } else {
-      setAvailableBalance([]);
-    }
-  }, [walletAddr, environment, updateASAInfo]);
+    },
+    [walletAddr, environment, updateASAInfo]
+  );
 
   useEffect(() => {
-    if (walletAddr) {
-      getAccount();
+    if (walletAddr && formikRef.current?.values?.assetId) {
+      getAccount(formikRef.current?.values?.assetId);
     } else {
-      setAvailableBalance([]);
+      setVisibleBalance([]);
     }
   }, [getAccount, walletAddr, environment]);
 
   const lowBalance = (assetId: number) => {
-    if (assetId && availableBalance.length > 0) {
-      const found = availableBalance.find(
+    if (assetId && visibleBalance.length > 0) {
+      const found = visibleBalance.find(
         (asset) => asset["asset-id"] === assetId
       );
-      const algoBal = availableBalance.find(
+      const algoBal = visibleBalance.find(
         (asset) => asset["asset-id"] === "ALGO"
       );
       if (found) {
@@ -402,8 +414,13 @@ export const BotForm = () => {
                   <Grid item md={7} xs={12}>
                     <AssetSearchInput
                       setFieldValue={(name: string, val: string) => {
-                        setFieldValue(name, val);
+                        setFieldValue(name, parseInt(val));
                         setFormError("");
+                        if (val) {
+                          getAccount(parseInt(val));
+                        } else {
+                          setVisibleBalance([]);
+                        }
                       }}
                       name="assetId"
                       environment={environment}
@@ -420,7 +437,7 @@ export const BotForm = () => {
                       </Typography>
                     )}
                   </Grid>
-                  {formikRef.current?.values?.assetId && (
+                  {formikRef.current?.values?.assetId ? (
                     <Grid item md={4} marginLeft={"auto"}>
                       <Link
                         href={`https://${
@@ -443,6 +460,8 @@ export const BotForm = () => {
                         <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
                       </Link>
                     </Grid>
+                  ) : (
+                    ""
                   )}
                 </Grid>
                 <Typography sx={{ pt: "5px", fontSize: "14px" }}>
@@ -467,7 +486,7 @@ export const BotForm = () => {
                     {formError}
                   </Typography>
                 )}
-                {availableBalance.length > 0 && (
+                {visibleBalance.length > 0 && (
                   <Box
                     sx={{
                       border: "2px solid",
@@ -482,7 +501,7 @@ export const BotForm = () => {
                     <Typography marginBottom={"10px"}>
                       Available Balance
                     </Typography>
-                    {availableBalance.map((asset) => (
+                    {visibleBalance.map((asset) => (
                       <Box
                         key={asset["asset-id"]}
                         sx={{
