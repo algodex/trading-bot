@@ -74,3 +74,18 @@ export const isMnemonicValid = (mnemonic: string) => {
     return false;
   }
 };
+
+export const getTinymanAssets = async (env: Environment) => {
+  const tinymanAssetsURL =
+    env === "mainnet"
+      ? "https://mainnet.analytics.tinyman.org/api/v1/current-asset-prices/"
+      : "https://testnet.analytics.tinyman.org/api/v1/current-asset-prices/";
+
+  const assetList = await axios({
+    method: "get",
+    url: tinymanAssetsURL,
+    responseType: "json",
+    timeout: 3000,
+  });
+  return assetList.data;
+};

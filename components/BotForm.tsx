@@ -48,7 +48,7 @@ import { BotConfig, Environment } from "@/lib/types/config";
 import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 import { AssetSearchInput } from "./AssetSearchInput";
-import { getAccountInfo } from "@/lib/helper";
+import { getAccountInfo, getTinymanAssets } from "@/lib/helper";
 import getAssetInfo from "@/lib/getAssetInfo";
 import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
@@ -270,32 +270,36 @@ export const BotForm = () => {
   const getAccount = useCallback(
     async (assetId: number) => {
       if (walletAddr && assetId) {
-        try {
-          const res = await getAccountInfo(walletAddr, environment);
-          const ASAs = res.data.assets;
-          const currentASA = ASAs.find(
-            (asset: AssetSchema) => asset["asset-id"] === assetId
-          );
-          const algoBalance = {
-            amount: res.data.amount / 1000000,
-            "asset-id": "ALGO",
-            "is-frozen": false,
-          };
-          if (currentASA) {
-            const val = [
-              algoBalance,
-              {
-                ...currentASA,
-                amount: currentASA.amount / 1000000,
-              },
-            ];
-            setVisibleBalance(val);
-            updateASAInfo(val);
-          } else {
-            setVisibleBalance([algoBalance]);
+        if (await presentOnTinyman(assetId)) {
+          try {
+            const res = await getAccountInfo(walletAddr, environment);
+            const ASAs = res.data.assets;
+            const currentASA = ASAs.find(
+              (asset: AssetSchema) => asset["asset-id"] === assetId
+            );
+            const algoBalance = {
+              amount: res.data.amount / 1000000,
+              "asset-id": "ALGO",
+              "is-frozen": false,
+            };
+            if (currentASA) {
+              const val = [
+                algoBalance,
+                {
+                  ...currentASA,
+                  amount: currentASA.amount / 1000000,
+                },
+              ];
+              setVisibleBalance(val);
+              updateASAInfo(val);
+            } else {
+              setVisibleBalance([algoBalance]);
+            }
+          } catch (error) {
+            console.error(error);
           }
-        } catch (error) {
-          console.error(error);
+        } else {
+          setFormError("This asset is not present on Tinyman");
         }
       } else {
         setVisibleBalance([]);
@@ -337,6 +341,11 @@ export const BotForm = () => {
     return false;
   };
 
+  const presentOnTinyman = async (assetId: number) => {
+    const res = await getTinymanAssets(environment);
+    if (res[assetId]) return true;
+    return false;
+  };
   return (
     <>
       <Formik
