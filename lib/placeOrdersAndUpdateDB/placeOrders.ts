@@ -18,6 +18,7 @@ import orderDepthAmounts from "./order-depth-amounts";
 import { BotConfig } from ".././types/config";
 import { EscrowToMake } from "../getEscrowsToCancelAndMake";
 import * as events from "../events";
+import { stopLoop } from "../runLoop";
 
 export interface PlaceOrderInput {
   config: BotConfig;
@@ -34,7 +35,7 @@ const placeOrders = ({
 }: PlaceOrderInput) => {
   const { assetId, orderAlgoDepth, api } = config;
 
-  const placedOrders = createEscrowPrices.map((priceObj) => {
+  const placedOrders = createEscrowPrices.map(async (priceObj) => {
     const orderDepth = Object.prototype.hasOwnProperty.call(
       orderDepthAmounts,
       "" + assetId
@@ -63,8 +64,14 @@ const placeOrders = ({
         orderToPlace
       )},\n Latest Price: ${latestPrice}`,
     });
-    const orderPromise = api.placeOrder(orderToPlace);
-    return orderPromise;
+    try {
+      const orderPromise = await api.placeOrder(orderToPlace);
+      return orderPromise;
+    } catch (error) {
+      console.log("I want to see the error here and stop the loop");
+      // stopLoop()
+      console.log(error);
+    }
   });
   return placedOrders;
 };

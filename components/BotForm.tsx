@@ -353,6 +353,7 @@ export const BotForm = () => {
     if (res[assetId]) return true;
     return false;
   };
+
   return (
     <>
       <Grid
