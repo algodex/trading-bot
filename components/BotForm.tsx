@@ -39,7 +39,7 @@ import Button from "@mui/material/Button";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import styled from "@emotion/styled";
 
-// Custom components
+// Custom components and hooks
 import { Note } from "./Note";
 import CustomRangeSlider from "./CustomRangeSlider";
 import CustomTextInput from "./CustomTextInput";
@@ -48,11 +48,12 @@ import { BotConfig, Environment } from "@/lib/types/config";
 import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 import { AssetSearchInput } from "./AssetSearchInput";
-import { getAccountInfo } from "@/lib/helper";
+import { getAccountInfo, getTinymanAssets } from "@/lib/helper";
 import getAssetInfo from "@/lib/getAssetInfo";
 import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
+
 const WalletButton: any = dynamic(
   () =>
     import("@/components/walletButton").then((mod: any) => mod.WalletButton),
@@ -78,7 +79,7 @@ const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
 
 const environmentLinks = ["testnet", "mainnet"];
 
-const cardStyles = {
+export const cardStyles = {
   border: "1px solid",
   borderColor: "grey.100",
   padding: "15px 20px",
@@ -138,7 +139,12 @@ export const BotForm = () => {
       .min(1)
       .label("Order Size")
       .required("Required"),
-    nearestNeighborKeep: yup.number().label("Nearest Keep").optional(),
+    nearestNeighborKeep: yup
+      .number()
+      .positive("Invalid")
+      .min(0)
+      .label("Nearest Keep")
+      .optional(),
     ladderTiers: yup
       .number()
       .positive("Invalid")
@@ -150,8 +156,8 @@ export const BotForm = () => {
       .number()
       .positive("Invalid")
       .min(0.01)
-      .max(4)
-      .label("Please add a spread")
+      .max(5)
+      .label("Spread")
       .required("Required"),
   });
 
@@ -270,32 +276,36 @@ export const BotForm = () => {
   const getAccount = useCallback(
     async (assetId: number) => {
       if (walletAddr && assetId) {
-        try {
-          const res = await getAccountInfo(walletAddr, environment);
-          const ASAs = res.data.assets;
-          const currentASA = ASAs.find(
-            (asset: AssetSchema) => asset["asset-id"] === assetId
-          );
-          const algoBalance = {
-            amount: res.data.amount / 1000000,
-            "asset-id": "ALGO",
-            "is-frozen": false,
-          };
-          if (currentASA) {
-            const val = [
-              algoBalance,
-              {
-                ...currentASA,
-                amount: currentASA.amount / 1000000,
-              },
-            ];
-            setVisibleBalance(val);
-            updateASAInfo(val);
-          } else {
-            setVisibleBalance([algoBalance]);
+        if (await presentOnTinyman(assetId)) {
+          try {
+            const res = await getAccountInfo(walletAddr, environment);
+            const ASAs = res.data.assets;
+            const currentASA = ASAs.find(
+              (asset: AssetSchema) => asset["asset-id"] === assetId
+            );
+            const algoBalance = {
+              amount: res.data.amount / 1000000,
+              "asset-id": "ALGO",
+              "is-frozen": false,
+            };
+            if (currentASA) {
+              const val = [
+                algoBalance,
+                {
+                  ...currentASA,
+                  amount: currentASA.amount / 1000000,
+                },
+              ];
+              setVisibleBalance(val);
+              updateASAInfo(val);
+            } else {
+              setVisibleBalance([algoBalance]);
+            }
+          } catch (error) {
+            console.error(error);
           }
-        } catch (error) {
-          console.error(error);
+        } else {
+          setFormError("This asset is not present on Tinyman");
         }
       } else {
         setVisibleBalance([]);
@@ -317,18 +327,19 @@ export const BotForm = () => {
       const found = visibleBalance.find(
         (asset) => asset["asset-id"] === assetId
       );
-      const algoBal = visibleBalance.find(
-        (asset) => asset["asset-id"] === "ALGO"
-      );
+      // const algoBal = visibleBalance.find(
+      //   (asset) => asset["asset-id"] === "ALGO"
+      // );
       if (found) {
-        if (found.amount > 20 && algoBal && algoBal?.amount > 20) {
-          return false;
-        } else {
-          setFormError(
-            "This ASA‘s liquidity is too low on Tinyman to use this bot"
-          );
-          return true;
-        }
+        return false;
+        // if (found.amount > 20 && algoBal && algoBal?.amount > 20) {
+        //   return false;
+        // } else {
+        //   setFormError(
+        //     "This ASA‘s liquidity is too low on Tinyman to use this bot"
+        //   );
+        //   return true;
+        // }
       } else {
         setFormError("You need to have this asset in your wallet holdings");
         return true;
@@ -337,6 +348,11 @@ export const BotForm = () => {
     return false;
   };
 
+  const presentOnTinyman = async (assetId: number) => {
+    const res = await getTinymanAssets(environment);
+    if (res[assetId]) return true;
+    return false;
+  };
   return (
     <>
       <Formik
@@ -414,10 +430,11 @@ export const BotForm = () => {
                   <Grid item md={7} xs={12}>
                     <AssetSearchInput
                       setFieldValue={(name: string, val: string) => {
-                        setFieldValue(name, parseInt(val));
+                        const value = val ? parseInt(val) : "";
+                        setFieldValue(name, value);
                         setFormError("");
-                        if (val) {
-                          getAccount(parseInt(val));
+                        if (value) {
+                          getAccount(value);
                         } else {
                           setVisibleBalance([]);
                         }
@@ -610,6 +627,7 @@ export const BotForm = () => {
                         name="orderAlgoDepth"
                         id="orderAlgoDepth"
                         max={10000000}
+                        min={1}
                         required
                         sx={{
                           input: {
@@ -732,7 +750,7 @@ export const BotForm = () => {
                         name="minSpreadPerc"
                         id="minSpreadPerc"
                         max={5}
-                        min={0.01}
+                        // min={0.01}
                         required
                         sx={{
                           input: {
@@ -745,16 +763,18 @@ export const BotForm = () => {
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          const _value =
-                            parseFloat(value) <= 0
-                              ? 0.01
-                              : parseFloat(value) > 5
-                              ? 5
-                              : parseFloat(value);
-                          if (_value >= 0.01 && _value <= 5) {
-                            setFieldValue("minSpreadPerc", _value);
-                            setFieldValue("nearestNeighborKeep", _value / 2);
-                          }
+                          const _value = !value
+                            ? ""
+                            : parseFloat(value) <= 0
+                            ? 0.01
+                            : parseFloat(value) > 5
+                            ? 5
+                            : parseFloat(value);
+                          setFieldValue("minSpreadPerc", _value);
+                          setFieldValue(
+                            "nearestNeighborKeep",
+                            _value ? _value / 2 : 0
+                          );
                         }}
                       />
                       <span style={percentStyles}>%</span>
@@ -849,12 +869,25 @@ export const BotForm = () => {
                         name="ladderTiers"
                         id="ladderTiers"
                         max={15}
+                        min={1}
                         required
                         sx={{
                           input: {
                             padding: "6.5px 0px 6.5px 14px",
                             width: "63px",
                           },
+                        }}
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
+                          const _value = !value
+                            ? ""
+                            : parseFloat(value) > 15
+                            ? 15
+                            : parseFloat(value);
+                          setFieldValue("ladderTiers", _value);
                         }}
                       />
                     </Grid>
@@ -944,10 +977,12 @@ export const BotForm = () => {
                       <Grid item lg={9} md={8} xs={12}>
                         <Field
                           component={CustomRangeSlider}
-                          // step={0.1}
+                          step={0.1}
+                          marks
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc}
+                          min={0}
                         />
                         <Typography
                           sx={{
@@ -967,6 +1002,7 @@ export const BotForm = () => {
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc}
+                          // min={0}
                           required
                           sx={{
                             input: {

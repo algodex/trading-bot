@@ -23,10 +23,16 @@ import Typography from "@mui/material/Typography";
 const CustomTextInput = ({
   field,
   form: { touched, errors },
+  type,
+  min,
+  max,
   ...props
 }: {
   className?: string;
   field: HTMLFormElement;
+  type?:string;
+  min?: number,
+  max?: number,
   form: { touched: any; errors: any };
 }) => {
   const hasError = touched[field.name] && errors[field.name];
@@ -39,8 +45,10 @@ const CustomTextInput = ({
         onChange={field.onChange}
         onBlur={field.onBlur}
         fullWidth
+        type={type || 'text'}
         {...props}
-      />
+        InputProps={type === 'number' ? { inputProps: { min, max } }:{}}
+        />
       {hasError && (
         <Typography sx={{ pt: "5px", color: "error.main", fontSize: "12px" }}>
           {errors[field.name]}
