@@ -355,6 +355,54 @@ export const BotForm = () => {
   };
   return (
     <>
+      <Grid
+        container
+        sx={{
+          alignItems: "center",
+          rowGap: "5px",
+          marginBottom: "20px",
+        }}
+      >
+        <Grid item md={3} xs={12}>
+          <Select
+            className="environment-select-wrapper"
+            value={environment}
+            onChange={handleChange}
+            inputProps={{ "aria-label": "Without label" }}
+            sx={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: environment === "testnet" ? "accent.main" : "blue.main",
+              border: "none",
+              ".MuiOutlinedInput-input": {
+                padding: "0.4rem 1.7rem",
+                paddingLeft: "0.8rem",
+              },
+              ".MuiOutlinedInput-notchedOutline": {
+                borderWidth: "2px",
+                borderColor:
+                  environment === "testnet" ? "accent.main" : "blue.main",
+              },
+            }}
+          >
+            {environmentLinks.map((environment) => (
+              <MenuItem key={environment} value={environment}>
+                {environment.toUpperCase()}
+              </MenuItem>
+            ))}
+          </Select>
+        </Grid>
+        <Grid item md={8} xs={12} marginLeft={"auto"}>
+          <WalletButton
+            walletAddr={walletAddr}
+            setWalletAddr={setWalletAddr}
+            openMnemonic={openMnemonic}
+            setOpenMnemonic={setOpenMnemonic}
+            mnemonic={mnemonic}
+            setMnemonic={setMnemonic}
+          />
+        </Grid>
+      </Grid>
       <Formik
         innerRef={formikRef}
         initialValues={initialValues}
@@ -373,59 +421,6 @@ export const BotForm = () => {
           return (
             <Form onSubmit={handleSubmit}>
               <>
-                <Grid
-                  container
-                  sx={{
-                    alignItems: "center",
-                    rowGap: "5px",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <Grid item md={3} xs={12}>
-                    <Select
-                      className="environment-select-wrapper"
-                      value={environment}
-                      onChange={handleChange}
-                      inputProps={{ "aria-label": "Without label" }}
-                      sx={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color:
-                          environment === "testnet"
-                            ? "accent.main"
-                            : "blue.main",
-                        border: "none",
-                        ".MuiOutlinedInput-input": {
-                          padding: "0.4rem 1.7rem",
-                          paddingLeft: "0.8rem",
-                        },
-                        ".MuiOutlinedInput-notchedOutline": {
-                          borderWidth: "2px",
-                          borderColor:
-                            environment === "testnet"
-                              ? "accent.main"
-                              : "blue.main",
-                        },
-                      }}
-                    >
-                      {environmentLinks.map((environment) => (
-                        <MenuItem key={environment} value={environment}>
-                          {environment.toUpperCase()}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-                  <Grid item md={8} xs={12} marginLeft={"auto"}>
-                    <WalletButton
-                      walletAddr={walletAddr}
-                      setWalletAddr={setWalletAddr}
-                      openMnemonic={openMnemonic}
-                      setOpenMnemonic={setOpenMnemonic}
-                      mnemonic={mnemonic}
-                      setMnemonic={setMnemonic}
-                    />
-                  </Grid>
-                </Grid>
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
                   <Grid item md={7} xs={12}>
                     <AssetSearchInput

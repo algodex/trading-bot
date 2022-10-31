@@ -62,7 +62,8 @@ export const MnemonicModal = ({
     });
   }, []);
 
-  const importWallet = useCallback(async () => {
+  const importWallet = async (e: any) => {
+    e.preventDefault();
     if (mnemonic && passphrase.password) {
       const account = algosdk.mnemonicToSecretKey(mnemonic);
       setWalletAddr(account.addr);
@@ -73,7 +74,7 @@ export const MnemonicModal = ({
       });
       handleClose();
     }
-  }, [mnemonic, passphrase]);
+  };
 
   const getPassPhrase = useCallback(() => {
     const inputs: NodeListOf<HTMLInputElement> | null =
@@ -214,31 +215,32 @@ export const MnemonicModal = ({
                   </Typography>
                 </Box>
               </Box>
-              <Box
-                sx={{
-                  width: "50%",
-                  marginX: "auto",
-                  "@media (max-width: 501px)": {
-                    width: "80%",
-                  },
-                }}
-              >
-                <form>
+              <form>
+                <Box
+                  sx={{
+                    width: "50%",
+                    marginX: "auto",
+                    "@media (max-width: 501px)": {
+                      width: "80%",
+                    },
+                  }}
+                >
                   <CustomPasswordInput
                     passphrase={passphrase}
                     setPassphrase={setPassphrase}
                   />
-                </form>
-              </Box>
-              <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
-                <Button
-                  variant="contained"
-                  disabled={!passphrase.password}
-                  onClick={importWallet}
-                >
-                  Create Passphrase
-                </Button>
-              </Box>
+                </Box>
+                <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!passphrase.password}
+                    onClick={importWallet}
+                  >
+                    Create Passphrase
+                  </Button>
+                </Box>
+              </form>
             </Box>
           ) : (
             <>
@@ -357,7 +359,7 @@ export const MnemonicModal = ({
                     fontSize: "12px",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent:'center',
+                    justifyContent: "center",
                     columnGap: "5px",
                   }}
                 >

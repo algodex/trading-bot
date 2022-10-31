@@ -50,7 +50,8 @@ export const ValidateWallet = ({
   const [tooltiptext, setTooltiptext] = useState("Click to Copy");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const validate = () => {
+  const validate = (e: any) => {
+    e.preventDefault();
     if (passphrase) {
       const mnemonic: any = getMnemonic(passphrase.password);
       if (!mnemonic || mnemonic.message === "Malformed UTF-8 data") {
@@ -316,42 +317,42 @@ export const ValidateWallet = ({
                   </Typography>
                 </Box>
               </Box>
-              <Box
-                sx={{
-                  width: "50%",
-                  marginX: "auto",
-                  "@media (max-width: 501px)": {
-                    width: "80%",
-                  },
-                }}
-              >
-                <form>
+              <form>
+                <Box
+                  sx={{
+                    width: "50%",
+                    marginX: "auto",
+                    "@media (max-width: 501px)": {
+                      width: "80%",
+                    },
+                  }}
+                >
                   <CustomPasswordInput
                     passphrase={passphrase}
                     setPassphrase={setPassphrase}
                   />
-                </form>
-                {errorMessage && (
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: "error.main",
-                    }}
+                  {errorMessage && (
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        color: "error.main",
+                      }}
+                    >
+                      {errorMessage}
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!passphrase.password}
+                    onClick={validate}
                   >
-                    {errorMessage}
-                  </Typography>
-                )}
-              </Box>
-              <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={!passphrase.password}
-                  onClick={validate}
-                >
-                  Enter
-                </Button>
-              </Box>
+                    Enter
+                  </Button>
+                </Box>
+              </form>
               <Typography
                 sx={{
                   fontSize: "12px",
