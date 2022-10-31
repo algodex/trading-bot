@@ -80,7 +80,11 @@ const theme = createTheme({
     accent: {
       main: "#44C480",
       dark: "#579F6E",
+      dark600: '#255C46',
       contrastText: "#FFFFFF",
+    },
+    dark600:{
+      main: '#255C46',
     },
     error: {
       main: "#B82828",
