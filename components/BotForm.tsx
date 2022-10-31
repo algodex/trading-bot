@@ -601,6 +601,9 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="orderAlgoDepth"
                         id="orderAlgoDepth"
+                        valueLabelFormat={(value: number) => (
+                          <div>{value.toLocaleString()}</div>
+                        )}
                         min={1}
                         max={10000000}
                       />
