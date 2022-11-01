@@ -19,7 +19,6 @@ const waitForOrders = async (ordersToPlace: any[]) => {
   const results = await Promise.all(
     ordersToPlace.map((p) => p ? p.catch((e:any) => e): p)
   );
-  // const results = ordersToPlace
   const validResults = results.filter((result:any) => !(result instanceof Error));
   const invalidResults = results.filter((result:any) => result instanceof Error);
   if (invalidResults && invalidResults.length > 0) {

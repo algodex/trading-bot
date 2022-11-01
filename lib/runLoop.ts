@@ -16,7 +16,7 @@
 
 import sleep from "./sleep";
 import placeOrdersAndUpdateDB from "./placeOrdersAndUpdateDB";
-import getCurrentState, { CurrentState } from "./getCurrentState";
+import getCurrentState from "./getCurrentState";
 import getPlannedOrderChanges from "./getPlannedOrderChanges";
 import cancelOrdersAndUpdateDB from "./cancelOrdersAndUpdateDB";
 import { BotConfig } from "./types/config";
