@@ -14,18 +14,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { getAppId } from "./convertToDBObject";
+import { Environment } from "./types/config";
 import { AllDocsResult, OrderDoc } from "./types/order";
 
 const getCurrentOrders = async (
   escrowDB: any,
   indexer: any,
-  openAccountSet: Set<string>
+  openAccountSet: Set<string>,
+  environment: Environment
 ): Promise<AllDocsResult> => {
   const currentEscrows: AllDocsResult = await escrowDB.allDocs({
     include_docs: true,
   });
   currentEscrows.rows.forEach((escrow) => {
     escrow.doc.order.escrowAddr = escrow.doc._id;
+    escrow.doc.order.appId = getAppId({
+      isTestnet: environment === "testnet",
+      isBuyOrder: escrow.doc.order.type === "buy",
+    });
   });
   const escrowsWithBalances: Array<OrderDoc> = [];
   const currentUnixTime = Math.round(Date.now() / 1000);

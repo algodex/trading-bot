@@ -170,13 +170,13 @@ export const BotForm = () => {
         validateWallet();
       } else if (walletAddr && mnemonic) {
         try {
-          const pouchUrl = process.env.POUCHDB_URL
-            ? process.env.POUCHDB_URL + "/"
+          const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
+            ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
             : "";
           const fullPouchUrl =
             pouchUrl +
             "market_maker_" +
-            formValues.assetId +
+            assetId +
             "_" +
             walletAddr.slice(0, 8).toLowerCase();
           const escrowDB = new PouchDB(fullPouchUrl);
@@ -327,19 +327,20 @@ export const BotForm = () => {
       const found = visibleBalance.find(
         (asset) => asset["asset-id"] === assetId
       );
-      // const algoBal = visibleBalance.find(
-      //   (asset) => asset["asset-id"] === "ALGO"
-      // );
+      const algoBal = visibleBalance.find(
+        (asset) => asset["asset-id"] === "ALGO"
+      );
       if (found) {
-        return false;
-        // if (found.amount > 20 && algoBal && algoBal?.amount > 20) {
-        //   return false;
-        // } else {
-        //   setFormError(
-        //     "This ASA‘s liquidity is too low on Tinyman to use this bot"
-        //   );
-        //   return true;
-        // }
+        if (found.amount > 0 && algoBal && algoBal?.amount > 0) {
+          return false;
+        } else {
+          setFormError("This ASA or Algo balance is too low to use this bot");
+          return true;
+
+          // setFormError(
+          //   "This ASA‘s liquidity is too low on Tinyman to use this bot"
+          // );
+        }
       } else {
         setFormError("You need to have this asset in your wallet holdings");
         return true;

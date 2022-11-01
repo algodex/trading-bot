@@ -40,7 +40,7 @@ const placeOrdersAndUpdateDB = async ({
   });
   const { validResults } = await waitForOrders(ordersToPlace);
 
-  await addOrdersToDB(config.escrowDB, validResults);
+  await addOrdersToDB(config.escrowDB, validResults, config.environment);
 };
 
 export default placeOrdersAndUpdateDB;

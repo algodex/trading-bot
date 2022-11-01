@@ -34,8 +34,15 @@ const getCurrentState = async (
   config: BotConfig,
   assetInfo: any
 ): Promise<CurrentState> => {
-  const { assetId, walletAddr, escrowDB, useTinyMan, api, environment, mnemonic } =
-    config;
+  const {
+    assetId,
+    walletAddr,
+    escrowDB,
+    useTinyMan,
+    api,
+    environment,
+    mnemonic,
+  } = config;
 
   const openAccountSet = await getOpenAccountSetFromAlgodex(
     environment,
@@ -53,7 +60,8 @@ const getCurrentState = async (
   const currentEscrows = await getCurrentOrders(
     escrowDB,
     api.indexer,
-    openAccountSet
+    openAccountSet,
+    environment
   );
 
   const latestPrice = await getLatestPrice(assetId, environment, useTinyMan);

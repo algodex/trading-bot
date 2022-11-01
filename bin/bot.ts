@@ -139,7 +139,12 @@ process.on("SIGINT", async () => {
     walletAddr,
     assetId
   );
-  const escrows = await getCurrentOrders(escrowDB, api.indexer, openAccountSet);
+  const escrows = await getCurrentOrders(
+    escrowDB,
+    api.indexer,
+    openAccountSet,
+    environment
+  );
   const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
   const cancelSet = new Set(cancelArr);
   const cancelPromises = await getCancelPromises({

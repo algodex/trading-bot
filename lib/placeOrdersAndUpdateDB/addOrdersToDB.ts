@@ -14,6 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import convertToDBObject from "../convertToDBObject";
+import { Environment } from "../types/config";
 
 interface ValidResult {
   contract: {
@@ -21,13 +22,13 @@ interface ValidResult {
   };
 }
 
-const addOrdersToDB = async (escrowDB: any, validResults: any[][]) => {
+const addOrdersToDB = async (escrowDB: any, validResults: any[][], environment:Environment) => {
   const ordersAddToDB = validResults
     .filter((order) => order[0].contract.amount > 0)
     .map((order) => {
       return escrowDB.put({
         _id: order[0].contract.escrow,
-        order: convertToDBObject(order[0]),
+        order: convertToDBObject(order[0], environment),
       });
     });
   return await Promise.all(ordersAddToDB).catch((e) => {

@@ -15,8 +15,7 @@
  */
 
 import { LogicSigAccount } from "algosdk";
-import events from "./events";
-import { stopLoop } from "./runLoop";
+import * as events from "./events";
 import { AllDocsResult } from "./types/order";
 
 export interface GetCancelPromisesInput {
@@ -56,13 +55,7 @@ const getCancelPromises = async ({
         status: "CANCELLING ORDER: ",
         content: `${JSON.stringify(tempOrder)},\n Latest Price: ${latestPrice}`,
       });
-      try {
-        return api.closeOrder(cancelOrderObj);
-      } catch (error) {
-        console.log("I want to see the error here and stop the loop");
-        // stopLoop()
-        console.log(error);
-      }
+      return api.closeOrder(cancelOrderObj);
     });
 };
 
