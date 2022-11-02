@@ -15,6 +15,7 @@
  */
 
 import { LogicSigAccount } from "algosdk";
+import * as events from "./events";
 import { AllDocsResult } from "./types/order";
 
 export interface GetCancelPromisesInput {
@@ -50,6 +51,10 @@ const getCancelPromises = async ({
         JSON.stringify(tempOrder),
         ` Latest Price: ${latestPrice}`
       );
+      events.emit("running-bot", {
+        status: "CANCELLING ORDER: ",
+        content: `${JSON.stringify(tempOrder)},\n Latest Price: ${latestPrice}`,
+      });
       return api.closeOrder(cancelOrderObj);
     });
 };

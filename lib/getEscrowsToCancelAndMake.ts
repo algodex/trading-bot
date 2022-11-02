@@ -107,6 +107,5 @@ export const getEscrowsToCancelAndMake = ({
         type: price < latestPrice ? "buy" : "sell",
       };
     });
-
   return { createEscrowPrices, cancelEscrowAddrs };
 };

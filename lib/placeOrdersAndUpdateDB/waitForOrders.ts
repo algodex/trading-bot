@@ -14,11 +14,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Order } from "../types/order";
 
 const waitForOrders = async (ordersToPlace: any[]) => {
   const results = await Promise.all(
-    ordersToPlace.map((p) => p.catch((e:any) => e))
+    ordersToPlace.map((p) => p ? p.catch((e:any) => e): p)
   );
   const validResults = results.filter((result:any) => !(result instanceof Error));
   const invalidResults = results.filter((result:any) => result instanceof Error);

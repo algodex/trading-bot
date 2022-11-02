@@ -16,7 +16,7 @@
 
 import sleep from "./sleep";
 import placeOrdersAndUpdateDB from "./placeOrdersAndUpdateDB";
-import getCurrentState, { CurrentState } from "./getCurrentState";
+import getCurrentState from "./getCurrentState";
 import getPlannedOrderChanges from "./getPlannedOrderChanges";
 import cancelOrdersAndUpdateDB from "./cancelOrdersAndUpdateDB";
 import { BotConfig } from "./types/config";
@@ -49,7 +49,7 @@ const runLoop = async ({
   if (runState.isExiting || exitLoop) {
     console.log("Exiting!");
     events.emit("running-bot", {
-      status: "Stop bot",
+      status: "Bot Stopped",
       content: "Exiting!",
     });
     return;
@@ -117,23 +117,27 @@ export const stopLoop = async ({
 
     console.log("Canceling all orders");
     events.emit("running-bot", {
-      status: "Stop bot",
-      content: "Will cancel current orders",
+      status: "Exiting bot",
+      content: "Canceling all orders",
     });
     const openAccountSet = await getOpenAccountSetFromAlgodex(
       environment,
       walletAddr,
       assetId
     );
+
+    events.emit("running-bot", {
+      status: "Exiting bot",
+      content: "Get current orders",
+    });
+
     const escrows = await getCurrentOrders(
       escrowDB,
       api.indexer,
-      openAccountSet
+      openAccountSet,
+      environment
     );
-    events.emit("running-bot", {
-      status: "Stop bot",
-      content: "Getting current orders",
-    });
+    console.log({ escrows });
     const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
     const cancelSet = new Set(cancelArr);
     const cancelPromises = await getCancelPromises({
@@ -143,7 +147,7 @@ export const stopLoop = async ({
       latestPrice: 0,
     });
     events.emit("running-bot", {
-      status: "Stop bot",
+      status: "Exiting bot",
       content: "Cancelling promises and orders!",
     });
     await cancelOrders(escrowDB, escrows, cancelPromises);

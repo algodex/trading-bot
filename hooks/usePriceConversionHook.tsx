@@ -25,11 +25,15 @@ export const usePriceConversionHook = ({ env }: { env: Environment }) => {
   const getPrice = useCallback(async () => {
     const USDCId = env === "mainnet" ? 31566704 : 10458941;
     setLoading(true);
-    const price: any = await getAlgoPrice(USDCId, env);
-    setConversionRate(price);
-    setTimeout(() => {
-      setLoading(false);
-    }, 4000);
+    try {
+      const price: any = await getAlgoPrice(USDCId, env);
+      setConversionRate(price);
+      setTimeout(() => {
+        setLoading(false);
+      }, 6000);
+    } catch (error) {
+      console.error(error);
+    }
   }, [env]);
 
   useEffect(() => {

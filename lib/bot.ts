@@ -84,7 +84,9 @@ const assetId = parseInt(args.assetId);
 const walletAddr = algosdk.mnemonicToSecretKey(
   process.env.WALLET_MNEMONIC
 ).addr;
-const pouchUrl = process.env.POUCHDB_URL ? process.env.POUCHDB_URL + "/" : "";
+const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
+  ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
+  : "";
 const fullPouchUrl =
   pouchUrl +
   "market_maker_" +
@@ -140,7 +142,12 @@ process.on("SIGINT", async () => {
     walletAddr,
     assetId
   );
-  const escrows = await getCurrentOrders(escrowDB, api.indexer, openAccountSet);
+  const escrows = await getCurrentOrders(
+    escrowDB,
+    api.indexer,
+    openAccountSet,
+    environment
+  );
   const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
   const cancelSet = new Set(cancelArr);
   const cancelPromises = await getCancelPromises({

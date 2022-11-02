@@ -18,6 +18,7 @@ import orderDepthAmounts from "./order-depth-amounts";
 import { BotConfig } from ".././types/config";
 import { EscrowToMake } from "../getEscrowsToCancelAndMake";
 import * as events from "../events";
+import { stopLoop } from "../runLoop";
 
 export interface PlaceOrderInput {
   config: BotConfig;
@@ -63,8 +64,12 @@ const placeOrders = ({
         orderToPlace
       )},\n Latest Price: ${latestPrice}`,
     });
-    const orderPromise = api.placeOrder(orderToPlace);
-    return orderPromise;
+    try {
+      const orderPromise = api.placeOrder(orderToPlace);
+      return orderPromise;
+    } catch (error) {
+      stopLoop({ config });
+    }
   });
   return placedOrders;
 };
