@@ -18,7 +18,6 @@ import TextField from "@mui/material/TextField";
 import { cardStyles } from "./BotForm";
 
 export const LogOutput = () => {
-  const [logs, setLogs] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [delCount, setDelCount] = useState(0);
 
@@ -26,13 +25,13 @@ export const LogOutput = () => {
     events.on(
       "running-bot",
       ({ status, content }: { status: string; content: string }) => {
-        setLogs((prev) => `${prev} \n ${status} \n ${content}`);
         if (textareaRef.current) {
-          textareaRef.current.focus();
-          textareaRef.current.scrollTop = textareaRef.current.scrollHeight + 100;
           const value = textareaRef.current.value;
+          textareaRef.current.value = `${value} \n ${status} \n ${content}`;
+          textareaRef.current.focus();
+          textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
           if (delCount > 0 && value.split("").length > delCount) {
-            setLogs("");
+            textareaRef.current.value = "";
           }
         }
       }
@@ -48,12 +47,10 @@ export const LogOutput = () => {
     <>
       <TextareaAutosize
         ref={textareaRef}
-        value={logs}
         style={{
           width: "100%",
           height: "85vh",
           overflow: "scroll",
-          paddingBottom: "17px",
         }}
         readOnly
       />
@@ -157,7 +154,9 @@ export const LogOutput = () => {
             variant="outlined"
             sx={{ marginBlock: "30px", whiteSpace: "nowrap" }}
             onClick={() => {
-              setLogs("");
+              if (textareaRef.current) {
+                textareaRef.current.value = "";
+              }
             }}
           >
             CLEAR LOGS

@@ -48,10 +48,6 @@ const runLoop = async ({
   // Note - during jest testing, runState is a Proxy
   if (runState.isExiting || exitLoop) {
     console.log("Exiting!");
-    events.emit("running-bot", {
-      status: "Bot Stopped",
-      content: "Exiting!",
-    });
     return;
   }
   runState.inRunLoop = true;
@@ -83,7 +79,7 @@ const runLoop = async ({
   });
 
   events.emit("running-bot", {
-    status: "Place order and update DB",
+    status: "Trying to place order...",
     content: "",
   });
 
@@ -113,6 +109,7 @@ export const stopLoop = async ({
     return;
   }
   if (config) {
+    exitLoop = true;
     const { assetId, walletAddr, escrowDB, api, environment } = config;
 
     console.log("Canceling all orders");
@@ -151,6 +148,9 @@ export const stopLoop = async ({
       content: "Cancelling promises and orders!",
     });
     await cancelOrders(escrowDB, escrows, cancelPromises);
-    exitLoop = true;
+    events.emit("running-bot", {
+      status: "Bot Stopped",
+      content: "Exiting!",
+    });
   }
 };
