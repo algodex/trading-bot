@@ -118,10 +118,28 @@ export const BotForm = () => {
   const [formError, setFormError] = useState("");
   const { conversionRate } = usePriceConversionHook({ env: environment });
 
+  const calculateLogValue = (value: number, min: number, max: number) => {
+    if (value === min) return min;
+    const newValue = Math.pow(2, value);
+    if (newValue > max) return max;
+    return newValue;
+  };
+
+  const calculateReverseLogValue = (value: any, min: number) => {
+    if (value) {
+      const newValue = Math.log2(value);
+      if (newValue < min) return min;
+      return newValue;
+    }
+    return min;
+  };
+
   const initialValues = {
     assetId: "",
+    orderAlgoDepth_range: calculateReverseLogValue(25000, 1),
     orderAlgoDepth: 25000,
     ladderTiers: 3,
+    minSpreadPerc_range: calculateReverseLogValue(0.25, 0.01),
     minSpreadPerc: 0.25,
     nearestNeighborKeep: 0.125,
   };
@@ -162,6 +180,9 @@ export const BotForm = () => {
   });
 
   const handleStart = (formValues: FormikValues) => {
+    const _formValues = {...formValues}
+    delete _formValues.minSpreadPerc_range
+    delete _formValues.orderAlgoDepth_range
     const assetId = formValues.assetId;
     if (!lowBalance(assetId)) {
       if (!walletAddr) {
@@ -182,7 +203,7 @@ export const BotForm = () => {
           const escrowDB = new PouchDB(fullPouchUrl);
           const api = initAPI(environment);
           const _config = {
-            ...(formValues as any),
+            ...(_formValues as any),
             assetId,
             walletAddr,
             environment,
@@ -601,13 +622,27 @@ export const BotForm = () => {
                     <Grid item lg={9} md={8} xs={12}>
                       <Field
                         component={CustomRangeSlider}
-                        name="orderAlgoDepth"
-                        id="orderAlgoDepth"
+                        name="orderAlgoDepth_range"
+                        id="orderAlgoDepth_range"
+                        scale={(value: number) =>
+                          calculateLogValue(value, 1, 10000000)
+                        }
                         valueLabelFormat={(value: number) => (
                           <div>{value.toLocaleString()}</div>
                         )}
                         min={1}
-                        max={10000000}
+                        max={23.3}
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
+                          setFieldValue("orderAlgoDepth_range", value);
+                          setFieldValue(
+                            "orderAlgoDepth",
+                            calculateLogValue(parseFloat(value), 1, 10000000)
+                          );
+                        }}
                       />
                       <Typography
                         sx={{
@@ -634,6 +669,24 @@ export const BotForm = () => {
                             padding: "6.5px 0px 6.5px 14px",
                             width: "94px",
                           },
+                        }}
+                        onChange={({
+                          target: { value },
+                        }: {
+                          target: HTMLInputElement;
+                        }) => {
+                          const _value = !value
+                            ? ""
+                            : parseFloat(value) <= 0
+                            ? 1
+                            : parseFloat(value) > 10000000
+                            ? 10000000
+                            : parseFloat(value);
+                          setFieldValue(
+                            "orderAlgoDepth_range",
+                            calculateReverseLogValue(_value, 1)
+                          );
+                          setFieldValue("orderAlgoDepth", _value);
                         }}
                       />
                     </Grid>
@@ -704,25 +757,34 @@ export const BotForm = () => {
                     <Grid item lg={9} md={8} xs={12}>
                       <Field
                         component={CustomRangeSlider}
-                        name="minSpreadPerc"
-                        id="minSpreadPerc"
+                        name="minSpreadPerc_range"
+                        id="minSpreadPerc_range"
                         marks
                         step={0.1}
-                        max={5}
+                        scale={(value: number) =>
+                          calculateLogValue(value, 0.01, 5)
+                        }
+                        max={2.4}
                         min={0.01}
                         onChange={({
                           target: { value },
                         }: {
                           target: HTMLInputElement;
                         }) => {
-                          if (
-                            parseFloat(value) >= 0.01 &&
-                            parseFloat(value) <= 5
-                          ) {
-                            setFieldValue("minSpreadPerc", parseFloat(value));
+                          const _value = parseFloat(value);
+                          if (_value >= 0.01 && _value <= 5) {
+                            setFieldValue("minSpreadPerc_range", _value);
+                            setFieldValue(
+                              "minSpreadPerc",
+                              parseFloat(
+                                calculateLogValue(_value, 0.01, 5).toFixed(2)
+                              )
+                            );
                             setFieldValue(
                               "nearestNeighborKeep",
-                              parseFloat(value) / 2
+                              parseFloat(
+                                calculateLogValue(_value, 0.01, 5).toFixed(2)
+                              ) / 2
                             );
                           }
                         }}
@@ -770,6 +832,12 @@ export const BotForm = () => {
                             : parseFloat(value) > 5
                             ? 5
                             : parseFloat(value);
+                          setFieldValue(
+                            "minSpreadPerc_range",
+                            parseFloat(
+                              calculateReverseLogValue(_value, 0.01).toFixed(2)
+                            )
+                          );
                           setFieldValue("minSpreadPerc", _value);
                           setFieldValue(
                             "nearestNeighborKeep",
@@ -981,7 +1049,7 @@ export const BotForm = () => {
                           marks
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
-                          max={values.minSpreadPerc}
+                          max={values.minSpreadPerc || 0}
                           min={0}
                         />
                         <Typography
@@ -1001,7 +1069,7 @@ export const BotForm = () => {
                           type="number"
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
-                          max={values.minSpreadPerc}
+                          max={values.minSpreadPerc || 0}
                           // min={0}
                           required
                           sx={{
