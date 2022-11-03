@@ -48,7 +48,11 @@ import { BotConfig, Environment } from "@/lib/types/config";
 import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 import { AssetSearchInput } from "./AssetSearchInput";
-import { getAccountInfo, getTinymanAssets } from "@/lib/helper";
+import {
+  getAccountInfo,
+  getTinymanAssets,
+  getTinymanLiquidity,
+} from "@/lib/helper";
 import getAssetInfo from "@/lib/getAssetInfo";
 import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
@@ -115,7 +119,8 @@ export const BotForm = () => {
   const [visibleBalance, setVisibleBalance] = useState<AssetSchema[]>([]);
   const [walletAddr, setWalletAddr] = useState(getWallet());
   const [mnemonic, setMnemonic] = useState("");
-  const [formError, setFormError] = useState("");
+  const [ASAError, setASAError] = useState("");
+  const [ASAWarning, setASAWarning] = useState("");
   const { conversionRate } = usePriceConversionHook({ env: environment });
 
   const calculateLogValue = (value: number, min: number, max: number) => {
@@ -179,17 +184,25 @@ export const BotForm = () => {
       .required("Required"),
   });
 
-  const handleStart = (formValues: FormikValues) => {
-    const _formValues = {...formValues}
-    delete _formValues.minSpreadPerc_range
-    delete _formValues.orderAlgoDepth_range
+  const handleStart = async (formValues: FormikValues) => {
+    const _formValues = { ...formValues };
+    delete _formValues.minSpreadPerc_range;
+    delete _formValues.orderAlgoDepth_range;
     const assetId = formValues.assetId;
-    if (!lowBalance(assetId)) {
+
+    if (
+      !(await lowBalanceOrRisky(
+        assetId,
+        formValues.orderAlgoDepth,
+        formValues.ladderTiers
+      ))
+    ) {
       if (!walletAddr) {
         setOpenMnemonic("mnemonic");
       } else if (walletAddr && !mnemonic) {
         validateWallet();
       } else if (walletAddr && mnemonic) {
+        console.log("fourth");
         try {
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
@@ -326,7 +339,7 @@ export const BotForm = () => {
             console.error(error);
           }
         } else {
-          setFormError("This asset is not present on Tinyman");
+          setASAError("This asset is not present on Tinyman");
         }
       } else {
         setVisibleBalance([]);
@@ -343,7 +356,11 @@ export const BotForm = () => {
     }
   }, [getAccount, walletAddr, environment]);
 
-  const lowBalance = (assetId: number) => {
+  const lowBalanceOrRisky = (
+    assetId: number,
+    orderAlgoDepth: number,
+    ladderTiers: number
+  ) => {
     if (assetId && visibleBalance.length > 0) {
       const found = visibleBalance.find(
         (asset) => asset["asset-id"] === assetId
@@ -353,17 +370,52 @@ export const BotForm = () => {
       );
       if (found) {
         if (found.amount > 0 && algoBal && algoBal?.amount > 0) {
-          return false;
+          const checkLiquidity = async () => {
+            try {
+              const { results } = await getTinymanLiquidity(environment);
+              const maxLiquidity = Math.max(
+                ...results
+                  .filter(
+                    (item: any) =>
+                      item.asset_1.id === String(assetId) &&
+                      !isNaN(item.current_asset_1_reserves_in_usd)
+                  )
+                  .map((item: any) => item.current_asset_1_reserves_in_usd)
+              );
+              const amountToTrade =
+                orderAlgoDepth * conversionRate * ladderTiers;
+              if (maxLiquidity) {
+                if (amountToTrade >= maxLiquidity * 0.5) {
+                  setASAError(
+                    "This ASA‘s liquidity is too high and risky to use this bot"
+                  );
+                  return true;
+                } else if (amountToTrade > maxLiquidity * 0.1) {
+                  setASAWarning("Warning, this ASA‘s liquidity is high");
+                  return false;
+                }
+              } else {
+                setASAError(
+                  "This ASA‘s liquidity is too low on Tinyman to use this bot"
+                );
+                return true;
+              }
+              setASAError("");
+              setASAWarning("");
+              return false;
+            } catch (error) {
+              setTimeout(() => {
+                checkLiquidity();
+              }, 7000);
+            }
+          };
+          return checkLiquidity();
         } else {
-          setFormError("This ASA or Algo balance is too low to use this bot");
+          setASAError("This ASA or Algo balance is too low to use this bot");
           return true;
-
-          // setFormError(
-          //   "This ASA‘s liquidity is too low on Tinyman to use this bot"
-          // );
         }
       } else {
-        setFormError("You need to have this asset in your wallet holdings");
+        setASAError("You need to have this asset in your wallet holdings");
         return true;
       }
     }
@@ -371,9 +423,15 @@ export const BotForm = () => {
   };
 
   const presentOnTinyman = async (assetId: number) => {
-    const res = await getTinymanAssets(environment);
-    if (res[assetId]) return true;
-    return false;
+    try {
+      const res = await getTinymanAssets(environment);
+      if (res[assetId]) return true;
+      return false;
+    } catch (error) {
+      setTimeout(() => {
+        presentOnTinyman(assetId);
+      }, 7000);
+    }
   };
 
   return (
@@ -450,7 +508,8 @@ export const BotForm = () => {
                       setFieldValue={(name: string, val: string) => {
                         const value = val ? parseInt(val) : "";
                         setFieldValue(name, value);
-                        setFormError("");
+                        setASAError("");
+                        setASAWarning("");
                         if (value) {
                           getAccount(value);
                         } else {
@@ -502,7 +561,7 @@ export const BotForm = () => {
                 <Typography sx={{ pt: "5px", fontSize: "14px" }}>
                   *This bot currently uses Tinyman as a price oracle.
                 </Typography>
-                {formError && (
+                {(ASAError || ASAWarning) && (
                   <Typography
                     sx={{
                       pt: "5px",
@@ -518,7 +577,7 @@ export const BotForm = () => {
                         fontSize: "12px",
                       }}
                     />
-                    {formError}
+                    {ASAError || ASAWarning}
                   </Typography>
                 )}
                 {visibleBalance.length > 0 && (
@@ -1090,7 +1149,7 @@ export const BotForm = () => {
                     fullWidth
                     type="submit"
                     loading={loading}
-                    disabled={loading || !isValid || formError !== ""}
+                    disabled={loading || !isValid || ASAError !== ""}
                     sx={{ py: "0.8rem", mt: "1rem" }}
                   >
                     Start Bot
