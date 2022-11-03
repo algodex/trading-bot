@@ -77,12 +77,13 @@ const runLoop = async ({
     latestPrice,
     currentEscrows,
   });
-  if (createEscrowPrices.length > 0) {
+  if (createEscrowPrices && createEscrowPrices.length > 0) {
     events.emit("running-bot", {
       status: "Trying to place order...",
       content: "",
     });
-  } else {
+  }
+  if (createEscrowPrices && createEscrowPrices.length === 0) {
     events.emit("running-bot", {
       status: "Maintaining order while waiting for a price change...",
       content: "",

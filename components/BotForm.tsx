@@ -184,23 +184,25 @@ export const BotForm = () => {
       .required("Required"),
   });
 
-  const handleStart = (formValues: FormikValues) => {
+  const handleStart = async (formValues: FormikValues) => {
     const _formValues = { ...formValues };
     delete _formValues.minSpreadPerc_range;
     delete _formValues.orderAlgoDepth_range;
     const assetId = formValues.assetId;
+
     if (
-      !lowBalanceOrRisky(
+      !(await lowBalanceOrRisky(
         assetId,
         formValues.orderAlgoDepth,
         formValues.ladderTiers
-      )
+      ))
     ) {
       if (!walletAddr) {
         setOpenMnemonic("mnemonic");
       } else if (walletAddr && !mnemonic) {
         validateWallet();
       } else if (walletAddr && mnemonic) {
+        console.log("fourth");
         try {
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
