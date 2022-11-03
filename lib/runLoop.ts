@@ -77,11 +77,17 @@ const runLoop = async ({
     latestPrice,
     currentEscrows,
   });
-
-  events.emit("running-bot", {
-    status: "Trying to place order...",
-    content: "",
-  });
+  if (createEscrowPrices.length > 0) {
+    events.emit("running-bot", {
+      status: "Trying to place order...",
+      content: "",
+    });
+  } else {
+    events.emit("running-bot", {
+      status: "Maintaining order while waiting for a price change...",
+      content: "",
+    });
+  }
 
   await placeOrdersAndUpdateDB({
     config,

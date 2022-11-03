@@ -89,3 +89,18 @@ export const getTinymanAssets = async (env: Environment) => {
   });
   return assetList.data;
 };
+
+export const getTinymanLiquidity = async (env: Environment) => {
+  const tinymanPoolURL =
+    env === "mainnet"
+      ? "https://mainnet.analytics.tinyman.org/api/v1/pools/?limit=all"
+      : "https://testnet.analytics.tinyman.org/api/v1/pools/?limit=all";
+
+  const response = await axios({
+    method: "get",
+    url: tinymanPoolURL,
+    responseType: "json",
+    timeout: 3000,
+  });
+  return response.data;
+};
