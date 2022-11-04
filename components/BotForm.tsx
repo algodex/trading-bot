@@ -456,6 +456,7 @@ export const BotForm = () => {
             className="environment-select-wrapper"
             value={environment}
             onChange={handleChange}
+            disabled={loading}
             inputProps={{ "aria-label": "Without label" }}
             sx={{
               fontSize: "14px",
@@ -488,6 +489,7 @@ export const BotForm = () => {
             setOpenMnemonic={setOpenMnemonic}
             mnemonic={mnemonic}
             setMnemonic={setMnemonic}
+            loading={loading}
           />
         </Grid>
       </Grid>
