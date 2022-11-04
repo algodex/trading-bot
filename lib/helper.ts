@@ -16,7 +16,6 @@
 
 import algosdk from "algosdk";
 import axios from "axios";
-import getTinymanPrice from "./getTinymanPrice";
 import { Environment } from "./types/config";
 
 export const shortenAddress = (address: string, numb?: number) => {
@@ -55,16 +54,6 @@ export const getAccountInfo = async (address: string, env: Environment) => {
     timeout: 3000,
   });
   return res;
-};
-
-export const getAlgoPrice = async (
-  assetId: number,
-  environment: Environment
-) => {
-  if (assetId) {
-    const latestPrice = await getTinymanPrice(assetId, environment);
-    return latestPrice;
-  }
 };
 
 export const isMnemonicValid = (mnemonic: string) => {
