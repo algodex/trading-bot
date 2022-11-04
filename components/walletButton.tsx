@@ -33,6 +33,7 @@ export const WalletButton = ({
   setOpenMnemonic,
   mnemonic,
   setMnemonic,
+  loading,
 }: {
   walletAddr: string;
   setWalletAddr: any;
@@ -40,6 +41,7 @@ export const WalletButton = ({
   setOpenMnemonic: any;
   mnemonic: string | undefined;
   setMnemonic: any;
+  loading: boolean;
 }) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const handleOpenModal = () => {
@@ -77,7 +79,7 @@ export const WalletButton = ({
         <Typography sx={{ fontWeight: 600, fontSize: "17px" }}>
           Connected Wallet:
         </Typography>
-        <Button variant="outlined" onClick={handleOpenModal}>
+        <Button variant="outlined" onClick={handleOpenModal} disabled={loading}>
           {walletAddr ? shortenAddress(walletAddr || "") : "Input Mnemonic"}
         </Button>
       </Box>
