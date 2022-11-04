@@ -16,10 +16,16 @@ import TextField from "@mui/material/TextField";
 
 //Custom styles
 import { cardStyles } from "./BotForm";
+import { storageKeys } from "@/lib/storage";
 
 export const LogOutput = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [delCount, setDelCount] = useState(0);
+
+  useEffect(() => {
+    const _default = localStorage.getItem(storageKeys.logSetting);
+    setDelCount(_default ? parseFloat(_default) : 1000);
+  }, []);
 
   useEffect(() => {
     events.on(
@@ -42,6 +48,7 @@ export const LogOutput = () => {
 
   const handleChange = ({ target: { value } }: { target: any }) => {
     setDelCount(value);
+    localStorage.setItem(storageKeys.logSetting, value);
   };
   return (
     <>
