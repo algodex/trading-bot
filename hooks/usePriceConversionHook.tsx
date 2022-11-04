@@ -14,27 +14,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getAlgoPrice } from "@/lib/helper";
+import { getTinymanAssets } from "@/lib/helper";
 import { Environment } from "@/lib/types/config";
 import { useCallback, useEffect, useState } from "react";
 
 export const usePriceConversionHook = ({ env }: { env: Environment }) => {
-  const [conversionRate, setConversionRate] = useState<number>(0);
+  const [assetRates, setAssetRates] = useState<any>({});
+  const [algoRate, setAlgoRate] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  const getPrice = useCallback(async () => {
-    const USDCId = env === "mainnet" ? 31566704 : 10458941;
-    setLoading(true);
-    try {
-      const price: any = await getAlgoPrice(USDCId, env);
-      setConversionRate(price);
-      setTimeout(() => {
-        setLoading(false);
-      }, 6000);
-    } catch (error) {
-      console.error(error);
-    }
-  }, [env]);
+  const getPrice = useCallback(
+    async (assetId?: number) => {
+      console.log({ assetId });
+      setLoading(true);
+      try {
+        const data: any = await getTinymanAssets(env);
+        setAlgoRate(data[0].price);
+        setAssetRates(data);
+        setTimeout(() => {
+          setLoading(false);
+        }, 6000);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [env]
+  );
 
   useEffect(() => {
     if (!loading) {
@@ -42,5 +47,5 @@ export const usePriceConversionHook = ({ env }: { env: Environment }) => {
     }
   }, [env, getPrice, loading]);
 
-  return { conversionRate, getPrice, loading };
+  return { assetRates, algoRate, getPrice, loading };
 };

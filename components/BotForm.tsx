@@ -71,6 +71,7 @@ interface AssetSchema {
   amount: number;
   "is-frozen": boolean;
   name?: string;
+  amountInUSD?: number;
 }
 
 const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -98,7 +99,7 @@ export const cardStyles = {
 
 const percentStyles: any = {
   position: "absolute",
-  right: "16px",
+  right: "4px",
   top: "9px",
   fontSize: "12px",
 };
@@ -116,12 +117,14 @@ export const BotForm = () => {
   const formikRef = useRef<any>();
   const [openModal, setOpenModal] = useState(false);
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
-  const [visibleBalance, setVisibleBalance] = useState<AssetSchema[]>([]);
+  const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
   const [walletAddr, setWalletAddr] = useState(getWallet());
   const [mnemonic, setMnemonic] = useState("");
   const [ASAError, setASAError] = useState("");
   const [ASAWarning, setASAWarning] = useState("");
-  const { conversionRate } = usePriceConversionHook({ env: environment });
+  const { assetRates, algoRate } = usePriceConversionHook({
+    env: environment,
+  });
 
   const calculateLogValue = (value: number, min: number, max: number) => {
     if (value === min) return min;
@@ -202,7 +205,6 @@ export const BotForm = () => {
       } else if (walletAddr && !mnemonic) {
         validateWallet();
       } else if (walletAddr && mnemonic) {
-        console.log("fourth");
         try {
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
@@ -256,7 +258,7 @@ export const BotForm = () => {
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     if (!loading) {
       setEnvironment(value);
-      setVisibleBalance([]);
+      setAvailableBalance([]);
     }
   };
 
@@ -295,14 +297,13 @@ export const BotForm = () => {
               indexerClient,
               assetId: asset["asset-id"] as number,
             });
-
             return { ...asset, name: res.asset.params.name };
           } catch (error) {
             console.error(error);
           }
         })
       );
-      setVisibleBalance(result);
+      setAvailableBalance(result);
     },
     [environment]
   );
@@ -321,6 +322,7 @@ export const BotForm = () => {
               amount: res.data.amount / 1000000,
               "asset-id": "ALGO",
               "is-frozen": false,
+              amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
             };
             if (currentASA) {
               const val = [
@@ -328,12 +330,15 @@ export const BotForm = () => {
                 {
                   ...currentASA,
                   amount: currentASA.amount / 1000000,
+                  amountInUSD:
+                    (currentASA.amount / 1000000) *
+                    assetRates[currentASA["asset-id"]]?.price,
                 },
               ];
-              setVisibleBalance(val);
+              setAvailableBalance(val);
               updateASAInfo(val);
             } else {
-              setVisibleBalance([algoBalance]);
+              setAvailableBalance([algoBalance]);
             }
           } catch (error) {
             console.error(error);
@@ -342,7 +347,7 @@ export const BotForm = () => {
           setASAError("This asset is not present on Tinyman");
         }
       } else {
-        setVisibleBalance([]);
+        setAvailableBalance([]);
       }
     },
     [walletAddr, environment, updateASAInfo]
@@ -352,7 +357,7 @@ export const BotForm = () => {
     if (walletAddr && formikRef.current?.values?.assetId) {
       getAccount(formikRef.current?.values?.assetId);
     } else {
-      setVisibleBalance([]);
+      setAvailableBalance([]);
     }
   }, [getAccount, walletAddr, environment]);
 
@@ -361,11 +366,11 @@ export const BotForm = () => {
     orderAlgoDepth: number,
     ladderTiers: number
   ) => {
-    if (assetId && visibleBalance.length > 0) {
-      const found = visibleBalance.find(
+    if (assetId && availableBalance.length > 0) {
+      const found = availableBalance.find(
         (asset) => asset["asset-id"] === assetId
       );
-      const algoBal = visibleBalance.find(
+      const algoBal = availableBalance.find(
         (asset) => asset["asset-id"] === "ALGO"
       );
       if (found) {
@@ -382,27 +387,29 @@ export const BotForm = () => {
                   )
                   .map((item: any) => item.current_asset_1_reserves_in_usd)
               );
-              const amountToTrade =
-                orderAlgoDepth * conversionRate * ladderTiers;
-              if (maxLiquidity) {
-                if (amountToTrade >= maxLiquidity * 0.5) {
+              if (assetRates[assetId]) {
+                const amountToTrade =
+                  orderAlgoDepth * assetRates[assetId].price * ladderTiers;
+                if (maxLiquidity) {
+                  if (amountToTrade >= maxLiquidity * 0.5) {
+                    setASAError(
+                      "This ASA‘s liquidity is too high and risky to use this bot"
+                    );
+                    return true;
+                  } else if (amountToTrade > maxLiquidity * 0.1) {
+                    setASAWarning("Warning, this ASA‘s liquidity is high");
+                    return false;
+                  }
+                } else {
                   setASAError(
-                    "This ASA‘s liquidity is too high and risky to use this bot"
+                    "This ASA‘s liquidity is too low on Tinyman to use this bot"
                   );
                   return true;
-                } else if (amountToTrade > maxLiquidity * 0.1) {
-                  setASAWarning("Warning, this ASA‘s liquidity is high");
-                  return false;
                 }
-              } else {
-                setASAError(
-                  "This ASA‘s liquidity is too low on Tinyman to use this bot"
-                );
-                return true;
+                setASAError("");
+                setASAWarning("");
+                return false;
               }
-              setASAError("");
-              setASAWarning("");
-              return false;
             } catch (error) {
               setTimeout(() => {
                 checkLiquidity();
@@ -513,7 +520,7 @@ export const BotForm = () => {
                         if (value) {
                           getAccount(value);
                         } else {
-                          setVisibleBalance([]);
+                          setAvailableBalance([]);
                         }
                       }}
                       name="assetId"
@@ -580,7 +587,7 @@ export const BotForm = () => {
                     {ASAError || ASAWarning}
                   </Typography>
                 )}
-                {visibleBalance.length > 0 && (
+                {availableBalance.length > 0 && (
                   <Box
                     sx={{
                       border: "2px solid",
@@ -595,7 +602,7 @@ export const BotForm = () => {
                     <Typography marginBottom={"10px"}>
                       Available Balance
                     </Typography>
-                    {visibleBalance.map((asset) => (
+                    {availableBalance.map((asset) => (
                       <Box
                         key={asset["asset-id"]}
                         sx={{
@@ -605,21 +612,54 @@ export const BotForm = () => {
                           paddingInline: "30px",
                         }}
                       >
-                        <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
-                          {asset.name || asset["asset-id"]}:
-                        </Typography>
-                        <Typography
-                          sx={{
-                            textAlign: "end",
-                            fontSize: "18px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {asset.amount.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            sx={{ fontSize: "18px", fontWeight: 700 }}
+                          >
+                            {asset.name || asset["asset-id"]}:
+                          </Typography>
+                          {asset.amountInUSD && (
+                            <Typography
+                              sx={{
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                color: "grey.200",
+                              }}
+                            >
+                              Value in $USD:
+                            </Typography>
+                          )}
+                        </Box>
+                        <Box>
+                          <Typography
+                            sx={{
+                              textAlign: "end",
+                              fontSize: "18px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {asset.amount.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </Typography>
+                          {asset.amountInUSD && (
+                            <Typography
+                              sx={{
+                                textAlign: "end",
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                color: "grey.200",
+                              }}
+                            >
+                              $
+                              {asset.amountInUSD.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </Typography>
+                          )}
+                        </Box>
                       </Box>
                     ))}
                   </Box>
@@ -678,7 +718,7 @@ export const BotForm = () => {
                       marginBottom: "20px",
                     }}
                   >
-                    <Grid item lg={9} md={8} xs={12}>
+                    <Grid item lg={8} md={8} xs={12}>
                       <Field
                         component={CustomRangeSlider}
                         name="orderAlgoDepth_range"
@@ -714,7 +754,7 @@ export const BotForm = () => {
                         <span>10M</span>
                       </Typography>
                     </Grid>
-                    <Grid item md={2} marginLeft={"auto"}>
+                    <Grid item md={3} marginLeft={"auto"} textAlign="end">
                       <Field
                         component={CustomTextInput}
                         type="number"
@@ -724,9 +764,11 @@ export const BotForm = () => {
                         min={1}
                         required
                         sx={{
+                          maxWidth: "111px",
                           input: {
                             padding: "6.5px 0px 6.5px 14px",
-                            width: "94px",
+                            width: "100%",
+                            textAlign: "end",
                           },
                         }}
                         onChange={({
@@ -748,13 +790,29 @@ export const BotForm = () => {
                           setFieldValue("orderAlgoDepth", _value);
                         }}
                       />
+                      <Typography
+                        sx={{
+                          textAlign: "end",
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: "grey.200",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        $
+                        {(values.orderAlgoDepth * algoRate).toLocaleString(
+                          undefined,
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }
+                        )}
+                      </Typography>
                     </Grid>
                   </Grid>
                   <Note
                     note={`These settings ${
-                      values.orderAlgoDepth / conversionRate < 100
-                        ? "DO NOT "
-                        : ""
+                      values.orderAlgoDepth * algoRate < 100 ? "DO NOT " : ""
                     }qualify for ALGX Rewards.`}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
@@ -813,7 +871,7 @@ export const BotForm = () => {
                       marginBottom: "20px",
                     }}
                   >
-                    <Grid item lg={9} md={8} xs={12}>
+                    <Grid item lg={8} md={8} xs={12}>
                       <Field
                         component={CustomRangeSlider}
                         name="minSpreadPerc_range"
@@ -861,9 +919,9 @@ export const BotForm = () => {
                     </Grid>
                     <Grid
                       item
-                      md={2}
+                      md={3}
                       marginLeft={"auto"}
-                      sx={{ position: "relative" }}
+                      sx={{ position: "relative", textAlign: "end" }}
                     >
                       <Field
                         component={CustomTextInput}
@@ -874,9 +932,11 @@ export const BotForm = () => {
                         // min={0.01}
                         required
                         sx={{
+                          maxWidth: "111px",
                           input: {
-                            padding: "6.5px 0px 6.5px 14px",
-                            width: "63px",
+                            padding: "6.5px 14px 6.5px 14px",
+                            width: "100%",
+                            textAlign: "end",
                           },
                         }}
                         onChange={({
@@ -970,7 +1030,7 @@ export const BotForm = () => {
                       marginBottom: "20px",
                     }}
                   >
-                    <Grid item lg={9} md={8} xs={12}>
+                    <Grid item lg={8} md={8} xs={12}>
                       <Field
                         component={CustomRangeSlider}
                         name="ladderTiers"
@@ -989,7 +1049,7 @@ export const BotForm = () => {
                         <span>15</span>
                       </Typography>
                     </Grid>
-                    <Grid item md={2} marginLeft={"auto"}>
+                    <Grid item md={3} marginLeft={"auto"} textAlign="end">
                       <Field
                         component={CustomTextInput}
                         type="number"
@@ -999,9 +1059,11 @@ export const BotForm = () => {
                         min={1}
                         required
                         sx={{
+                          maxWidth: "111px",
                           input: {
                             padding: "6.5px 0px 6.5px 14px",
-                            width: "63px",
+                            width: "100%",
+                            textAlign: "end",
                           },
                         }}
                         onChange={({
@@ -1101,7 +1163,7 @@ export const BotForm = () => {
                         marginBottom: "20px",
                       }}
                     >
-                      <Grid item lg={9} md={8} xs={12}>
+                      <Grid item lg={8} md={8} xs={12}>
                         <Field
                           component={CustomRangeSlider}
                           step={0.1}
@@ -1122,7 +1184,12 @@ export const BotForm = () => {
                           <span>{values.minSpreadPerc}</span>
                         </Typography>
                       </Grid>
-                      <Grid item md={2} marginLeft={"auto"}>
+                      <Grid
+                        item
+                        md={3}
+                        marginLeft={"auto"}
+                        sx={{ position: "relative", textAlign: "end" }}
+                      >
                         <Field
                           component={CustomTextInput}
                           type="number"
@@ -1132,12 +1199,15 @@ export const BotForm = () => {
                           // min={0}
                           required
                           sx={{
+                            maxWidth: "111px",
                             input: {
-                              padding: "6.5px 0px 6.5px 14px",
-                              width: "63px",
+                              padding: "6.5px 14px 6.5px 14px",
+                              width: "100%",
+                              textAlign: "end",
                             },
                           }}
                         />
+                        <span style={percentStyles}>%</span>
                       </Grid>
                     </Grid>
                   </AccordionDetails>
