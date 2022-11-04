@@ -18,6 +18,7 @@ import CryptoJS from "crypto-js";
 export const storageKeys = {
   wallet: "algodex_tb_wallet_address",
   mnemonic: "ag_m_s_x",
+  logSetting: "log_setting",
 };
 
 export const getWallet = () => {
