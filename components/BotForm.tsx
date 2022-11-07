@@ -125,6 +125,7 @@ export const BotForm = () => {
   const { assetRates, algoRate } = usePriceConversionHook({
     env: environment,
   });
+  const [gettingAccount, setGettingAccount] = useState(false);
 
   const calculateLogValue = (value: number, min: number, max: number) => {
     if (value === min) return min;
@@ -310,6 +311,7 @@ export const BotForm = () => {
 
   const getAccount = async (assetId: number) => {
     if (walletAddr && assetId) {
+      setGettingAccount(true);
       if (await presentOnTinyman(assetId)) {
         try {
           const res = await getAccountInfo(walletAddr, environment);
@@ -317,6 +319,11 @@ export const BotForm = () => {
           const currentASA = ASAs.find(
             (asset: AssetSchema) => asset["asset-id"] === assetId
           ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
+
+          const currentData = availableBalance.find(
+            (ass) => ass?.["asset-id"] === assetId
+          );
+
           const algoBalance = {
             amount: res.data.amount / 1000000,
             "asset-id": "ALGO",
@@ -328,6 +335,7 @@ export const BotForm = () => {
               algoBalance,
               {
                 ...currentASA,
+                name: currentData?.name || currentASA.name,
                 amount: currentASA.amount / 1000000,
                 amountInUSD:
                   (currentASA.amount / 1000000) *
@@ -339,11 +347,21 @@ export const BotForm = () => {
           } else {
             setAvailableBalance([algoBalance]);
           }
+          setTimeout(() => {
+            setGettingAccount(false);
+          }, 5000);
         } catch (error) {
           console.error(error);
+
+          setTimeout(() => {
+            setGettingAccount(false);
+          }, 5000);
         }
       } else {
         setASAError("This asset is not present on Tinyman");
+        setTimeout(() => {
+          setGettingAccount(false);
+        }, 5000);
       }
     } else {
       setAvailableBalance([]);
@@ -351,12 +369,14 @@ export const BotForm = () => {
   };
 
   useEffect(() => {
-    if (walletAddr && formikRef.current?.values?.assetId) {
-      getAccount(formikRef.current?.values?.assetId);
-    } else {
-      setAvailableBalance([]);
+    if (!gettingAccount) {
+      if (walletAddr && formikRef.current?.values?.assetId && !ASAError) {
+        getAccount(formikRef.current?.values?.assetId);
+      } else {
+        setAvailableBalance([]);
+      }
     }
-  }, [walletAddr, environment]);
+  }, [walletAddr, environment, gettingAccount, ASAError]);
 
   const lowBalanceOrRisky = (
     assetId: number,
