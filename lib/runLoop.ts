@@ -152,7 +152,7 @@ export const stopLoop = async ({
     });
     events.emit("running-bot", {
       status: "Exiting bot",
-      content: "Cancelling promises and orders!",
+      content: "Cancelling orders...",
     });
     await cancelOrders(escrowDB, escrows, cancelPromises);
     events.emit("running-bot", {
