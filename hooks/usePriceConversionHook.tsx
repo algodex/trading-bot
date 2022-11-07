@@ -23,23 +23,19 @@ export const usePriceConversionHook = ({ env }: { env: Environment }) => {
   const [algoRate, setAlgoRate] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  const getPrice = useCallback(
-    async (assetId?: number) => {
-      console.log({ assetId });
-      setLoading(true);
-      try {
-        const data: any = await getTinymanAssets(env);
-        setAlgoRate(data[0].price);
-        setAssetRates(data);
-        setTimeout(() => {
-          setLoading(false);
-        }, 6000);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [env]
-  );
+  const getPrice = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data: any = await getTinymanAssets(env);
+      setAlgoRate(data[0].price);
+      setAssetRates(data);
+      setTimeout(() => {
+        setLoading(false);
+      }, 6000);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [env]);
 
   useEffect(() => {
     if (!loading) {

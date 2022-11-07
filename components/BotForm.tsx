@@ -308,50 +308,47 @@ export const BotForm = () => {
     [environment]
   );
 
-  const getAccount = useCallback(
-    async (assetId: number) => {
-      if (walletAddr && assetId) {
-        if (await presentOnTinyman(assetId)) {
-          try {
-            const res = await getAccountInfo(walletAddr, environment);
-            const ASAs = res.data.assets;
-            const currentASA = ASAs.find(
-              (asset: AssetSchema) => asset["asset-id"] === assetId
-            );
-            const algoBalance = {
-              amount: res.data.amount / 1000000,
-              "asset-id": "ALGO",
-              "is-frozen": false,
-              amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
-            };
-            if (currentASA) {
-              const val = [
-                algoBalance,
-                {
-                  ...currentASA,
-                  amount: currentASA.amount / 1000000,
-                  amountInUSD:
-                    (currentASA.amount / 1000000) *
-                    assetRates[currentASA["asset-id"]]?.price,
-                },
-              ];
-              setAvailableBalance(val);
-              updateASAInfo(val);
-            } else {
-              setAvailableBalance([algoBalance]);
-            }
-          } catch (error) {
-            console.error(error);
+  const getAccount = async (assetId: number) => {
+    if (walletAddr && assetId) {
+      if (await presentOnTinyman(assetId)) {
+        try {
+          const res = await getAccountInfo(walletAddr, environment);
+          const ASAs = res.data.assets;
+          const currentASA = ASAs.find(
+            (asset: AssetSchema) => asset["asset-id"] === assetId
+          ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
+          const algoBalance = {
+            amount: res.data.amount / 1000000,
+            "asset-id": "ALGO",
+            "is-frozen": false,
+            amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
+          };
+          if (currentASA) {
+            const val = [
+              algoBalance,
+              {
+                ...currentASA,
+                amount: currentASA.amount / 1000000,
+                amountInUSD:
+                  (currentASA.amount / 1000000) *
+                  assetRates[currentASA["asset-id"]]?.price,
+              },
+            ];
+            setAvailableBalance(val);
+            updateASAInfo(val);
+          } else {
+            setAvailableBalance([algoBalance]);
           }
-        } else {
-          setASAError("This asset is not present on Tinyman");
+        } catch (error) {
+          console.error(error);
         }
       } else {
-        setAvailableBalance([]);
+        setASAError("This asset is not present on Tinyman");
       }
-    },
-    [walletAddr, environment, updateASAInfo]
-  );
+    } else {
+      setAvailableBalance([]);
+    }
+  };
 
   useEffect(() => {
     if (walletAddr && formikRef.current?.values?.assetId) {
@@ -359,7 +356,7 @@ export const BotForm = () => {
     } else {
       setAvailableBalance([]);
     }
-  }, [getAccount, walletAddr, environment]);
+  }, [walletAddr, environment]);
 
   const lowBalanceOrRisky = (
     assetId: number,
@@ -421,9 +418,6 @@ export const BotForm = () => {
           setASAError("This ASA or Algo balance is too low to use this bot");
           return true;
         }
-      } else {
-        setASAError("You need to have this asset in your wallet holdings");
-        return true;
       }
     }
     return false;
@@ -614,24 +608,10 @@ export const BotForm = () => {
                           paddingInline: "30px",
                         }}
                       >
-                        <Box>
-                          <Typography
-                            sx={{ fontSize: "18px", fontWeight: 700 }}
-                          >
-                            {asset.name || asset["asset-id"]}:
-                          </Typography>
-                          {asset.amountInUSD && (
-                            <Typography
-                              sx={{
-                                fontSize: "14px",
-                                fontWeight: 700,
-                                color: "grey.200",
-                              }}
-                            >
-                              Value in $USD:
-                            </Typography>
-                          )}
-                        </Box>
+                        <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
+                          {asset.name || asset["asset-id"]}:
+                        </Typography>
+
                         <Box>
                           <Typography
                             sx={{
@@ -645,7 +625,7 @@ export const BotForm = () => {
                               maximumFractionDigits: 2,
                             })}
                           </Typography>
-                          {asset.amountInUSD && (
+                          {(asset.amountInUSD || asset.amountInUSD === 0) && (
                             <Typography
                               sx={{
                                 textAlign: "end",
