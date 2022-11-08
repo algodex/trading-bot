@@ -73,9 +73,9 @@ export function Layout({ children, components, componentsProps }: any) {
             "@media (min-width:1200px)": {
               maxWidth: "95vw !important",
             },
-            "@media (min-width:1600px)": {
-              maxWidth: "80vw !important",
-            },
+            // "@media (min-width:1600px)": {
+            //   maxWidth: "80vw !important",
+            // },
           }}
         >
           {children}
