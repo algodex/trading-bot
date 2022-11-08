@@ -258,6 +258,8 @@ export const BotForm = () => {
 
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     if (!loading) {
+      formikRef.current.resetForm();
+      setASAError("");
       setEnvironment(value);
       setAvailableBalance([]);
     }
