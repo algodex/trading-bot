@@ -112,6 +112,11 @@ export const AssetSearchInput = ({
     }
   }, [query]);
 
+  useEffect(() => {
+    setQuery("");
+    setAssetValue(null);
+  }, [environment]);
+
   return (
     <>
       <Autocomplete
