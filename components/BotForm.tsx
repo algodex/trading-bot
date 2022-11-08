@@ -57,6 +57,7 @@ import getAssetInfo from "@/lib/getAssetInfo";
 import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
+import Image from "next/image";
 
 const WalletButton: any = dynamic(
   () =>
@@ -669,7 +670,7 @@ export const BotForm = () => {
                   </Box>
                 )}
                 <Box sx={cardStyles}>
-                  <Typography marginBottom={"20px"}>
+                  <Typography marginBottom={"8px"}>
                     Order Size (in ALGOs)
                     <HtmlTooltip
                       title={
@@ -722,7 +723,7 @@ export const BotForm = () => {
                       marginBottom: "20px",
                     }}
                   >
-                    <Grid item lg={8} md={8} xs={12}>
+                    <Grid item lg={8} md={8} xs={12} sx={{ marginTop: "14px" }}>
                       <Field
                         component={CustomRangeSlider}
                         name="orderAlgoDepth_range"
@@ -758,42 +759,12 @@ export const BotForm = () => {
                         <span>10M</span>
                       </Typography>
                     </Grid>
-                    <Grid item md={3} marginLeft={"auto"} textAlign="end">
-                      <Field
-                        component={CustomTextInput}
-                        type="number"
-                        name="orderAlgoDepth"
-                        id="orderAlgoDepth"
-                        max={10000000}
-                        min={1}
-                        required
-                        sx={{
-                          maxWidth: "111px",
-                          input: {
-                            padding: "6.5px 0px 6.5px 14px",
-                            width: "100%",
-                            textAlign: "end",
-                          },
-                        }}
-                        onChange={({
-                          target: { value },
-                        }: {
-                          target: HTMLInputElement;
-                        }) => {
-                          const _value = !value
-                            ? ""
-                            : parseFloat(value) <= 0
-                            ? 1
-                            : parseFloat(value) > 10000000
-                            ? 10000000
-                            : parseFloat(value);
-                          setFieldValue(
-                            "orderAlgoDepth_range",
-                            calculateReverseLogValue(_value, 1)
-                          );
-                          setFieldValue("orderAlgoDepth", _value);
-                        }}
-                      />
+                    <Grid
+                      item
+                      md={3}
+                      marginLeft={"auto"}
+                      sx={{ textAlign: "end" }}
+                    >
                       <Typography
                         sx={{
                           textAlign: "end",
@@ -803,7 +774,7 @@ export const BotForm = () => {
                           wordBreak: "break-word",
                         }}
                       >
-                        $
+                        ≈$
                         {(values.orderAlgoDepth * algoRate).toLocaleString(
                           undefined,
                           {
@@ -812,6 +783,51 @@ export const BotForm = () => {
                           }
                         )}
                       </Typography>
+                      <Box sx={{ position: "relative" }}>
+                        <Field
+                          component={CustomTextInput}
+                          type="number"
+                          name="orderAlgoDepth"
+                          id="orderAlgoDepth"
+                          max={10000000}
+                          min={1}
+                          required
+                          sx={{
+                            maxWidth: "111px",
+                            input: {
+                              padding: "6.5px 14px 6.5px 14px",
+                              width: "100%",
+                              textAlign: "end",
+                            },
+                          }}
+                          onChange={({
+                            target: { value },
+                          }: {
+                            target: HTMLInputElement;
+                          }) => {
+                            const _value = !value
+                              ? ""
+                              : parseFloat(value) <= 0
+                              ? 1
+                              : parseFloat(value) > 10000000
+                              ? 10000000
+                              : parseFloat(value);
+                            setFieldValue(
+                              "orderAlgoDepth_range",
+                              calculateReverseLogValue(_value, 1)
+                            );
+                            setFieldValue("orderAlgoDepth", _value);
+                          }}
+                        />
+                        <span style={percentStyles}>
+                          <Image
+                            src={"/algorand-logo.svg"}
+                            alt=""
+                            width={12}
+                            height={12}
+                          />
+                        </span>
+                      </Box>
                     </Grid>
                   </Grid>
                   <Note
