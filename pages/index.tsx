@@ -23,6 +23,7 @@ import { BotForm } from "@/components/BotForm";
 
 //MUI components
 import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
 import { LogOutput } from "@/components/LogOutput";
 
 export async function getServerSideProps({ locale }: { locale: any }) {
@@ -49,7 +50,9 @@ const RegisterPage = () => {
         }}
       >
         <Grid item xs={12} sm={10} marginX="auto" md={6} lg={6} xl={6}>
-          <BotForm />
+          <Box sx={{ maxWidth: "1015px" }}>
+            <BotForm />
+          </Box>
         </Grid>
         <Grid item xs={12} sm={10} marginX="auto" md={6} lg={6} xl={6}>
           <LogOutput />
