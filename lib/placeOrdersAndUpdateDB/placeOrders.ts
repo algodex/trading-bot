@@ -60,7 +60,7 @@ const placeOrders = ({
     );
     events.emit("running-bot", {
       status: "PLACING ORDER",
-      content: `Placing Buy Order (Maker) for asset: ${JSON.stringify(
+      content: `Placing ${orderToPlace.type} Order for asset: ${JSON.stringify(
         orderToPlace
       )},\n Latest Price: ${latestPrice}`,
     });
