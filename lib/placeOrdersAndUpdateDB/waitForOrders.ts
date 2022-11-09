@@ -15,10 +15,12 @@
  */
 
 const waitForOrders = async (ordersToPlace: any[]) => {
-  console.log({ ordersToPlace });
   const results = await Promise.all(
-    ordersToPlace.map((p) => p.catch((e: any) => e))
+    ordersToPlace.map((p) => (p ? p.catch((e: any) => e) : p))
   );
+  // const results = await Promise.all(
+  //   ordersToPlace.map((p) => p.catch((e:any) => e))
+  // );
   console.log({ results });
   const validResults = results.filter(
     (result: any) => !(result instanceof Error)
