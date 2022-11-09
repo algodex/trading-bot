@@ -35,7 +35,7 @@ const placeOrders = ({
 }: PlaceOrderInput) => {
   const { assetId, orderAlgoDepth, api } = config;
 
-  const placedOrders = createEscrowPrices.map((priceObj) => {
+  const placedOrders = createEscrowPrices.map(async (priceObj) => {
     const orderDepth = Object.prototype.hasOwnProperty.call(
       orderDepthAmounts,
       "" + assetId
@@ -48,30 +48,45 @@ const placeOrders = ({
         decimals: decimals, // Asset Decimals
       },
       address: api.wallet.address,
+      wallet: api.wallet,
       price: priceObj.price, // Price in ALGOs
       amount: orderDepth / latestPrice, // Amount to Buy or Sell
       execution: "maker", // Type of exeuction
       type: priceObj.type, // Order Type
     };
+    const orderTodisplay = { ...orderToPlace };
+    delete orderTodisplay.wallet;
     console.log(
       "PLACING ORDER: ",
-      JSON.stringify(orderToPlace),
+      JSON.stringify(orderTodisplay),
       ` Latest Price: ${latestPrice}`
     );
     events.emit("running-bot", {
       status: "PLACING ORDER",
-      content: `Placing ${orderToPlace.type} Order for asset: ${JSON.stringify(
-        orderToPlace
+      content: `Placing ${
+        orderTodisplay.type
+      } Order for asset: ${JSON.stringify(
+        orderTodisplay
       )},\n Latest Price: ${latestPrice}`,
     });
     try {
-      const orderPromise = api.placeOrder(orderToPlace);
+      const orderPromise = await api.placeOrder(
+        orderToPlace,
+        { wallet: api.wallet },
+        notifyStatus
+      );
+      console.log({ orderPromise });
       return orderPromise;
     } catch (error) {
-      stopLoop({ config });
+      console.log("show error here", error);
+      // stopLoop({ config });
     }
   });
   return placedOrders;
 };
 
 export default placeOrders;
+
+const notifyStatus = (status: any) => {
+  console.log("show status here", status);
+};

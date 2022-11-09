@@ -14,16 +14,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 const waitForOrders = async (ordersToPlace: any[]) => {
+  console.log({ ordersToPlace });
   const results = await Promise.all(
-    ordersToPlace.map((p) => p ? p.catch((e:any) => e): p)
+    ordersToPlace.map((p) => p.catch((e: any) => e))
   );
-  const validResults = results.filter((result:any) => !(result instanceof Error));
-  const invalidResults = results.filter((result:any) => result instanceof Error);
-  if (invalidResults && invalidResults.length > 0) {
-    console.error({ invalidResults });
-  }
+  console.log({ results });
+  const validResults = results.filter(
+    (result: any) => !(result instanceof Error)
+  );
+  const invalidResults = results.filter(
+    (result: any) => result instanceof Error
+  );
+
   return { validResults, invalidResults };
 };
 
