@@ -131,26 +131,28 @@ export const BotForm = () => {
 
   const calculateLogValue = (value: number, min: number, max: number) => {
     if (value === min) return min;
-    const newValue = Math.pow(2, value);
-    if (newValue > max) return max;
-    return newValue;
+    const minv = Math.log(min);
+    const maxv = Math.log(max);
+    const scale = (maxv - minv) / (max - min);
+    return parseFloat(Math.exp(minv + scale * (value - min)).toFixed(2));
   };
 
-  const calculateReverseLogValue = (value: any, min: number) => {
+  const calculateReverseLogValue = (value: any, min: number, max: number) => {
     if (value) {
-      const newValue = Math.log2(value);
-      if (newValue < min) return min;
-      return newValue;
+      const minv = Math.log(min);
+      const maxv = Math.log(max);
+      const scale = (maxv - minv) / (max - min);
+      return (Math.log(value) - minv) / scale + min;
     }
     return min;
   };
 
   const initialValues = {
     assetId: "",
-    orderAlgoDepth_range: calculateReverseLogValue(25000, 1),
+    orderAlgoDepth_range: calculateReverseLogValue(25000, 1, 10000000),
     orderAlgoDepth: 25000,
     ladderTiers: 3,
-    minSpreadPerc_range: calculateReverseLogValue(0.25, 0.01),
+    minSpreadPerc_range: calculateReverseLogValue(0.25, 0.01, 5),
     minSpreadPerc: 0.25,
     nearestNeighborKeep: 0.125,
   };
@@ -313,76 +315,79 @@ export const BotForm = () => {
     [environment]
   );
 
-  const getAccount = async (assetId: number) => {
-    if (walletAddr && assetId) {
-      setGettingAccount(true);
-      if (await presentOnTinyman(assetId)) {
-        try {
-          const res = await getAccountInfo(walletAddr, environment);
-          const ASAs = res.data.assets;
-          const currentASA = ASAs.find(
-            (asset: AssetSchema) => asset["asset-id"] === assetId
-          ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
+  const getAccount = useCallback(
+    async (assetId: number) => {
+      if (walletAddr && assetId) {
+        setGettingAccount(true);
+        if (await presentOnTinyman(assetId)) {
+          try {
+            const res = await getAccountInfo(walletAddr, environment);
+            const ASAs = res.data.assets;
+            const currentASA = ASAs.find(
+              (asset: AssetSchema) => asset["asset-id"] === assetId
+            ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
 
-          const currentData = availableBalance.find(
-            (ass) => ass?.["asset-id"] === assetId
-          );
+            const currentData = availableBalance.find(
+              (ass) => ass?.["asset-id"] === assetId
+            );
 
-          const algoBalance = {
-            amount: res.data.amount / 1000000,
-            "asset-id": "ALGO",
-            "is-frozen": false,
-            amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
-          };
-          if (currentASA) {
-            const val = [
-              algoBalance,
-              {
-                ...currentASA,
-                name: currentData?.name || currentASA.name,
-                amount: currentASA.amount / 1000000,
-                amountInUSD:
-                  (currentASA.amount / 1000000) *
-                  assetRates[currentASA["asset-id"]]?.price,
-              },
-            ];
-            setAvailableBalance(val);
-            updateASAInfo(val);
-
-            if (loading) {
-              events.emit("current-balance", {
-                walletBalance: {
-                  assetId,
-                  algo: algoBalance.amount,
-                  asa: val[1].amount,
+            const algoBalance = {
+              amount: res.data.amount / 1000000,
+              "asset-id": "ALGO",
+              "is-frozen": false,
+              amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
+            };
+            if (currentASA) {
+              const val = [
+                algoBalance,
+                {
+                  ...currentASA,
+                  name: currentData?.name || currentASA.name,
+                  amount: currentASA.amount / 1000000,
+                  amountInUSD:
+                    (currentASA.amount / 1000000) *
+                    assetRates[currentASA["asset-id"]]?.price,
                 },
-              });
-            }
-          } else {
-            setAvailableBalance([algoBalance]);
-          }
-          setTimeout(() => {
-            setGettingAccount(false);
-          }, 5000);
-        } catch (error) {
-          console.error(error);
+              ];
+              setAvailableBalance(val);
+              updateASAInfo(val);
 
+              if (loading) {
+                events.emit("current-balance", {
+                  walletBalance: {
+                    assetId,
+                    algo: algoBalance.amount,
+                    asa: val[1].amount,
+                  },
+                });
+              }
+            } else {
+              setAvailableBalance([algoBalance]);
+            }
+            setTimeout(() => {
+              setGettingAccount(false);
+            }, 5000);
+          } catch (error) {
+            console.error(error);
+
+            setTimeout(() => {
+              setGettingAccount(false);
+            }, 5000);
+          }
+        } else {
+          if (!loading) {
+            setASAError("This asset is not present on Tinyman");
+          }
           setTimeout(() => {
             setGettingAccount(false);
           }, 5000);
         }
       } else {
-        if (!loading) {
-          setASAError("This asset is not present on Tinyman");
-        }
-        setTimeout(() => {
-          setGettingAccount(false);
-        }, 5000);
+        setAvailableBalance([]);
       }
-    } else {
-      setAvailableBalance([]);
-    }
-  };
+    },
+    [assetRates, availableBalance, environment, loading, walletAddr]
+  );
 
   useEffect(() => {
     if (!gettingAccount) {
@@ -758,7 +763,7 @@ export const BotForm = () => {
                           <div>{value.toLocaleString()}</div>
                         )}
                         min={1}
-                        max={23.3}
+                        max={10000000}
                         onChange={({
                           target: { value },
                         }: {
@@ -838,7 +843,7 @@ export const BotForm = () => {
                               : parseFloat(value);
                             setFieldValue(
                               "orderAlgoDepth_range",
-                              calculateReverseLogValue(_value, 1)
+                              calculateReverseLogValue(_value, 1, 10000000)
                             );
                             setFieldValue("orderAlgoDepth", _value);
                             setASAError("");
@@ -926,8 +931,8 @@ export const BotForm = () => {
                         scale={(value: number) =>
                           calculateLogValue(value, 0.01, 5)
                         }
-                        max={2.4}
                         min={0.01}
+                        max={5}
                         onChange={({
                           target: { value },
                         }: {
@@ -999,7 +1004,9 @@ export const BotForm = () => {
                           setFieldValue(
                             "minSpreadPerc_range",
                             parseFloat(
-                              calculateReverseLogValue(_value, 0.01).toFixed(2)
+                              calculateReverseLogValue(_value, 0.01, 5).toFixed(
+                                2
+                              )
                             )
                           );
                           setFieldValue("minSpreadPerc", _value);
