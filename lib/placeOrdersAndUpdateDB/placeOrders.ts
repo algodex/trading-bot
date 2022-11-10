@@ -58,18 +58,31 @@ const placeOrders = ({
       JSON.stringify(orderToPlace),
       ` Latest Price: ${latestPrice}`
     );
+
     events.emit("running-bot", {
       status: "PLACING ORDER",
       content: `Placing ${orderToPlace.type} Order for asset: ${JSON.stringify(
         orderToPlace
       )},\n Latest Price: ${latestPrice}`,
     });
-    try {
-      const orderPromise = api.placeOrder(orderToPlace);
-      return orderPromise;
-    } catch (error) {
-      stopLoop({ config });
-    }
+    events.on(
+      "current-balance",
+      ({
+        walletBalance,
+      }: {
+        walletBalance: { algo: number; asa: number; assetId: number; };
+      }) => {
+        if (
+          walletBalance.assetId === assetId &&
+          (walletBalance.algo < orderDepth ||
+            walletBalance.asa < orderDepth / latestPrice)
+        ) {
+          stopLoop({ config, errorStatus: "Low balance!" });
+        }
+      }
+    );
+    const orderPromise = api.placeOrder(orderToPlace);
+    return orderPromise;
   });
   return placedOrders;
 };

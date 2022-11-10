@@ -58,6 +58,7 @@ import algosdk from "algosdk";
 import { getWallet } from "@/lib/storage";
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 import Image from "next/image";
+import events from "@/lib/events";
 
 const WalletButton: any = dynamic(
   () =>
@@ -347,6 +348,16 @@ export const BotForm = () => {
             ];
             setAvailableBalance(val);
             updateASAInfo(val);
+
+            if (loading) {
+              events.emit("current-balance", {
+                walletBalance: {
+                  assetId,
+                  algo: algoBalance.amount,
+                  asa: val[1].amount,
+                },
+              });
+            }
           } else {
             setAvailableBalance([algoBalance]);
           }
@@ -361,7 +372,9 @@ export const BotForm = () => {
           }, 5000);
         }
       } else {
-        setASAError("This asset is not present on Tinyman");
+        if (!loading) {
+          setASAError("This asset is not present on Tinyman");
+        }
         setTimeout(() => {
           setGettingAccount(false);
         }, 5000);
@@ -375,7 +388,7 @@ export const BotForm = () => {
     if (!gettingAccount) {
       if (walletAddr && formikRef.current?.values?.assetId && !ASAError) {
         getAccount(formikRef.current?.values?.assetId);
-      } else {
+      } else if (!walletAddr || !formikRef.current?.values?.assetId) {
         setAvailableBalance([]);
       }
     }
@@ -458,6 +471,16 @@ export const BotForm = () => {
     }
   };
 
+  useEffect(() => {
+    events.on("running-bot", ({ content }: { content: string }) => {
+      if (content === "Low balance!") {
+        setLoading(false);
+        setASAError(content);
+      }
+    });
+
+    return () => events.off("running-bot");
+  }, []);
   return (
     <>
       <Grid
@@ -746,6 +769,7 @@ export const BotForm = () => {
                             "orderAlgoDepth",
                             calculateLogValue(parseFloat(value), 1, 10000000)
                           );
+                          setASAError("");
                         }}
                       />
                       <Typography
@@ -817,6 +841,7 @@ export const BotForm = () => {
                               calculateReverseLogValue(_value, 1)
                             );
                             setFieldValue("orderAlgoDepth", _value);
+                            setASAError("");
                           }}
                         />
                         <span style={percentStyles}>
