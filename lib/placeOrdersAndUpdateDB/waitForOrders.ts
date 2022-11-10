@@ -18,7 +18,6 @@ const waitForOrders = async (ordersToPlace: any[]) => {
   const results = await Promise.all(
     ordersToPlace.map((p) => p.catch((e: any) => e))
   );
-  console.log({ results });
   const validResults = results.filter(
     (result: any) => !(result instanceof Error)
   );

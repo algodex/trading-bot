@@ -33,8 +33,12 @@ export const LogOutput = () => {
       ({ status, content }: { status: string; content: string }) => {
         if (textareaRef.current) {
           const value = textareaRef.current.value;
-          if (delCount > 0 && value.split("").length > delCount) {
-            textareaRef.current.value = `${status} \n ${content}`;
+          const total = value.split("").length;
+          if (delCount > 0 && total > delCount) {
+            textareaRef.current.value = `${value
+              .split("")
+              .slice(delCount, total)
+              .join("")} \n${status} \n ${content}`;
           } else {
             textareaRef.current.value = `${value} \n ${status} \n ${content}`;
           }
