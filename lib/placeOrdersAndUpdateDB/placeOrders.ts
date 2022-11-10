@@ -70,14 +70,21 @@ const placeOrders = ({
       ({
         walletBalance,
       }: {
-        walletBalance: { algo: number; asa: number; assetId: number; };
+        walletBalance: {
+          algo: number;
+          asa: number;
+          assetId: number;
+          currentDepth: number;
+        };
       }) => {
         if (
           walletBalance.assetId === assetId &&
+          walletBalance.currentDepth === orderDepth &&
           (walletBalance.algo < orderDepth ||
             walletBalance.asa < orderDepth / latestPrice)
         ) {
           stopLoop({ config, errorStatus: "Low balance!" });
+          return [];
         }
       }
     );

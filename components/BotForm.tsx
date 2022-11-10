@@ -315,79 +315,77 @@ export const BotForm = () => {
     [environment]
   );
 
-  const getAccount = useCallback(
-    async (assetId: number) => {
-      if (walletAddr && assetId) {
-        setGettingAccount(true);
-        if (await presentOnTinyman(assetId)) {
-          try {
-            const res = await getAccountInfo(walletAddr, environment);
-            const ASAs = res.data.assets;
-            const currentASA = ASAs.find(
-              (asset: AssetSchema) => asset["asset-id"] === assetId
-            ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
+  const getAccount = async (assetId: number) => {
+    if (walletAddr && assetId) {
+      setGettingAccount(true);
+      if (await presentOnTinyman(assetId)) {
+        try {
+          const res = await getAccountInfo(walletAddr, environment);
+          const ASAs = res.data.assets;
+          const currentASA = ASAs.find(
+            (asset: AssetSchema) => asset["asset-id"] === assetId
+          ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
 
-            const currentData = availableBalance.find(
-              (ass) => ass?.["asset-id"] === assetId
-            );
+          const currentData = availableBalance.find(
+            (ass) => ass?.["asset-id"] === assetId
+          );
 
-            const algoBalance = {
-              amount: res.data.amount / 1000000,
-              "asset-id": "ALGO",
-              "is-frozen": false,
-              amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
-            };
-            if (currentASA) {
-              const val = [
-                algoBalance,
-                {
-                  ...currentASA,
-                  name: currentData?.name || currentASA.name,
-                  amount: currentASA.amount / 1000000,
-                  amountInUSD:
-                    (currentASA.amount / 1000000) *
-                    assetRates[currentASA["asset-id"]]?.price,
+          const algoBalance = {
+            amount: res.data.amount / 1000000,
+            "asset-id": "ALGO",
+            "is-frozen": false,
+            amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
+          };
+          if (currentASA) {
+            const val = [
+              algoBalance,
+              {
+                ...currentASA,
+                name: currentData?.name || currentASA.name,
+                amount: currentASA.amount / 1000000,
+                amountInUSD:
+                  (currentASA.amount / 1000000) *
+                  assetRates[currentASA["asset-id"]]?.price,
+              },
+            ];
+            setAvailableBalance(val);
+            updateASAInfo(val);
+
+            if (loading) {
+              events.emit("current-balance", {
+                walletBalance: {
+                  assetId,
+                  algo: algoBalance.amount,
+                  asa: val[1].amount,
+                  currentDepth: formikRef.current.values.orderAlgoDepth,
                 },
-              ];
-              setAvailableBalance(val);
-              updateASAInfo(val);
-
-              if (loading) {
-                events.emit("current-balance", {
-                  walletBalance: {
-                    assetId,
-                    algo: algoBalance.amount,
-                    asa: val[1].amount,
-                  },
-                });
-              }
-            } else {
-              setAvailableBalance([algoBalance]);
+              });
             }
-            setTimeout(() => {
-              setGettingAccount(false);
-            }, 5000);
-          } catch (error) {
-            console.error(error);
+          } else {
+            setAvailableBalance([algoBalance]);
+          }
+          setTimeout(() => {
+            setGettingAccount(false);
+          }, 5000);
+        } catch (error) {
+          console.error(error);
 
-            setTimeout(() => {
-              setGettingAccount(false);
-            }, 5000);
-          }
-        } else {
-          if (!loading) {
-            setASAError("This asset is not present on Tinyman");
-          }
           setTimeout(() => {
             setGettingAccount(false);
           }, 5000);
         }
       } else {
-        setAvailableBalance([]);
+        if (!loading) {
+          setASAError("This asset is not present on Tinyman");
+        }
+        setTimeout(() => {
+          setGettingAccount(false);
+        }, 5000);
       }
-    },
-    [assetRates, availableBalance, environment, loading, walletAddr]
-  );
+    } else {
+      setAvailableBalance([]);
+    }
+  };
 
   useEffect(() => {
     if (!gettingAccount) {
