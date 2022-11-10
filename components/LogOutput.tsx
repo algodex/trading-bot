@@ -33,12 +33,13 @@ export const LogOutput = () => {
       ({ status, content }: { status: string; content: string }) => {
         if (textareaRef.current) {
           const value = textareaRef.current.value;
-          textareaRef.current.value = `${value} \n ${status} \n ${content}`;
+          if (delCount > 0 && value.split("").length > delCount) {
+            textareaRef.current.value = `${status} \n ${content}`;
+          } else {
+            textareaRef.current.value = `${value} \n ${status} \n ${content}`;
+          }
           textareaRef.current.focus();
           textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
-          if (delCount > 0 && value.split("").length > delCount) {
-            textareaRef.current.value = "";
-          }
         }
       }
     );

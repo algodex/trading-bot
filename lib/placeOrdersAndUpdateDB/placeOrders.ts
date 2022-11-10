@@ -35,7 +35,7 @@ const placeOrders = ({
 }: PlaceOrderInput) => {
   const { assetId, orderAlgoDepth, api } = config;
 
-  const placedOrders = createEscrowPrices.map(async (priceObj) => {
+  const placedOrders = createEscrowPrices.map((priceObj) => {
     const orderDepth = Object.prototype.hasOwnProperty.call(
       orderDepthAmounts,
       "" + assetId
@@ -48,45 +48,43 @@ const placeOrders = ({
         decimals: decimals, // Asset Decimals
       },
       address: api.wallet.address,
-      wallet: api.wallet,
       price: priceObj.price, // Price in ALGOs
       amount: orderDepth / latestPrice, // Amount to Buy or Sell
       execution: "maker", // Type of exeuction
       type: priceObj.type, // Order Type
     };
-    const orderTodisplay = { ...orderToPlace };
-    delete orderTodisplay.wallet;
     console.log(
       "PLACING ORDER: ",
-      JSON.stringify(orderTodisplay),
+      JSON.stringify(orderToPlace),
       ` Latest Price: ${latestPrice}`
     );
+
     events.emit("running-bot", {
       status: "PLACING ORDER",
-      content: `Placing ${
-        orderTodisplay.type
-      } Order for asset: ${JSON.stringify(
-        orderTodisplay
+      content: `Placing ${orderToPlace.type} Order for asset: ${JSON.stringify(
+        orderToPlace
       )},\n Latest Price: ${latestPrice}`,
     });
-    try {
-      const orderPromise = await api.placeOrder(
-        orderToPlace,
-        { wallet: api.wallet },
-        notifyStatus
-      );
-      console.log({ orderPromise });
-      return orderPromise;
-    } catch (error) {
-      console.log("show error here", error);
-      // stopLoop({ config });
-    }
+    events.on(
+      "current-balance",
+      ({
+        walletBalance,
+      }: {
+        walletBalance: { algo: number; asa: number; assetId: number; };
+      }) => {
+        if (
+          walletBalance.assetId === assetId &&
+          (walletBalance.algo < orderDepth ||
+            walletBalance.asa < orderDepth / latestPrice)
+        ) {
+          stopLoop({ config, errorStatus: "Low balance!" });
+        }
+      }
+    );
+    const orderPromise = api.placeOrder(orderToPlace);
+    return orderPromise;
   });
   return placedOrders;
 };
 
 export default placeOrders;
-
-const notifyStatus = (status: any) => {
-  console.log("show status here", status);
-};

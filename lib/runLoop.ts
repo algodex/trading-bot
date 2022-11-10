@@ -107,9 +107,11 @@ export default runLoop;
 export const stopLoop = async ({
   config,
   resetExit,
+  errorStatus,
 }: {
   config?: BotConfig;
   resetExit?: boolean;
+  errorStatus?: string;
 }) => {
   if (resetExit) {
     exitLoop = false;
@@ -141,7 +143,6 @@ export const stopLoop = async ({
       openAccountSet,
       environment
     );
-    console.log({ escrows });
     const cancelArr = escrows.rows.map((escrow) => escrow.doc.order.escrowAddr);
     const cancelSet = new Set(cancelArr);
     const cancelPromises = await getCancelPromises({
@@ -159,5 +160,11 @@ export const stopLoop = async ({
       status: "Bot Stopped",
       content: "Exiting!",
     });
+    if (errorStatus) {
+      events.emit("running-bot", {
+        status: "Bot Stopped",
+        content: errorStatus,
+      });
+    }
   }
 };
