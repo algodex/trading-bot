@@ -75,6 +75,7 @@ interface AssetSchema {
   "is-frozen": boolean;
   name?: string;
   amountInUSD?: number;
+  decimals: number;
 }
 
 const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -329,10 +330,15 @@ export const BotForm = () => {
             (asset: AssetSchema) => asset["asset-id"] === assetId
           ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
 
-          const currentData = availableBalance.find(
+          const _currentData = availableBalance.find(
             (ass) => ass?.["asset-id"] === assetId
           );
 
+          if (!_currentData) {
+            setAvailableBalance([]);
+            return;
+          }
+          
           const algoBalance = {
             amount: res.data.amount / 1000000,
             "asset-id": "ALGO",
