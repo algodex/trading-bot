@@ -26,6 +26,7 @@ const CustomTextInput = ({
   type,
   min,
   max,
+  step,
   ...props
 }: {
   className?: string;
@@ -33,6 +34,7 @@ const CustomTextInput = ({
   type?:string;
   min?: number,
   max?: number,
+  step?: number,
   form: { touched: any; errors: any };
 }) => {
   const hasError = touched[field.name] && errors[field.name];
@@ -47,7 +49,7 @@ const CustomTextInput = ({
         fullWidth
         type={type || 'text'}
         {...props}
-        InputProps={type === 'number' ? { inputProps: { min, max } }:{}}
+        InputProps={type === 'number' ? { inputProps: { min, max, step } }:{}}
         />
       {hasError && (
         <Typography sx={{ pt: "5px", color: "error.main", fontSize: "12px" }}>
