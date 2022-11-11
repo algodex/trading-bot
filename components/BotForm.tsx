@@ -338,7 +338,8 @@ export const BotForm = () => {
             setAvailableBalance([]);
             return;
           }
-          
+          const currentData = _currentData;
+
           const algoBalance = {
             amount: res.data.amount / 1000000,
             "asset-id": "ALGO",
