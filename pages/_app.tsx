@@ -28,6 +28,7 @@ import NextApp from "next/app";
 import getTheme from "@/themes/getTheme";
 import createEmotionCache from "@/utils/createEmotionCache";
 import { Layout } from "@/components/Layout";
+import { AppProvider } from "@/context/appContext";
 
 const theme = getTheme("normal");
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -48,9 +49,11 @@ export function MyApp(props: any) {
       >
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <AppProvider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </AppProvider>
       </ThemeProvider>
     </CacheProvider>
   );

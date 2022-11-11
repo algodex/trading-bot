@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import algosdk from "algosdk";
 import Image from "next/image";
 
@@ -31,25 +31,27 @@ import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { saveWallet } from "@/lib/storage";
 import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
 import { isMnemonicValid } from "@/lib/helper";
+import { AppContext } from "@/context/appContext";
 
 export const MnemonicModal = ({
   open,
   handleClose,
-  setWalletAddr,
-  mnemonic,
-  setMnemonic,
 }: {
   open: boolean;
   handleClose: any;
-  setWalletAddr: any;
-  mnemonic: string | undefined;
-  setMnemonic: any;
 }) => {
   const [error, setError] = useState<string>("");
-  const [passphrase, setPassphrase] = useState<PassPhrase>({
-    password: "",
-    show: false,
-  });
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error("Must be inside of an App Provider");
+  }
+  const {
+    mnemonic,
+    setMnemonic,
+    setWalletAddr,
+    passphrase,
+    setPassphrase,
+  }: any = context;
 
   const prefillInputs = useCallback((mnemonicList: string[]) => {
     [...Array(25)].forEach((item, index) => {

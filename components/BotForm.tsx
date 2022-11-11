@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -46,7 +46,6 @@ import CustomRangeSlider from "./CustomRangeSlider";
 import CustomTextInput from "./CustomTextInput";
 import initAPI from "@/lib/initAPI";
 import { BotConfig, Environment } from "@/lib/types/config";
-import { PassPhrase } from "./CustomPasswordInput";
 import { ValidateWallet } from "./validateWallet";
 import { AssetSearchInput } from "./AssetSearchInput";
 import {
@@ -61,6 +60,7 @@ import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 import Image from "next/image";
 import events from "@/lib/events";
 import CustomNumberFormatter from "./CustomNumberFormatter";
+import { AppContext } from "@/context/appContext";
 
 const WalletButton: any = dynamic(
   () =>
@@ -114,16 +114,22 @@ export const BotForm = () => {
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
   const [config, setConfig] = useState<null | BotConfig>();
-  const [passphrase, setPassphrase] = useState<PassPhrase>({
-    password: "",
-    show: false,
-  });
+
   const formikRef = useRef<any>();
-  const [openModal, setOpenModal] = useState(false);
-  const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error("Must be inside of a App Provider");
+  }
+  const {
+    walletAddr,
+    setWalletAddr,
+    validateWallet,
+    openMnemonic,
+    setOpenMnemonic,
+    mnemonic,
+    setMnemonic,
+  }: any = context;
   const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
-  const [walletAddr, setWalletAddr] = useState<any>(null);
-  const [mnemonic, setMnemonic] = useState("");
   const [ASAError, setASAError] = useState("");
   const [ASAWarning, setASAWarning] = useState("");
   const { assetRates, algoRate } = usePriceConversionHook({
@@ -272,25 +278,7 @@ export const BotForm = () => {
     }
   };
 
-  const validateWallet = useCallback(() => {
-    if (walletAddr && !mnemonic) {
-      setOpenModal(true);
-    }
-  }, [walletAddr, mnemonic]);
-
-  const handleClose = useCallback((mnemonic?: string) => {
-    setOpenModal(false);
-    if (mnemonic) {
-      setMnemonic(mnemonic);
-    }
-  }, []);
-
-  useEffect(() => {
-    validateWallet();
-    setWalletAddr(getWallet());
-  }, [validateWallet]);
-
-  //This gets the wallet's account
+  //Get the connected wallet's account
   const getAccount = async (assetId: number) => {
     if (walletAddr && assetId) {
       setGettingAccount(true);
@@ -369,7 +357,7 @@ export const BotForm = () => {
             });
           }
 
-          //Delaying the timer before it triggers a new request
+          //Delay timer before it triggers a new request
           setTimeout(() => {
             setGettingAccount(false);
           }, 5000);
@@ -394,7 +382,7 @@ export const BotForm = () => {
   };
 
   useEffect(() => {
-    //If there is no ongoing request and wallet is connected, get the current balance
+    //If no ongoing request and wallet is connected, get the current balance
     if (!gettingAccount) {
       if (walletAddr && formikRef.current?.values?.assetId && !ASAError) {
         getAccount(formikRef.current?.values?.assetId);
@@ -494,6 +482,7 @@ export const BotForm = () => {
 
     return () => events.off("running-bot");
   }, []);
+
   return (
     <>
       <Grid
@@ -1354,14 +1343,7 @@ export const BotForm = () => {
           );
         }}
       </Formik>
-      <ValidateWallet
-        open={openModal}
-        handleClose={handleClose}
-        passphrase={passphrase}
-        setPassphrase={setPassphrase}
-        walletAddr={walletAddr}
-        setWalletAddr={setWalletAddr}
-      />
+      <ValidateWallet />
     </>
   );
 };

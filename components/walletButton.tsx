@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 //MUI Components
 import Button from "@mui/material/Button";
@@ -24,33 +24,28 @@ import Box from "@mui/material/Box";
 // Custom components
 import { MnemonicModal } from "./MnemonicModal";
 import { shortenAddress } from "@/lib/helper";
-import { DisconnectWallet } from "./disconnectWallet";
+import { ExportWallet } from "./exportWallet";
+import { AppContext } from "@/context/appContext";
 
-export const WalletButton = ({
-  walletAddr,
-  setWalletAddr,
-  openMnemonic,
-  setOpenMnemonic,
-  mnemonic,
-  setMnemonic,
-  loading,
-  validateWallet,
-}: {
-  walletAddr: string;
-  setWalletAddr: any;
-  openMnemonic: string | null;
-  setOpenMnemonic: any;
-  mnemonic: string | undefined;
-  setMnemonic: any;
-  loading: boolean;
-  validateWallet: any;
-}) => {
+export const WalletButton = ({ loading }: { loading: boolean }) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error("Must be inside of a App Provider");
+  }
+  const {
+    mnemonic,
+    walletAddr,
+    validateWallet,
+    openMnemonic,
+    setOpenMnemonic,
+  }: any = context;
+
   const handleOpenModal = () => {
     if (walletAddr && !mnemonic) {
       validateWallet();
     } else if (walletAddr) {
-      setOpenModal("disconnect");
+      setOpenModal("export");
     } else {
       setOpenModal("mnemonic");
     }
@@ -90,16 +85,10 @@ export const WalletButton = ({
       <MnemonicModal
         open={openModal === "mnemonic"}
         handleClose={handleCloseModal}
-        setWalletAddr={setWalletAddr}
-        mnemonic={mnemonic}
-        setMnemonic={setMnemonic}
       />
-      <DisconnectWallet
-        open={openModal === "disconnect"}
+      <ExportWallet
+        open={openModal === "export"}
         handleClose={handleCloseModal}
-        walletAddr={walletAddr}
-        setWalletAddr={setWalletAddr}
-        setMnemonic={setMnemonic}
       />
     </>
   );
