@@ -33,14 +33,16 @@ export const LogOutput = () => {
       ({ status, content }: { status: string; content: string }) => {
         if (textareaRef.current) {
           const value = textareaRef.current.value;
-          const total = value.split("").length;
+          const total = value.split(" \n").length;
           if (delCount > 0 && total > delCount) {
             textareaRef.current.value = `${value
-              .split("")
-              .slice(delCount, total)
-              .join("")} \n${status} \n ${content}`;
+              .split(" \n")
+              .slice(delCount)
+              .join("")} \n${status} ${content ? `\n${content}` : ""}`;
           } else {
-            textareaRef.current.value = `${value} \n ${status} \n ${content}`;
+            textareaRef.current.value = `${value} \n${status} ${
+              content ? `\n${content}` : ""
+            }`;
           }
           textareaRef.current.focus();
           textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
@@ -52,7 +54,7 @@ export const LogOutput = () => {
   }, [delCount]);
 
   const handleChange = ({ target: { value } }: { target: any }) => {
-    setDelCount(value);
+    setDelCount(parseFloat(value));
     localStorage.setItem(storageKeys.logSetting, value);
   };
   return (
