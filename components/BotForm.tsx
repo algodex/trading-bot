@@ -307,7 +307,7 @@ export const BotForm = () => {
               indexerClient,
               assetId: asset["asset-id"] as number,
             });
-            return { ...asset, name: res.asset.params.name };
+            return { ...asset, name: res.asset.params.name, decimals: res.asset.params.decimals };
           } catch (error) {
             console.error(error);
           }
@@ -345,9 +345,9 @@ export const BotForm = () => {
               {
                 ...currentASA,
                 name: currentData?.name || currentASA.name,
-                amount: currentASA.amount / 1000000,
+                amount: currentASA.amount / (10 ** currentData.decimals),
                 amountInUSD:
-                  (currentASA.amount / 1000000) *
+                  (currentASA.amount / (10 ** currentData.decimals)) *
                   assetRates[currentASA["asset-id"]]?.price,
               },
             ];
