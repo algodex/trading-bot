@@ -231,6 +231,8 @@ export const BotForm = () => {
             escrowDB,
             mnemonic,
           };
+          _config.minSpreadPerc = _config.minSpreadPerc / 100;
+          _config.nearestNeighborKeep = _config.nearestNeighborKeep / 100;
 
           stopLoop({ resetExit: true });
           setConfig(_config);
