@@ -1323,6 +1323,7 @@ export const BotForm = () => {
                     disabled={
                       loading ||
                       !isValid ||
+                      !values.assetId ||
                       ASAError !== "" ||
                       (walletAddr && !mnemonic)
                     }
