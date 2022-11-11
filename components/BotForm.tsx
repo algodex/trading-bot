@@ -68,7 +68,6 @@ const WalletButton: any = dynamic(
     ssr: false,
   }
 );
-
 interface AssetSchema {
   "asset-id": number | string;
   amount: number;
@@ -121,7 +120,7 @@ export const BotForm = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
   const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
-  const [walletAddr, setWalletAddr] = useState(getWallet());
+  const [walletAddr, setWalletAddr] = useState<any>(null);
   const [mnemonic, setMnemonic] = useState("");
   const [ASAError, setASAError] = useState("");
   const [ASAWarning, setASAWarning] = useState("");
@@ -198,7 +197,6 @@ export const BotForm = () => {
     delete _formValues.minSpreadPerc_range;
     delete _formValues.orderAlgoDepth_range;
     const assetId = formValues.assetId;
-
     if (
       !(await lowBalanceOrRisky(
         assetId,
@@ -285,6 +283,7 @@ export const BotForm = () => {
 
   useEffect(() => {
     validateWallet();
+    setWalletAddr(getWallet());
   }, [validateWallet]);
 
   const updateASAInfo = useCallback(
@@ -820,6 +819,7 @@ export const BotForm = () => {
                           id="orderAlgoDepth"
                           max={10000000}
                           min={1}
+                          step={0.01}
                           required
                           sx={{
                             maxWidth: "111px",
@@ -1276,7 +1276,7 @@ export const BotForm = () => {
                   </AccordionDetails>
                 </Accordion>
 
-                {walletAddr !== undefined && !mnemonic && (
+                {walletAddr && !mnemonic && (
                   <Typography
                     sx={{
                       py: "5px",
@@ -1309,7 +1309,7 @@ export const BotForm = () => {
                       loading ||
                       !isValid ||
                       ASAError !== "" ||
-                      (walletAddr !== undefined && !mnemonic)
+                      (walletAddr && !mnemonic)
                     }
                     sx={{ py: "0.8rem", mt: "1rem" }}
                   >
