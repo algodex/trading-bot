@@ -926,7 +926,6 @@ export const BotForm = () => {
                         component={CustomRangeSlider}
                         name="minSpreadPerc_range"
                         id="minSpreadPerc_range"
-                        marks
                         step={0.1}
                         scale={(value: number) =>
                           calculateLogValue(value, 0.01, 5)
