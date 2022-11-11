@@ -60,6 +60,7 @@ import { getWallet } from "@/lib/storage";
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 import Image from "next/image";
 import events from "@/lib/events";
+import CustomNumberFormatter from "./CustomNumberFormatter";
 
 const WalletButton: any = dynamic(
   () =>
@@ -813,8 +814,7 @@ export const BotForm = () => {
                       </Typography>
                       <Box sx={{ position: "relative" }}>
                         <Field
-                          component={CustomTextInput}
-                          type="number"
+                          component={CustomNumberFormatter}
                           name="orderAlgoDepth"
                           id="orderAlgoDepth"
                           max={10000000}
@@ -824,7 +824,7 @@ export const BotForm = () => {
                           sx={{
                             maxWidth: "111px",
                             input: {
-                              padding: "6.5px 14px 6.5px 14px",
+                              padding: "6.5px 18px 6.5px 14px",
                               width: "100%",
                               textAlign: "end",
                             },
@@ -849,6 +849,7 @@ export const BotForm = () => {
                             setASAError("");
                           }}
                         />
+
                         <span style={percentStyles}>
                           <Image
                             src={"/algorand-logo.svg"}

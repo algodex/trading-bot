@@ -14,16 +14,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 
 //MUI Components
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
-const CustomTextInput = ({
+const CustomNumberFormatter = ({
   field,
   form: { touched, errors },
-  type,
   min,
   max,
   step,
@@ -31,26 +30,43 @@ const CustomTextInput = ({
 }: {
   className?: string;
   field: HTMLFormElement;
-  type?:string;
-  min?: number,
-  max?: number,
-  step?: number,
+  min?: number;
+  max?: number;
+  step?: number;
   form: { touched: any; errors: any };
 }) => {
   const hasError = touched[field.name] && errors[field.name];
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <Fragment>
-      <TextField
-        name={field.name}
-        value={field.value}
-        onChange={field.onChange}
-        onBlur={field.onBlur}
-        fullWidth
-        type={type || 'text'}
-        {...props}
-        InputProps={type === 'number' ? { inputProps: { min, max, step } }:{}}
+      {isEditing ? (
+        <TextField
+          type="number"
+          name={field.name}
+          value={field.value}
+          InputProps={{ inputProps: { min, max, step } }}
+          fullWidth
+          onBlur={() => {
+            setIsEditing(!isEditing);
+          }}
+          {...props}
         />
+      ) : (
+        <TextField
+          {...props}
+          type="text"
+          name={field.name}
+          fullWidth
+          value={field.value.toLocaleString()}
+          onFocus={() => {
+            setIsEditing(!isEditing);
+          }}
+          InputProps={{
+            readOnly: true,
+          }}
+        />
+      )}
       {hasError && (
         <Typography sx={{ pt: "5px", color: "error.main", fontSize: "12px" }}>
           {errors[field.name]}
@@ -60,4 +76,4 @@ const CustomTextInput = ({
   );
 };
 
-export default CustomTextInput;
+export default CustomNumberFormatter;
