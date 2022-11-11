@@ -1247,7 +1247,7 @@ export const BotForm = () => {
                           max={values.minSpreadPerc || 0}
                           min={0}
                           required
-                          step={0.01}
+                          step={0.001}
                           sx={{
                             maxWidth: "111px",
                             input: {
