@@ -33,6 +33,7 @@ export const LogOutput = () => {
       ({ status, content }: { status: string; content: string }) => {
         if (textareaRef.current) {
           const value = textareaRef.current.value;
+          //the space before the \n ensures it picks the next line and with the space before it
           const total = value.split(" \n").length;
           if (delCount > 0 && total > delCount) {
             textareaRef.current.value = `${value
