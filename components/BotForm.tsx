@@ -535,7 +535,7 @@ export const BotForm = () => {
             setMnemonic={setMnemonic}
             loading={loading}
             validateWallet={validateWallet}
-            />
+          />
         </Grid>
       </Grid>
       <Formik
@@ -978,7 +978,8 @@ export const BotForm = () => {
                         name="minSpreadPerc"
                         id="minSpreadPerc"
                         max={5}
-                        // min={0.01}
+                        min={0.01}
+                        step={0.01}
                         required
                         sx={{
                           maxWidth: "111px",
@@ -995,8 +996,6 @@ export const BotForm = () => {
                         }) => {
                           const _value = !value
                             ? ""
-                            : parseFloat(value) <= 0
-                            ? 0.01
                             : parseFloat(value) > 5
                             ? 5
                             : parseFloat(value);
@@ -1217,8 +1216,7 @@ export const BotForm = () => {
                       <Grid item lg={8} md={8} xs={12}>
                         <Field
                           component={CustomRangeSlider}
-                          step={0.1}
-                          marks
+                          step={0.01}
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc || 0}
@@ -1247,8 +1245,9 @@ export const BotForm = () => {
                           name="nearestNeighborKeep"
                           id="nearestNeighborKeep"
                           max={values.minSpreadPerc || 0}
-                          // min={0}
+                          min={0}
                           required
+                          step={0.01}
                           sx={{
                             maxWidth: "111px",
                             input: {
@@ -1256,6 +1255,19 @@ export const BotForm = () => {
                               width: "100%",
                               textAlign: "end",
                             },
+                          }}
+                          onChange={({
+                            target: { value },
+                          }: {
+                            target: HTMLInputElement;
+                          }) => {
+                            const _value = !value
+                              ? ""
+                              : parseFloat(value) > values.minSpreadPerc || 0
+                              ? values.minSpreadPerc || 0
+                              : parseFloat(value);
+
+                            setFieldValue("nearestNeighborKeep", _value);
                           }}
                         />
                         <span style={percentStyles}>%</span>
@@ -1268,7 +1280,6 @@ export const BotForm = () => {
                   <Typography
                     sx={{
                       py: "5px",
-                      // px: "20%",
                       color: "error.main",
                       fontSize: "12px",
                       display: "flex",
