@@ -38,6 +38,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import Button from "@mui/material/Button";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import styled from "@emotion/styled";
+import HttpsIcon from "@mui/icons-material/Https";
 
 // Custom components and hooks
 import { Note } from "./Note";
@@ -533,7 +534,8 @@ export const BotForm = () => {
             mnemonic={mnemonic}
             setMnemonic={setMnemonic}
             loading={loading}
-          />
+            validateWallet={validateWallet}
+            />
         </Grid>
       </Grid>
       <Formik
@@ -1263,13 +1265,42 @@ export const BotForm = () => {
                   </AccordionDetails>
                 </Accordion>
 
+                {walletAddr !== undefined && !mnemonic && (
+                  <Typography
+                    sx={{
+                      py: "5px",
+                      // px: "20%",
+                      color: "error.main",
+                      fontSize: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      columnGap: "2px",
+                    }}
+                  >
+                    <HttpsIcon
+                      sx={{
+                        fontSize: "17px",
+                      }}
+                    />
+                    Wallet is locked. Click on wallet address at top <br /> to
+                    enter passphrase to enable start button.
+                  </Typography>
+                )}
+
                 {!loading ? (
                   <LoadingButton
                     variant="contained"
                     fullWidth
                     type="submit"
                     loading={loading}
-                    disabled={loading || !isValid || ASAError !== ""}
+                    disabled={
+                      loading ||
+                      !isValid ||
+                      ASAError !== "" ||
+                      (walletAddr !== undefined && !mnemonic)
+                    }
                     sx={{ py: "0.8rem", mt: "1rem" }}
                   >
                     Start Bot

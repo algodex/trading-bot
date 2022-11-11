@@ -34,6 +34,7 @@ export const WalletButton = ({
   mnemonic,
   setMnemonic,
   loading,
+  validateWallet,
 }: {
   walletAddr: string;
   setWalletAddr: any;
@@ -42,10 +43,13 @@ export const WalletButton = ({
   mnemonic: string | undefined;
   setMnemonic: any;
   loading: boolean;
+  validateWallet: any;
 }) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const handleOpenModal = () => {
-    if (walletAddr) {
+    if (walletAddr && !mnemonic) {
+      validateWallet();
+    } else if (walletAddr) {
       setOpenModal("disconnect");
     } else {
       setOpenModal("mnemonic");
