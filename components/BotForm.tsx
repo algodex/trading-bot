@@ -150,8 +150,8 @@ export const BotForm = () => {
 
   const initialValues = {
     assetId: "",
-    orderAlgoDepth_range: calculateReverseLogValue(25000, 1, 10000000),
-    orderAlgoDepth: 25000,
+    orderAlgoDepth_range: calculateReverseLogValue(300, 1, 10000000),
+    orderAlgoDepth: 300,
     ladderTiers: 3,
     minSpreadPerc_range: calculateReverseLogValue(0.25, 0.01, 5),
     minSpreadPerc: 0.25,
