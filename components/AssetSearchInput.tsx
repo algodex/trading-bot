@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 //mui files
 import TextField from "@mui/material/TextField";
@@ -29,12 +29,21 @@ import { searchAlgoAssets } from "@/lib/helper";
 import { Environment } from "@/lib/types/config";
 
 interface AssetSchema {
-  verification: {
-    reputation: string;
-  };
   destroyed: boolean;
-  name: string;
-  id: number;
+  assetId: number;
+  assetName: string;
+  decimals: number;
+  formattedASALiquidity: string;
+  formattedAlgoLiquidity: string;
+  formattedPrice: string;
+  hasOrders: boolean;
+  isTraded: boolean;
+  price: string;
+  priceChg24Pct: number;
+  total: number;
+  unitName: string;
+  "unit-name": string;
+  verified: boolean;
 }
 
 export const AssetSearchInput = ({
@@ -52,54 +61,43 @@ export const AssetSearchInput = ({
   const [loading, setLoading] = useState(false);
   const [assetValue, setAssetValue] = useState<AssetSchema | null>(null);
 
-  const fetchData = () => {
+  const searchASAs = useCallback(() => {
     clearTimeout(timer);
     const newTimer = setTimeout(async () => {
       setAssetValue(null);
       setLoading(true);
       const res: any = await searchAlgoAssets(query.trim(), environment);
       setLoading(false);
-      if (res.data?.assets) {
-        const assets: AssetSchema[] = res.data.assets;
+      if (res.data) {
+        const assets: AssetSchema[] = res.data;
         const list = [...assets].filter((asset) => !asset.destroyed);
         if (list.length == 1) {
-          setFieldValue(name, list[0].id);
+          setFieldValue(name, list[0].assetId);
           setAssetValue(list[0]);
         }
         setSuggestedAssets(
           list.map((asset) => {
-            return { ...asset, name: `${asset.id} - ${asset.name}` };
+            return {
+              ...asset,
+              assetName: `${asset.assetId} - ${
+                asset.assetName || asset["unit-name"] || asset.unitName || ""
+              }`,
+            };
           })
         );
+      } else {
+        setSuggestedAssets([]);
       }
     }, 500);
     setTimer(newTimer);
-  };
+  }, [environment, query]);
 
-  const VerifyIcon = ({ reputation }: { reputation: string }) => {
+  const VerifyIcon = ({ verified }: { verified: boolean }) => {
     return (
       <>
-        {reputation == "Verified" ? (
+        {verified ? (
           <VerifiedUserIcon
             sx={{ marginLeft: 2, color: "info.main", fontSize: "10px" }}
-          />
-        ) : reputation == "Notable" ? (
-          <CheckCircleIcon
-            sx={{
-              marginLeft: 2,
-              color: "info.success",
-              opacity: "0.8",
-              fontSize: "10px",
-            }}
-          />
-        ) : reputation == "Neutral" ? (
-          <CheckCircleIcon
-            sx={{
-              marginLeft: 2,
-              color: "info.success",
-              opacity: "0.3",
-              fontSize: "10px",
-            }}
           />
         ) : null}
       </>
@@ -107,10 +105,8 @@ export const AssetSearchInput = ({
   };
 
   useEffect(() => {
-    if (query.split("").length > 2) {
-      fetchData();
-    }
-  }, [query]);
+    searchASAs();
+  }, [query, searchASAs, environment]);
 
   useEffect(() => {
     setQuery("");
@@ -121,7 +117,7 @@ export const AssetSearchInput = ({
     <>
       <Autocomplete
         disablePortal
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) => option.assetName}
         options={suggestedAssets}
         loading={loading}
         filterOptions={(x) => x}
@@ -136,10 +132,8 @@ export const AssetSearchInput = ({
             sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
             {...props}
           >
-            {option.name}
-            {option.verification && (
-              <VerifyIcon reputation={option.verification.reputation} />
-            )}
+            {option.assetName}
+            {option.verified && <VerifyIcon verified={option.verified} />}
           </Box>
         )}
         renderInput={(params) => (
@@ -152,11 +146,7 @@ export const AssetSearchInput = ({
                   {loading ? (
                     <CircularProgress color="primary" size={20} />
                   ) : (
-                    <VerifyIcon
-                      reputation={
-                        (assetValue as AssetSchema)?.verification?.reputation
-                      }
-                    />
+                    <VerifyIcon verified={assetValue?.verified || false} />
                   )}
                   {params.InputProps.endAdornment}
                 </>

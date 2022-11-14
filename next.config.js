@@ -14,12 +14,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const { i18n } = require('./next-i18next.config')
+const withPWA = require("next-pwa")({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+});
+const { i18n } = require("./next-i18next.config");
 /** @type {import('next').NextConfig} */
+
+const rewrites = () => {
+  return [
+    {
+      source: "/algodex-mainnet/:path*",
+      destination: "https://app.algodex.com/api/v2/:path*",
+    },
+    {
+      source: "/algodex-testnet/:path*",
+      destination: "https://testnet.algodex.com/algodex-backend/:path*",
+    },
+  ];
+};
+
 const nextConfig = {
   reactStrictMode: true,
   i18n,
+  rewrites,
   swcMinify: true,
-}
+};
 
-module.exports = nextConfig
+module.exports = withPWA(nextConfig);
