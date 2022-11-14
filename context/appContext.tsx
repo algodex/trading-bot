@@ -23,7 +23,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const validateWallet = useCallback(() => {
     if (walletAddr && !mnemonic) {
-      console.log("open here");
       setOpenValidateModal(true);
     }
   }, [walletAddr, mnemonic]);

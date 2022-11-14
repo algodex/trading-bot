@@ -28,21 +28,20 @@ export const shortenAddress = (address: string, numb?: number) => {
   }
 };
 
-export const searchAlgoAssets = async (keywords: string, env: Environment) => {
-  const url =
-    env === "mainnet"
-      ? "https://indexer.algoexplorerapi.io/rl/v1/search"
-      : "https://indexer.testnet.algoexplorerapi.io/rl/v1/search";
+export const searchAlgoAssets = async (query: string, env: Environment) => {
+  const mainnetURL = `${query ? `/algodex-mainnet/assets/search/${query}`:"algodex-mainnet/assets/searchall"}`
+  const baseUrl =
+    env === "mainnet" ? mainnetURL : "/algodex-testnet/asset_search.php";
   try {
-    const response = await axios.get(url, {
-      params: { keywords },
-    });
+    const response = await axios.get(
+      baseUrl,
+      env === "testnet" ? { params: { query } } : {}
+    );
     return response;
   } catch (error) {
     return error;
   }
 };
-
 export const getAccountInfo = async (address: string, env: Environment) => {
   const baseUrl =
     env === "testnet"
