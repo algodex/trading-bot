@@ -33,17 +33,6 @@ const getLatestPrice = async ({
   poolInfoAddr: string;
 }): Promise<number> => {
   if (String(useTinyMan) === "true") {
-    // if (!poolInfoAddr) {
-    //   //NB: This instance is only for jest testing
-    //   const poolInfo = await getTinymanPoolInfo(environment, assetId, decimals);
-    //   if (poolInfo)
-    //     return await getTinymanPrice(
-    //       assetId,
-    //       environment,
-    //       decimals,
-    //       poolInfo?.addr
-    //     );
-    // }
     return await getTinymanPrice(assetId, environment, decimals, poolInfoAddr);
   }
   const ordersURL =
