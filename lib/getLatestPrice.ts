@@ -16,15 +16,24 @@
 
 import { Environment } from "./types/config";
 import getTinymanPrice from "./getTinymanPrice";
+import { getTinymanPoolInfo } from "./getTinyman";
 const axios = require("axios");
 
-const getLatestPrice = async (
-  assetId: number,
-  environment: Environment,
-  useTinyMan: boolean = false
-): Promise<number> => {
+const getLatestPrice = async ({
+  assetId,
+  environment,
+  useTinyMan = false,
+  decimals,
+  poolInfoAddr,
+}: {
+  assetId: number;
+  environment: Environment;
+  useTinyMan: boolean;
+  decimals: number;
+  poolInfoAddr: string;
+}): Promise<number> => {
   if (String(useTinyMan) === "true") {
-    return await getTinymanPrice(assetId, environment);
+    return await getTinymanPrice(assetId, environment, decimals, poolInfoAddr);
   }
   const ordersURL =
     environment === "testnet"

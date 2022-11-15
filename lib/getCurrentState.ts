@@ -32,7 +32,8 @@ export interface CurrentState {
 
 const getCurrentState = async (
   config: BotConfig,
-  assetInfo: any
+  assetInfo: any,
+  poolInfoAddr: string
 ): Promise<CurrentState> => {
   const {
     assetId,
@@ -64,7 +65,13 @@ const getCurrentState = async (
     environment
   );
 
-  const latestPrice = await getLatestPrice(assetId, environment, useTinyMan);
+  const latestPrice = await getLatestPrice({
+    assetId,
+    environment,
+    useTinyMan,
+    decimals,
+    poolInfoAddr,
+  });
   return { latestPrice, currentEscrows, decimals, assetInfo, openAccountSet };
 };
 

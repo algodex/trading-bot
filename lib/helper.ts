@@ -16,7 +16,18 @@
 
 import algosdk from "algosdk";
 import axios from "axios";
+import { getTinymanPoolInfo } from "./getTinyman";
+import getTinymanPrice from "./getTinymanPrice";
 import { Environment } from "./types/config";
+
+const algodToken = "";
+const algodServer = "https://node.algoexplorerapi.io/";
+const algodPort = "";
+export const algodClient = new algosdk.Algodv2(
+  algodToken,
+  algodServer,
+  algodPort
+);
 
 export const shortenAddress = (address: string, numb?: number) => {
   const len = numb || 6;
@@ -29,7 +40,11 @@ export const shortenAddress = (address: string, numb?: number) => {
 };
 
 export const searchAlgoAssets = async (query: string, env: Environment) => {
-  const mainnetURL = `${query ? `/algodex-mainnet/assets/search/${query}`:"algodex-mainnet/assets/searchall"}`
+  const mainnetURL = `${
+    query
+      ? `/algodex-mainnet/assets/search/${query}`
+      : "algodex-mainnet/assets/searchall"
+  }`;
   const baseUrl =
     env === "mainnet" ? mainnetURL : "/algodex-testnet/asset_search.php";
   try {
@@ -42,6 +57,7 @@ export const searchAlgoAssets = async (query: string, env: Environment) => {
     return error;
   }
 };
+
 export const getAccountInfo = async (address: string, env: Environment) => {
   const baseUrl =
     env === "testnet"
@@ -63,32 +79,53 @@ export const isMnemonicValid = (mnemonic: string) => {
   }
 };
 
-export const getTinymanAssets = async (env: Environment) => {
-  const tinymanAssetsURL =
-    env === "mainnet"
-      ? "https://mainnet.analytics.tinyman.org/api/v1/current-asset-prices/"
-      : "https://testnet.analytics.tinyman.org/api/v1/current-asset-prices/";
-
-  const assetList = await axios({
-    method: "get",
-    url: tinymanAssetsURL,
-    responseType: "json",
-    timeout: 3000,
-  });
-  return assetList.data;
+export const calculateLogValue = (value: number, min: number, max: number) => {
+  if (value === min) return min;
+  const minv = Math.log(min);
+  const maxv = Math.log(max);
+  const scale = (maxv - minv) / (max - min);
+  return parseFloat(Math.exp(minv + scale * (value - min)).toFixed(2));
 };
 
-export const getTinymanLiquidity = async (env: Environment) => {
-  const tinymanPoolURL =
-    env === "mainnet"
-      ? "https://mainnet.analytics.tinyman.org/api/v1/pools/?limit=all"
-      : "https://testnet.analytics.tinyman.org/api/v1/pools/?limit=all";
+export const calculateReverseLogValue = (
+  value: any,
+  min: number,
+  max: number
+) => {
+  if (value) {
+    const minv = Math.log(min);
+    const maxv = Math.log(max);
+    const scale = (maxv - minv) / (max - min);
+    return (Math.log(value) - minv) / scale + min;
+  }
+  return min;
+};
 
-  const response = await axios({
-    method: "get",
-    url: tinymanPoolURL,
-    responseType: "json",
-    timeout: 3000,
-  });
-  return response.data;
+export const checkTinymanLiquidity = async ({
+  assetId,
+  decimals,
+  environment,
+}: {
+  assetId: number;
+  decimals: number;
+  environment: Environment;
+}) => {
+  try {
+    const poolInfo = await getTinymanPoolInfo(environment, assetId, decimals);
+    if (poolInfo) {
+      const latestPrice = await getTinymanPrice(
+        assetId,
+        environment,
+        decimals,
+        poolInfo.addr
+      );
+      if (latestPrice && latestPrice > 0) return true;
+      return false;
+    }
+    return false;
+  } catch (error) {
+    setTimeout(() => {
+      checkTinymanLiquidity({ assetId, decimals, environment });
+    }, 5000);
+  }
 };
