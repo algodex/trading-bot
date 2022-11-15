@@ -42,6 +42,7 @@ const getCurrentState = async (
     api,
     environment,
     mnemonic,
+    poolInfoAddr,
   } = config;
 
   const openAccountSet = await getOpenAccountSetFromAlgodex(
@@ -64,7 +65,13 @@ const getCurrentState = async (
     environment
   );
 
-  const latestPrice = await getLatestPrice(assetId, environment, useTinyMan);
+  const latestPrice = await getLatestPrice({
+    assetId,
+    environment,
+    useTinyMan,
+    decimals,
+    poolInfoAddr,
+  });
   return { latestPrice, currentEscrows, decimals, assetInfo, openAccountSet };
 };
 

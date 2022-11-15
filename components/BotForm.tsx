@@ -50,17 +50,16 @@ import { ValidateWallet } from "./validateWallet";
 import { AssetSearchInput } from "./AssetSearchInput";
 import {
   getAccountInfo,
-  getTinymanAssets,
-  getTinymanLiquidity,
+  calculateLogValue,
+  calculateReverseLogValue,
+  checkTinymanLiquidity,
 } from "@/lib/helper";
-import getAssetInfo from "@/lib/getAssetInfo";
-import algosdk from "algosdk";
-import { getWallet } from "@/lib/storage";
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 import Image from "next/image";
 import events from "@/lib/events";
 import CustomNumberFormatter from "./CustomNumberFormatter";
 import { AppContext } from "@/context/appContext";
+import { getTinymanPools } from "@/lib/getTinyman";
 
 const WalletButton: any = dynamic(
   () =>
@@ -73,8 +72,8 @@ interface AssetSchema {
   "asset-id": number | string;
   amount: number;
   "is-frozen": boolean;
-  name?: string;
-  amountInUSD?: number;
+  name: string;
+  amountInUSD: number;
   decimals: number;
 }
 
@@ -137,26 +136,10 @@ export const BotForm = () => {
   });
   const [gettingAccount, setGettingAccount] = useState(false);
 
-  const calculateLogValue = (value: number, min: number, max: number) => {
-    if (value === min) return min;
-    const minv = Math.log(min);
-    const maxv = Math.log(max);
-    const scale = (maxv - minv) / (max - min);
-    return parseFloat(Math.exp(minv + scale * (value - min)).toFixed(2));
-  };
-
-  const calculateReverseLogValue = (value: any, min: number, max: number) => {
-    if (value) {
-      const minv = Math.log(min);
-      const maxv = Math.log(max);
-      const scale = (maxv - minv) / (max - min);
-      return (Math.log(value) - minv) / scale + min;
-    }
-    return min;
-  };
-
   const initialValues = {
     assetId: "",
+    assetDecimals: "",
+    assetName: "",
     orderAlgoDepth_range: calculateReverseLogValue(300, 1, 10000000),
     orderAlgoDepth: 300,
     ladderTiers: 3,
@@ -278,11 +261,22 @@ export const BotForm = () => {
     }
   };
 
-  //Get the connected wallet's account
-  const getAccount = async (assetId: number) => {
+  //Look up the connected wallet's account
+  const getAccount = async (
+    assetId: number,
+    assetDecimals: number,
+    assetName: string
+  ) => {
     if (walletAddr && assetId) {
       setGettingAccount(true);
-      if (await presentOnTinyman(assetId)) {
+      //Check if this asset has liquidity on tinyman
+      if (
+        await checkTinymanLiquidity({
+          assetId,
+          decimals: assetDecimals,
+          environment,
+        })
+      ) {
         try {
           const res = await getAccountInfo(walletAddr, environment);
           const ASAs = res.data.assets;
@@ -292,12 +286,6 @@ export const BotForm = () => {
             (asset: AssetSchema) => asset["asset-id"] === assetId
           ) || { amount: 0, "asset-id": assetId, "is-frozen": false };
 
-          // Check if the assetId is in the current available balance list
-          // This will provide the asset information ahead
-          const currentData: AssetSchema | undefined = availableBalance.find(
-            (ass) => ass?.["asset-id"] === assetId
-          );
-
           const algoBalance = {
             amount: res.data.amount / 1000000, // Algo decimal is 6
             "asset-id": "ALGO",
@@ -306,45 +294,19 @@ export const BotForm = () => {
             amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
           };
 
-          let val: AssetSchema[] = [];
+          const val: AssetSchema[] = [
+            algoBalance,
+            {
+              ...walletASA,
+              name: assetName,
+              decimals: assetDecimals,
+              amount: walletASA.amount / 10 ** assetDecimals,
+              amountInUSD:
+                (walletASA.amount / 10 ** assetDecimals) *
+                assetRates[assetId]?.price,
+            },
+          ];
 
-          //If the asset is already on the list, make use of the information but update the amount
-          if (currentData) {
-            val = [
-              algoBalance,
-              {
-                ...currentData,
-                amount: walletASA.amount / 10 ** currentData.decimals,
-                amountInUSD:
-                  (walletASA.amount / 10 ** currentData.decimals) *
-                  assetRates[currentData["asset-id"]]?.price,
-              },
-            ];
-          } else {
-            const url =
-              environment === "testnet"
-                ? "https://algoindexer.testnet.algoexplorerapi.io"
-                : "https://algoindexer.algoexplorerapi.io";
-            const indexerClient = new algosdk.Indexer("", url, 443);
-
-            //The walletASA has no name, I need to fetch the name and decimal
-            const { asset } = await getAssetInfo({
-              indexerClient,
-              assetId: walletASA["asset-id"] as number,
-            });
-            val = [
-              algoBalance,
-              {
-                ...walletASA,
-                name: asset.params.name,
-                decimals: asset.params.decimals,
-                amount: walletASA.amount / 10 ** asset.params.decimals,
-                amountInUSD:
-                  (walletASA.amount / 10 ** asset.params.decimals) *
-                  assetRates[walletASA["asset-id"]]?.price,
-              },
-            ];
-          }
           setAvailableBalance(val);
           if (loading) {
             events.emit("current-balance", {
@@ -370,7 +332,9 @@ export const BotForm = () => {
         }
       } else {
         if (!loading) {
-          setASAError("This asset is not present on Tinyman");
+          setASAError(
+            "This ASA‘s liquidity is too low on Tinyman to use this bot"
+          );
         }
         setTimeout(() => {
           setGettingAccount(false);
@@ -385,7 +349,11 @@ export const BotForm = () => {
     //If no ongoing request and wallet is connected, get the current balance
     if (!gettingAccount) {
       if (walletAddr && formikRef.current?.values?.assetId && !ASAError) {
-        getAccount(formikRef.current?.values?.assetId);
+        getAccount(
+          formikRef.current?.values?.assetId,
+          formikRef.current?.values?.assetDecimals,
+          formikRef.current?.values?.assetName
+        );
       } else if (!walletAddr || !formikRef.current?.values?.assetId) {
         setAvailableBalance([]);
       }
@@ -409,7 +377,7 @@ export const BotForm = () => {
         if (found.amount > 0 && algoBal && algoBal?.amount > 0) {
           const checkLiquidity = async () => {
             try {
-              const { results } = await getTinymanLiquidity(environment);
+              const { results } = await getTinymanPools(environment);
               const maxLiquidity = Math.max(
                 ...results
                   .filter(
@@ -456,19 +424,6 @@ export const BotForm = () => {
       }
     }
     return false;
-  };
-
-  //Check if this asset's price can be found on tinyman
-  const presentOnTinyman = async (assetId: number) => {
-    try {
-      const res = await getTinymanAssets(environment);
-      if (res[assetId]) return true;
-      return false;
-    } catch (error) {
-      setTimeout(() => {
-        presentOnTinyman(assetId);
-      }, 7000);
-    }
   };
 
   useEffect(() => {
@@ -557,18 +512,23 @@ export const BotForm = () => {
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
                   <Grid item md={7} xs={12}>
                     <AssetSearchInput
-                      setFieldValue={(name: string, val: string) => {
-                        const value = val ? parseInt(val) : "";
-                        setFieldValue(name, value);
+                      setFieldValue={(
+                        val: string,
+                        assetDecimals: number,
+                        assetName: string
+                      ) => {
+                        const assetId = val ? parseInt(val) : "";
+                        setFieldValue("assetId", assetId);
+                        setFieldValue("assetDecimals", assetDecimals);
+                        setFieldValue("assetName", assetName);
                         setASAError("");
                         setASAWarning("");
-                        if (value) {
-                          getAccount(value);
+                        if (assetId && assetDecimals) {
+                          getAccount(assetId, assetDecimals, assetName);
                         } else {
                           setAvailableBalance([]);
                         }
                       }}
-                      name="assetId"
                       environment={environment}
                     />
                     {touched["assetId"] && errors["assetId"] && (
@@ -662,39 +622,32 @@ export const BotForm = () => {
                         </Typography>
 
                         <Box>
-                          {asset.decimals && (
-                            <>
-                              <Typography
-                                sx={{
-                                  textAlign: "end",
-                                  fontSize: "18px",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {asset.amount.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </Typography>
-                              {(asset.amountInUSD ||
-                                asset.amountInUSD === 0) && (
-                                <Typography
-                                  sx={{
-                                    textAlign: "end",
-                                    fontSize: "14px",
-                                    fontWeight: 700,
-                                    color: "grey.200",
-                                  }}
-                                >
-                                  $
-                                  {asset.amountInUSD.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                                </Typography>
-                              )}
-                            </>
-                          )}
+                          <Typography
+                            sx={{
+                              textAlign: "end",
+                              fontSize: "18px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {asset.amount.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              textAlign: "end",
+                              fontSize: "14px",
+                              fontWeight: 700,
+                              color: "grey.200",
+                            }}
+                          >
+                            $
+                            {asset.amountInUSD.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </Typography>
                         </Box>
                       </Box>
                     ))}

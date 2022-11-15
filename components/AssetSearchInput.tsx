@@ -22,7 +22,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 //Lib files
 import { searchAlgoAssets } from "@/lib/helper";
@@ -48,11 +47,9 @@ interface AssetSchema {
 
 export const AssetSearchInput = ({
   setFieldValue,
-  name,
   environment,
 }: {
   setFieldValue: any;
-  name: string;
   environment: Environment;
 }) => {
   const [query, setQuery] = useState("");
@@ -72,7 +69,11 @@ export const AssetSearchInput = ({
         const assets: AssetSchema[] = res.data;
         const list = [...assets].filter((asset) => !asset.destroyed);
         if (list.length == 1) {
-          setFieldValue(name, list[0].assetId);
+          setFieldValue(
+            list[0].assetId,
+            list[0].decimals,
+            list[0].assetName || list[0]["unit-name"] || list[0].unitName || ""
+          );
           setAssetValue(list[0]);
         }
         setSuggestedAssets(
@@ -82,6 +83,8 @@ export const AssetSearchInput = ({
               assetName: `${asset.assetId} - ${
                 asset.assetName || asset["unit-name"] || asset.unitName || ""
               }`,
+              name:
+                asset.assetName || asset["unit-name"] || asset.unitName || "",
             };
           })
         );
@@ -123,7 +126,11 @@ export const AssetSearchInput = ({
         filterOptions={(x) => x}
         value={suggestedAssets.length == 1 ? suggestedAssets[0] : assetValue}
         onChange={(event, value) => {
-          setFieldValue(name, value?.id || "");
+          setFieldValue(
+            value?.assetId || "",
+            value?.decimals || "",
+            value?.name
+          );
           setAssetValue(value);
         }}
         renderOption={(props, option) => (

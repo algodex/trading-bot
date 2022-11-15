@@ -114,7 +114,7 @@ const config: BotConfig = {
   orderAlgoDepth,
   api,
 };
-Object.freeze(config);
+// Object.freeze(config);
 
 if (!process.env.WALLET_MNEMONIC) {
   throw new Error("Mnemonic not set!");

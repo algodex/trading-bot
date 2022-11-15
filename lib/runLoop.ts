@@ -26,6 +26,8 @@ import getCurrentOrders from "./getCurrentOrders";
 import getCancelPromises from "./getCancelPromises";
 import { cancelOrders } from "./cancelOrders";
 import * as events from "./events";
+import { getTinymanPoolInfo } from "./getTinyman";
+import getAssetInfo from "./getAssetInfo";
 
 let exitLoop = false;
 export interface RunLoopInput {
@@ -45,8 +47,29 @@ const runLoop = async ({
   //   escrowDB, ladderTiers, useTinyMan, api,
   // environment, orderAlgoDepth} = config;
 
+  if (!config.poolInfoAddr && !exitLoop && config.api) {
+    assetInfo = await getAssetInfo({
+      indexerClient: config.api.indexer,
+      assetId: config.assetId,
+    });
+
+    const poolInfo = await getTinymanPoolInfo(
+      config.environment,
+      config.assetId,
+      assetInfo.asset.params.decimals
+    );
+
+    if (poolInfo) {
+      config.poolInfoAddr = poolInfo?.addr;
+    } else {
+      stopLoop({ config });
+      return;
+    }
+  }
+
   // Note - during jest testing, runState is a Proxy
   if (runState.isExiting || exitLoop) {
+    config.poolInfoAddr = "";
     console.log("Exiting!");
     return;
   }
@@ -57,7 +80,7 @@ const runLoop = async ({
   if (!assetInfo) {
     assetInfo = currentState.assetInfo;
   }
-
+  console.debug({ latestPrice });
   if (latestPrice === undefined || latestPrice === 0) {
     runState.inRunLoop = false;
     await sleep(1000);

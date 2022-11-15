@@ -28,4 +28,5 @@ export interface BotConfig {
   orderAlgoDepth: number;
   api: any;
   mnemonic?: string
+  poolInfoAddr?:string
 }

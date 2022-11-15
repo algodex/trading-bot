@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getTinymanAssets } from "@/lib/helper";
+import { getTinymanAssets } from "@/lib/getTinyman";
 import { Environment } from "@/lib/types/config";
 import { useCallback, useEffect, useState } from "react";
 

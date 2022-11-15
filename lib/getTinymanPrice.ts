@@ -14,26 +14,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const axios = require("axios");
+import { Environment } from "./types/config";
+import { getAccountInfo } from "./helper";
 
 const getTinymanPrice = async (
   assetId: number,
-  environment: string
+  environment: Environment,
+  assetDecimals: number,
+  poolInfoAddr?: string
 ): Promise<number> => {
-  const tinymanPriceURL =
-    environment === "mainnet"
-      ? "https://mainnet.analytics.tinyman.org/api/v1/current-asset-prices/"
-      : "https://testnet.analytics.tinyman.org/api/v1/current-asset-prices/";
-
-  const assetData = await axios({
-    method: "get",
-    url: tinymanPriceURL,
-    responseType: "json",
-    timeout: 10000,
-  });
-  const algoPrice = assetData.data[0].price;
-  const latestPrice = assetData.data[assetId].price / algoPrice;
-  return latestPrice;
+  if (poolInfoAddr) {
+    const accountInfo = await getAccountInfo(poolInfoAddr, environment);
+    if (accountInfo.data) {
+      const { amount: algo, assets } = accountInfo.data;
+      const assetAmount =
+        assets.find(
+          (asset: { [x: string]: any }) => asset["asset-id"] === assetId
+        )?.amount || 0;
+      if (algo > 0 && assetAmount > 0) {
+        const latestPrice = algo / assetAmount / 10 ** (6 - assetDecimals);
+        return latestPrice;
+      } else {
+        return 0;
+      }
+    }
+    return 0;
+  }
+  return 0;
 };
 
 export default getTinymanPrice;
