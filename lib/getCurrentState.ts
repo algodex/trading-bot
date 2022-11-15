@@ -32,7 +32,8 @@ export interface CurrentState {
 
 const getCurrentState = async (
   config: BotConfig,
-  assetInfo: any
+  assetInfo: any,
+  poolInfoAddr: string
 ): Promise<CurrentState> => {
   const {
     assetId,
@@ -42,7 +43,6 @@ const getCurrentState = async (
     api,
     environment,
     mnemonic,
-    poolInfoAddr,
   } = config;
 
   const openAccountSet = await getOpenAccountSetFromAlgodex(

@@ -21,7 +21,7 @@ const getTinymanPrice = async (
   assetId: number,
   environment: Environment,
   assetDecimals: number,
-  poolInfoAddr?: string
+  poolInfoAddr: string
 ): Promise<number> => {
   if (poolInfoAddr) {
     const accountInfo = await getAccountInfo(poolInfoAddr, environment);

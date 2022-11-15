@@ -29,7 +29,6 @@ import * as events from "./events";
 import { getTinymanPoolInfo } from "./getTinyman";
 import getAssetInfo from "./getAssetInfo";
 
-let exitLoop = false;
 export interface RunLoopInput {
   assetInfo: any;
   config: BotConfig;
@@ -37,6 +36,10 @@ export interface RunLoopInput {
   runState: RunState;
   //   runState: CurrentState;
 }
+
+let exitLoop = false;
+let poolInfoAddr:string;
+
 const runLoop = async ({
   assetInfo,
   config,
@@ -47,7 +50,7 @@ const runLoop = async ({
   //   escrowDB, ladderTiers, useTinyMan, api,
   // environment, orderAlgoDepth} = config;
 
-  if (!config.poolInfoAddr && !exitLoop && config.api) {
+  if (!poolInfoAddr && !exitLoop && config.api) {
     assetInfo = await getAssetInfo({
       indexerClient: config.api.indexer,
       assetId: config.assetId,
@@ -60,7 +63,7 @@ const runLoop = async ({
     );
 
     if (poolInfo) {
-      config.poolInfoAddr = poolInfo?.addr;
+      poolInfoAddr = poolInfo?.addr;
     } else {
       stopLoop({ config });
       return;
@@ -69,13 +72,13 @@ const runLoop = async ({
 
   // Note - during jest testing, runState is a Proxy
   if (runState.isExiting || exitLoop) {
-    config.poolInfoAddr = "";
+    poolInfoAddr = "";
     console.log("Exiting!");
     return;
   }
   runState.inRunLoop = true;
 
-  const currentState = await getCurrentState(config, assetInfo);
+  const currentState = await getCurrentState(config, assetInfo, poolInfoAddr);
   const { latestPrice, currentEscrows, decimals } = currentState;
   if (!assetInfo) {
     assetInfo = currentState.assetInfo;
