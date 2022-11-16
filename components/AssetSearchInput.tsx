@@ -72,7 +72,8 @@ export const AssetSearchInput = ({
           setFieldValue(
             list[0].assetId,
             list[0].decimals,
-            list[0].assetName || list[0]["unit-name"] || list[0].unitName || ""
+            list[0].assetName || list[0]["unit-name"] || list[0].unitName || "",
+            list[0].formattedPrice || 0
           );
           setAssetValue(list[0]);
         }
@@ -129,7 +130,8 @@ export const AssetSearchInput = ({
           setFieldValue(
             value?.assetId || "",
             value?.decimals || "",
-            value?.name
+            value?.name,
+            value.formattedPrice || 0
           );
           setAssetValue(value);
         }}

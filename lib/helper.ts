@@ -71,6 +71,15 @@ export const getAccountInfo = async (address: string, env: Environment) => {
   return res;
 };
 
+export const getAlgoUSD = async () => {
+  const baseUrl = "https://price.algoexplorerapi.io/price/algo-usd";
+  const res = await axios({
+    method: "get",
+    url: `${baseUrl}`,
+    timeout: 3000,
+  });
+  return res;
+};
 export const isMnemonicValid = (mnemonic: string) => {
   try {
     return algosdk.mnemonicToSecretKey(mnemonic).sk;

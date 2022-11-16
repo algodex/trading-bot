@@ -14,34 +14,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getTinymanAssets } from "@/lib/getTinyman";
+import { getAlgoUSD } from "@/lib/helper";
 import { Environment } from "@/lib/types/config";
 import { useCallback, useEffect, useState } from "react";
 
 export const usePriceConversionHook = ({ env }: { env: Environment }) => {
-  const [assetRates, setAssetRates] = useState<any>({});
   const [algoRate, setAlgoRate] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  const getPrice = useCallback(async () => {
+  const getUSDPrice = useCallback(async () => {
     setLoading(true);
     try {
-      const data: any = await getTinymanAssets(env);
-      setAlgoRate(data[0].price);
-      setAssetRates(data);
+      const algoUsd: any = await getAlgoUSD();
+      setAlgoRate(parseFloat(algoUsd.data?.price));
       setTimeout(() => {
         setLoading(false);
       }, 6000);
     } catch (error) {
       console.error(error);
     }
-  }, [env]);
+  }, []);
 
   useEffect(() => {
     if (!loading) {
-      getPrice();
+      getUSDPrice();
     }
-  }, [env, getPrice, loading]);
+  }, [env, getUSDPrice, loading]);
 
-  return { assetRates, algoRate, getPrice, loading };
+  return { algoRate, getUSDPrice, loading };
 };

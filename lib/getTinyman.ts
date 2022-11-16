@@ -20,20 +20,6 @@ import axios from "axios";
 import { Environment } from "./types/config";
 import { getPoolInfo, getValidatorAppID } from "@tinymanorg/tinyman-js-sdk";
 
-export const getTinymanAssets = async (env: Environment) => {
-  const tinymanAssetsURL =
-    env === "mainnet"
-      ? "https://mainnet.analytics.tinyman.org/api/v1/current-asset-prices/"
-      : "https://testnet.analytics.tinyman.org/api/v1/current-asset-prices/";
-
-  const assetList = await axios({
-    method: "get",
-    url: tinymanAssetsURL,
-    responseType: "json",
-    timeout: 3000,
-  });
-  return assetList.data;
-};
 
 export const getTinymanPoolInfo = async (
   env: Environment,

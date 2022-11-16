@@ -131,7 +131,7 @@ export const BotForm = () => {
   const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
   const [ASAError, setASAError] = useState("");
   const [ASAWarning, setASAWarning] = useState("");
-  const { assetRates, algoRate } = usePriceConversionHook({
+  const { algoRate } = usePriceConversionHook({
     env: environment,
   });
   const [gettingAccount, setGettingAccount] = useState(false);
@@ -140,6 +140,7 @@ export const BotForm = () => {
     assetId: "",
     assetDecimals: "",
     assetName: "",
+    assetPrice: 0,
     orderAlgoDepth_range: calculateReverseLogValue(300, 1, 10000000),
     orderAlgoDepth: 300,
     ladderTiers: 3,
@@ -187,7 +188,10 @@ export const BotForm = () => {
     const _formValues = { ...formValues };
     delete _formValues.minSpreadPerc_range;
     delete _formValues.orderAlgoDepth_range;
+    delete _formValues.assetPrice;
+    delete _formValues.assetDecimals;
     const assetId = formValues.assetId;
+
     if (
       !(await lowBalanceOrRisky(
         assetId,
@@ -265,7 +269,8 @@ export const BotForm = () => {
   const getAccount = async (
     assetId: number,
     assetDecimals: number,
-    assetName: string
+    assetName: string,
+    assetPrice: number
   ) => {
     if (walletAddr && assetId) {
       setGettingAccount(true);
@@ -291,7 +296,7 @@ export const BotForm = () => {
             "asset-id": "ALGO",
             "is-frozen": false,
             decimals: 6, // Algo decimal is 6
-            amountInUSD: (res.data.amount / 1000000) * assetRates[0]?.price,
+            amountInUSD: (res.data.amount / 1000000) * algoRate,
           };
 
           const val: AssetSchema[] = [
@@ -303,7 +308,8 @@ export const BotForm = () => {
               amount: walletASA.amount / 10 ** assetDecimals,
               amountInUSD:
                 (walletASA.amount / 10 ** assetDecimals) *
-                assetRates[assetId]?.price,
+                assetPrice *
+                algoRate,
             },
           ];
 
@@ -352,7 +358,8 @@ export const BotForm = () => {
         getAccount(
           formikRef.current?.values?.assetId,
           formikRef.current?.values?.assetDecimals,
-          formikRef.current?.values?.assetName
+          formikRef.current?.values?.assetName,
+          formikRef.current?.values?.assetPrice
         );
       } else if (!walletAddr || !formikRef.current?.values?.assetId) {
         setAvailableBalance([]);
@@ -387,29 +394,26 @@ export const BotForm = () => {
                   )
                   .map((item: any) => item.current_asset_1_reserves_in_usd)
               );
-              if (assetRates[assetId]) {
-                const amountToTrade =
-                  orderAlgoDepth * assetRates[assetId].price * ladderTiers;
-                if (maxLiquidity) {
-                  if (amountToTrade >= maxLiquidity * 0.5) {
-                    setASAError(
-                      "This ASA‘s liquidity is too high and risky to use this bot"
-                    );
-                    return true;
-                  } else if (amountToTrade > maxLiquidity * 0.1) {
-                    setASAWarning("Warning, this ASA‘s liquidity is high");
-                    return false;
-                  }
-                } else {
+              const amountToTrade = ladderTiers * algoRate * orderAlgoDepth;
+              if (maxLiquidity) {
+                if (amountToTrade >= maxLiquidity * 0.5) {
                   setASAError(
-                    "This ASA‘s liquidity is too low on Tinyman to use this bot"
+                    "This ASA‘s liquidity is too high and risky to use this bot"
                   );
                   return true;
+                } else if (amountToTrade > maxLiquidity * 0.1) {
+                  setASAWarning("Warning, this ASA‘s liquidity is high");
+                  return false;
                 }
-                setASAError("");
-                setASAWarning("");
-                return false;
+              } else {
+                setASAError(
+                  "This ASA‘s liquidity is too low on Tinyman to use this bot"
+                );
+                return true;
               }
+              setASAError("");
+              setASAWarning("");
+              return false;
             } catch (error) {
               setTimeout(() => {
                 checkLiquidity();
@@ -515,16 +519,23 @@ export const BotForm = () => {
                       setFieldValue={(
                         val: string,
                         assetDecimals: number,
-                        assetName: string
+                        assetName: string,
+                        assetPrice: number
                       ) => {
                         const assetId = val ? parseInt(val) : "";
                         setFieldValue("assetId", assetId);
                         setFieldValue("assetDecimals", assetDecimals);
                         setFieldValue("assetName", assetName);
+                        setFieldValue("assetPrice", assetPrice);
                         setASAError("");
                         setASAWarning("");
                         if (assetId && assetDecimals) {
-                          getAccount(assetId, assetDecimals, assetName);
+                          getAccount(
+                            assetId,
+                            assetDecimals,
+                            assetName,
+                            assetPrice
+                          );
                         } else {
                           setAvailableBalance([]);
                         }

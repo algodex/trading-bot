@@ -22,14 +22,20 @@ const initAPI = (environment: Environment): any => {
   return new AlgodexAPI({
     config: {
       algod: {
-        uri: process.env.NEXT_PUBLIC_ALGOD_SERVER,
+        uri:
+          environment === "mainnet"
+            ? "https://node.algoexplorerapi.io"
+            : "https://node.testnet.algoexplorerapi.io",
         token: process.env.NEXT_PUBLIC_ALGOD_TOKEN || "",
         port: process.env.NEXT_PUBLIC_ALGOD_PORT
           ? parseInt(process.env.NEXT_PUBLIC_ALGOD_PORT)
           : undefined,
       },
       indexer: {
-        uri: process.env.NEXT_PUBLIC_INDEXER_SERVER,
+        uri:
+          environment === "mainnet"
+            ? "https://algoindexer.algoexplorerapi.io"
+            : "https://algoindexer.testnet.algoexplorerapi.io",
         token: process.env.NEXT_PUBLIC_INDEXER_TOKEN || "",
         port: process.env.NEXT_PUBLIC_INDEXER_PORT
           ? parseInt(process.env.NEXT_PUBLIC_INDEXER_PORT)
@@ -38,13 +44,13 @@ const initAPI = (environment: Environment): any => {
       explorer: {
         uri:
           environment === "mainnet"
-            ? "https://indexer.testnet.algoexplorerapi.io"
-            : "https://indexer.algoexplorerapi.io",
+            ? "https://indexer.algoexplorerapi.io"
+            : "https://indexer.testnet.algoexplorerapi.io",
       },
       dexd: {
         uri:
           environment === "mainnet"
-            ? "https://app.algodex.com/algodex-backend"
+            ? "https://app.algodex.com/api/v2"
             : "https://testnet.algodex.com/algodex-backend",
         token: "",
       },
