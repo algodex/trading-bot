@@ -114,10 +114,12 @@ export const checkTinymanLiquidity = async ({
   assetId,
   decimals,
   environment,
+  setASAError,
 }: {
   assetId: number;
   decimals: number;
   environment: Environment;
+  setASAError: any;
 }) => {
   try {
     const poolInfo = await getTinymanPoolInfo(environment, assetId, decimals);
@@ -128,13 +130,24 @@ export const checkTinymanLiquidity = async ({
         decimals,
         poolInfo.addr
       );
-      if (latestPrice && latestPrice > 0) return true;
-      return false;
+      if (latestPrice && latestPrice > 0) {
+        return true;
+      } else {
+        setASAError(
+          "This ASA‘s liquidity is too low on Tinyman to use this bot"
+        );
+        return false;
+      }
     }
     return false;
   } catch (error) {
     setTimeout(() => {
-      checkTinymanLiquidity({ assetId, decimals, environment });
+      return checkTinymanLiquidity({
+        assetId,
+        decimals,
+        environment,
+        setASAError,
+      });
     }, 5000);
   }
 };

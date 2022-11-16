@@ -18,7 +18,6 @@ import orderDepthAmounts from "./order-depth-amounts";
 import { BotConfig } from ".././types/config";
 import { EscrowToMake } from "../getEscrowsToCancelAndMake";
 import * as events from "../events";
-import { stopLoop } from "../runLoop";
 
 export interface PlaceOrderInput {
   config: BotConfig;
@@ -65,29 +64,7 @@ const placeOrders = ({
         orderToPlace
       )},\n Latest Price: ${latestPrice}`,
     });
-    events.on(
-      "current-balance",
-      ({
-        walletBalance,
-      }: {
-        walletBalance: {
-          algo: number;
-          asa: number;
-          assetId: number;
-          currentDepth: number;
-        };
-      }) => {
-        if (
-          walletBalance.assetId === assetId &&
-          walletBalance.currentDepth === orderDepth &&
-          (walletBalance.algo < orderDepth ||
-            walletBalance.asa < orderDepth / latestPrice)
-        ) {
-          stopLoop({ config, errorStatus: "Low balance!" });
-          return [];
-        }
-      }
-    );
+
     const orderPromise = api.placeOrder(orderToPlace);
     return orderPromise;
   });

@@ -25,22 +25,26 @@ export interface PlaceOrdersAndUpdateDBInput {
   createEscrowPrices: EscrowToMake[];
   decimals: number;
   latestPrice: number;
+  exitLoop: boolean;
 }
 const placeOrdersAndUpdateDB = async ({
   config,
   createEscrowPrices,
   decimals,
   latestPrice,
+  exitLoop,
 }: PlaceOrdersAndUpdateDBInput) => {
-  const ordersToPlace = placeOrders({
-    config,
-    createEscrowPrices,
-    decimals,
-    latestPrice,
-  });
-  const { validResults } = await waitForOrders(ordersToPlace);
+  if (!exitLoop) {
+    const ordersToPlace = placeOrders({
+      config,
+      createEscrowPrices,
+      decimals,
+      latestPrice,
+    });
+    const { validResults } = await waitForOrders(ordersToPlace);
 
-  await addOrdersToDB(config.escrowDB, validResults, config.environment);
+    await addOrdersToDB(config.escrowDB, validResults, config.environment);
+  }
 };
 
 export default placeOrdersAndUpdateDB;
