@@ -398,7 +398,7 @@ export const BotForm = () => {
               if (maxLiquidity) {
                 if (amountToTrade >= maxLiquidity * 0.5) {
                   setASAError(
-                    "This ASA‘s liquidity is too high and risky to use this bot"
+                    "This ASA’s liquidity on Tinyman is too low and risky to use this bot, please reduce your order sizes or select a different ASA"
                   );
                   return true;
                 } else if (amountToTrade > maxLiquidity * 0.1) {
