@@ -131,7 +131,7 @@ export const AssetSearchInput = ({
             value?.assetId || "",
             value?.decimals || "",
             value?.name,
-            value.formattedPrice || 0
+            value?.formattedPrice || 0
           );
           setAssetValue(value);
         }}

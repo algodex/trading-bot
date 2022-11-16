@@ -26,6 +26,8 @@ import Button from "@mui/material/Button";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 //lib
 import { saveWallet } from "@/lib/storage";
@@ -41,6 +43,7 @@ export const MnemonicModal = ({
   handleClose: any;
 }) => {
   const [error, setError] = useState<string>("");
+  const [agreement, setAgreement] = useState(false);
   const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error("Must be inside of an App Provider");
@@ -373,8 +376,26 @@ export const MnemonicModal = ({
                   {error}
                 </Typography>
               )}
+              <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      color={"dark600" as any}
+                      value={agreement}
+                      onChange={({ target: { checked } }) => {
+                        setAgreement(checked);
+                      }}
+                    />
+                  }
+                  label="I agree that Algodex is not responsible for lost funds."
+                />
+              </Box>
               <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
-                <Button variant="outlined" onClick={getPassPhrase}>
+                <Button
+                  variant="outlined"
+                  disabled={!agreement}
+                  onClick={getPassPhrase}
+                >
                   IMPORT WALLET
                 </Button>
               </Box>
