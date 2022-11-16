@@ -280,6 +280,7 @@ export const BotForm = () => {
           assetId,
           decimals: assetDecimals,
           environment,
+          setASAError,
         })
       ) {
         try {
@@ -337,11 +338,6 @@ export const BotForm = () => {
           }, 5000);
         }
       } else {
-        if (!loading) {
-          setASAError(
-            "This ASA‘s liquidity is too low on Tinyman to use this bot"
-          );
-        }
         setTimeout(() => {
           setGettingAccount(false);
         }, 5000);
@@ -402,7 +398,9 @@ export const BotForm = () => {
                   );
                   return true;
                 } else if (amountToTrade > maxLiquidity * 0.1) {
-                  setASAWarning("Warning, this ASA‘s liquidity is high");
+                  setASAWarning(
+                    "Warning, this ASA‘s liquidity is low on Tinyman"
+                  );
                   return false;
                 }
               } else {
@@ -500,7 +498,7 @@ export const BotForm = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleStart}
-        validateOnBlur={false}
+        validateOnBlur={true}
       >
         {({
           handleSubmit,

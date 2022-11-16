@@ -38,7 +38,7 @@ export interface RunLoopInput {
 }
 
 let exitLoop = false;
-let poolInfoAddr:string;
+let poolInfoAddr: string;
 
 const runLoop = async ({
   assetInfo,
@@ -84,6 +84,7 @@ const runLoop = async ({
     assetInfo = currentState.assetInfo;
   }
   console.debug({ latestPrice });
+
   if (latestPrice === undefined || latestPrice === 0) {
     runState.inRunLoop = false;
     await sleep(1000);
@@ -113,12 +114,36 @@ const runLoop = async ({
       status: "Maintaining order while waiting for a price change...",
     });
   }
+  events.on(
+    "current-balance",
+    ({
+      walletBalance,
+    }: {
+      walletBalance: {
+        algo: number;
+        asa: number;
+        assetId: number;
+        currentDepth: number;
+      };
+    }) => {
+      if (
+        walletBalance.assetId === config.assetId &&
+        walletBalance.currentDepth === config.orderAlgoDepth &&
+        (walletBalance.algo < config.orderAlgoDepth ||
+          walletBalance.asa < config.orderAlgoDepth / latestPrice)
+      ) {
+        stopLoop({ config, errorStatus: "Low balance!" });
+        return;
+      }
+    }
+  );
 
   await placeOrdersAndUpdateDB({
     config,
     createEscrowPrices,
     decimals,
     latestPrice,
+    exitLoop,
   });
 
   runState.inRunLoop = false;
