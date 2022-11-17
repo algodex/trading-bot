@@ -15,10 +15,10 @@
  */
 
 import algosdk from "algosdk";
-import axios from "axios";
 import { getTinymanPoolInfo } from "./getTinyman";
 import getTinymanPrice from "./getTinymanPrice";
 import { Environment } from "./types/config";
+const axios = require("axios");
 
 const algodToken = "";
 const algodServer = "https://node.algoexplorerapi.io/";
