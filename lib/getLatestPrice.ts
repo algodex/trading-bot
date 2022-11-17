@@ -16,7 +16,6 @@
 
 import { Environment } from "./types/config";
 import getTinymanPrice from "./getTinymanPrice";
-import { getTinymanPoolInfo } from "./getTinyman";
 const axios = require("axios");
 
 const getLatestPrice = async ({
