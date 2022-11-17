@@ -31,7 +31,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 
 //lib
 import { saveWallet } from "@/lib/storage";
-import { CustomPasswordInput, PassPhrase } from "./CustomPasswordInput";
+import { CustomPasswordInput } from "../Form/CustomPasswordInput";
 import { isMnemonicValid } from "@/lib/helper";
 import { AppContext } from "@/context/appContext";
 
@@ -93,6 +93,7 @@ export const MnemonicModal = ({
     if (phrases.length === 25) {
       if (isMnemonicValid(phrases.join(" "))) {
         setMnemonic(phrases.join(" "));
+        setAgreement(false);
       } else {
         setError("Invalid Mnemonic. Check phrase and try again.");
       }
@@ -381,7 +382,7 @@ export const MnemonicModal = ({
                   control={
                     <Checkbox
                       color={"dark600" as any}
-                      value={agreement}
+                      checked={agreement}
                       onChange={({ target: { checked } }) => {
                         setAgreement(checked);
                       }}

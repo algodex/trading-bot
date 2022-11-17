@@ -25,9 +25,9 @@ import Button from "@mui/material/Button";
 //lib and custom components
 import { getMnemonic } from "@/lib/storage";
 import Image from "next/image";
-import { CustomPasswordInput } from "./CustomPasswordInput";
+import { CustomPasswordInput } from "../Form/CustomPasswordInput";
 import { AppContext } from "@/context/appContext";
-import { ClearPassphrase } from "./ClearPassphrase";
+import { ClearPassphrase } from "../ClearPassphrase";
 
 export const ValidateWallet = () => {
   const [errorMessage, setErrorMessage] = useState("");

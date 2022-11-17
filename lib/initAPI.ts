@@ -47,13 +47,24 @@ const initAPI = (environment: Environment): any => {
             ? "https://indexer.algoexplorerapi.io"
             : "https://indexer.testnet.algoexplorerapi.io",
       },
-      dexd: {
-        uri:
-          environment === "mainnet"
-            ? "https://app.algodex.com/api/v2"
-            : "https://testnet.algodex.com/algodex-backend",
-        token: "",
-      },
+      dexd:
+        globalThis.location !== undefined
+          ? {
+              apiVersion: environment === "mainnet" ? 2 : 1,
+              uri:
+                environment === "mainnet"
+                  ? "http://localhost:3000/algodex-mainnet"
+                  : "https://testnet.algodex.com/algodex-backend",
+              token: "",
+            }
+          : {
+              apiVersion: environment === "mainnet" ? 2 : 1,
+              uri:
+                environment === "mainnet"
+                  ? "https://app.algodex.com/api/v2"
+                  : "https://testnet.algodex.com/algodex-backend",
+              token: "",
+            },
     },
   });
 };

@@ -22,9 +22,9 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 // Custom components
-import { MnemonicModal } from "./MnemonicModal";
+import { MnemonicModal } from "./Modals/MnemonicModal";
 import { shortenAddress } from "@/lib/helper";
-import { ExportWallet } from "./exportWallet";
+import { ExportWallet } from "./Modals/exportWallet";
 import { AppContext } from "@/context/appContext";
 
 export const WalletButton = ({ loading }: { loading: boolean }) => {
