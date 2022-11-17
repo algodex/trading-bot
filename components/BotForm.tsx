@@ -40,6 +40,8 @@ import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import styled from "@emotion/styled";
 import HttpsIcon from "@mui/icons-material/Https";
 
+import { cancelAssetOrders } from "@/lib/cancelAssetOrders";
+
 // Custom components and hooks
 import { Note } from "./Note";
 import CustomRangeSlider from "./Form/CustomRangeSlider";
@@ -1241,6 +1243,33 @@ export const BotForm = () => {
                     </Grid>
                   </AccordionDetails>
                 </Accordion>
+
+                <Button
+                  variant='contained'
+                  fullWidth
+                  type='button'
+                  sx={{
+                    py: '0.8rem',
+                    mt: '1rem',
+                    backgroundColor: 'error.dark',
+                    '&:hover': {
+                      backgroundColor: 'error.dark',
+                    },
+                  }}
+                  onClick={() =>
+                    cancelAssetOrders(
+                      {
+                        address:
+                          'WYWRYK42XADLY3O62N52BOLT27DMPRA3WNBT2OBRT65N6OEZQWD4OSH6PI',
+                        mnemonic: mnemonic,
+                      },
+                      Number(values.assetId),
+                      'testnet'
+                    )
+                  }
+                >
+                  Canel Open Orders
+                </Button>
 
                 {walletAddr && !mnemonic && (
                   <Typography
