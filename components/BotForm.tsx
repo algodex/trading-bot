@@ -42,12 +42,12 @@ import HttpsIcon from "@mui/icons-material/Https";
 
 // Custom components and hooks
 import { Note } from "./Note";
-import CustomRangeSlider from "./CustomRangeSlider";
-import CustomTextInput from "./CustomTextInput";
+import CustomRangeSlider from "./Form/CustomRangeSlider";
+import CustomTextInput from "./Form/CustomTextInput";
 import initAPI from "@/lib/initAPI";
 import { BotConfig, Environment } from "@/lib/types/config";
-import { ValidateWallet } from "./validateWallet";
-import { AssetSearchInput } from "./AssetSearchInput";
+import { ValidateWallet } from "./Modals/validateWallet";
+import { AssetSearchInput } from "./Form/AssetSearchInput";
 import {
   getAccountInfo,
   calculateLogValue,
@@ -57,7 +57,7 @@ import {
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 import Image from "next/image";
 import events from "@/lib/events";
-import CustomNumberFormatter from "./CustomNumberFormatter";
+import CustomNumberFormatter from "./Form/CustomNumberFormatter";
 import { AppContext } from "@/context/appContext";
 import { getTinymanPools } from "@/lib/getTinyman";
 

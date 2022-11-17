@@ -1,4 +1,4 @@
-import { PassPhrase } from "@/components/CustomPasswordInput";
+import { PassPhrase } from "@/components/Form/CustomPasswordInput";
 import { getWallet } from "@/lib/storage";
 import React, {
   createContext,

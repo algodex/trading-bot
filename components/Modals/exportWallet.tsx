@@ -32,9 +32,9 @@ import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { getMnemonic } from "@/lib/storage";
 import Image from "next/image";
 import { shortenAddress } from "@/lib/helper";
-import { CustomPasswordInput } from "./CustomPasswordInput";
+import { CustomPasswordInput } from "../Form/CustomPasswordInput";
 import { AppContext } from "@/context/appContext";
-import { ClearPassphrase } from "./ClearPassphrase";
+import { ClearPassphrase } from "../ClearPassphrase";
 
 export const ExportWallet = ({
   open,
@@ -289,7 +289,17 @@ export const ExportWallet = ({
                       }}
                     >
                       You can copy the whole seed phrase or reveal the words
-                      below{" "}
+                      below
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Ensure that you have backed up this phrase in another
+                      location since this phrase is only stored locally on your
+                      device and Algodex cannot recover it.
                     </Typography>
                   </Box>
                 </Box>
@@ -449,7 +459,8 @@ export const ExportWallet = ({
                       Only one wallet can be connected at a time. You can
                       disconnect this wallet and connect a different one.
                       Disconnecting will clear the stored mnemonic and
-                      passphrase.
+                      passphrase and they are not recoverable so please ensure
+                      you have a backup of the seed phrase.
                     </Typography>
                   </Box>
                 </Box>
