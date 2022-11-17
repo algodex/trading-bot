@@ -25,7 +25,7 @@ const rewrites = () => {
   return [
     {
       source: "/algodex-mainnet/:path*",
-      destination: "https://app.algodex.com/api/v2/:path*",
+      destination: "http://mainnet-services-2.algodex.com:8080/:path*",
     },
     {
       source: "/algodex-testnet/:path*",
