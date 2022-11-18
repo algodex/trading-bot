@@ -53,7 +53,7 @@ const initAPI = (environment: Environment): any => {
               apiVersion: environment === "mainnet" ? 2 : 1,
               uri:
                 environment === "mainnet"
-                  ? `${globalThis.location.protocol + '//' + globalThis.location.host}/algodex-mainnet`
+                  ? `https://app.algodex.com/algodex-backend` // THe globalThis url fix doesn't work for local mainnet. 
                   : "https://testnet.algodex.com/algodex-backend",
               token: "",
             }
