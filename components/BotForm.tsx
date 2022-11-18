@@ -186,6 +186,12 @@ export const BotForm = () => {
       .required("Required"),
   });
 
+  const cancelAssetOrderCallback = (message:string) =>{
+    events.emit("canceling-asset-orders", {
+      message: message
+    });
+  }
+
   const handleStart = async (formValues: FormikValues) => {
     const _formValues = { ...formValues };
     delete _formValues.minSpreadPerc_range;
@@ -440,6 +446,16 @@ export const BotForm = () => {
     });
 
     return () => events.off("running-bot");
+  }, []);
+
+  useEffect(() => {
+    //Listen to when the event logs a low balance error so the bot can stop on the UI
+    events.on("canceling-asset-orders", ({  message }: { message:string }) => {
+        setLoading(false);
+        setASAError(message);
+    });
+
+    return () => events.off("canceling-asset-orders");
   }, []);
 
   return (
@@ -1264,7 +1280,8 @@ export const BotForm = () => {
                         mnemonic: mnemonic,
                       },
                       Number(values.assetId),
-                      'testnet'
+                      'testnet',
+                      cancelAssetOrderCallback
                     )
                   }
                 >

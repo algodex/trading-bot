@@ -2,10 +2,16 @@ import initAPI from './initAPI';
 import { Environment } from './types/config';
 import initWallet from './initWallet';
 
+type Wallet = {
+    address: string,
+    mnemonic: string
+}
+
 export const cancelAssetOrders = async (
-  wallet: any,
+  wallet: Wallet,
   assetId: number,
-  environment: Environment
+  environment: Environment,
+  callbackFn: (message:string )=> void
 ) => {
   const algodexApi = initAPI(environment);
   await initWallet(algodexApi, wallet.address, wallet.mnemonic);
@@ -25,7 +31,7 @@ export const cancelAssetOrders = async (
 
   await Promise.all(
     mappedOpenAssetOrders.map((order: any) => {
-      algodexApi.closeOrder(order);
+      algodexApi.closeOrder(order, callbackFn);
     })
   );
   //   console.log(openAssetOrders);
