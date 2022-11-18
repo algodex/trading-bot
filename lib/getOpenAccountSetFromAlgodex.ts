@@ -23,27 +23,38 @@ const getOpenAccountSetFromAlgodex = async (
   walletAddr: string,
   assetId: number
 ): Promise<Set<string>> => {
-  const url =
-    environment == "testnet"
-      ? "https://testnet.algodex.com/algodex-backend/orders.php?ownerAddr=" +
-        walletAddr
-      : "https://app.algodex.com/algodex-backend/orders.php?ownerAddr=" +
-        walletAddr;
-  const orders = await axios({
-    method: "get",
-    url: url,
-    responseType: "json",
-    timeout: 10000,
-  });
-  const allOrders = [
-    ...orders.data.buyASAOrdersInEscrow,
-    ...orders.data.sellASAOrdersInEscrow,
-  ];
-  const arr = allOrders
-    .filter((order) => order.assetId === assetId)
-    .map((order) => order.escrowAddress);
-  const set = new Set(arr);
-  return set;
+  try {
+    const windowHost = globalThis.location
+      ? globalThis.location.protocol + "//" + globalThis.location.host
+      : null;
+    const url =
+      windowHost && environment === "mainnet"
+        ? `${windowHost}/algodex-mainnet/orders/wallet/${walletAddr}`
+        : windowHost && environment === "testnet"
+        ? `${windowHost}/algodex-testnet/orders/wallet/${walletAddr}`
+        : !windowHost && environment === "mainnet"
+        ? `https://app.algodex.com/api/v2/orders/wallet/${walletAddr}`
+        : `https://testnet.algodex.com/api/v2/orders/wallet/${walletAddr}`;
+
+    const orders = await axios({
+      method: "get",
+      url: url,
+      responseType: "json",
+      timeout: 10000,
+    });
+    const allOrders = [
+      ...orders.data.buyASAOrdersInEscrow,
+      ...orders.data.sellASAOrdersInEscrow,
+    ];
+    const arr = allOrders
+      .filter((order) => order.assetId === assetId)
+      .map((order) => order.escrowAddress);
+    const set = new Set(arr);
+    return set;
+  } catch (error) {
+    console.error(error);
+    return getOpenAccountSetFromAlgodex(environment, walletAddr, assetId);
+  }
 };
 
 export default getOpenAccountSetFromAlgodex;
