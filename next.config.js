@@ -25,11 +25,11 @@ const rewrites = () => {
   return [
     {
       source: "/algodex-mainnet/:path*",
-      destination: "http://mainnet-services-2.algodex.com:8080/:path*",
+      destination: "https://app.algodex.com/api/v2/:path*",
     },
     {
       source: "/algodex-testnet/:path*",
-      destination: "https://testnet.algodex.com/algodex-backend/:path*",
+      destination: "https://testnet.algodex.com/api/v2/:path*",
     },
   ];
 };

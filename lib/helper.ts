@@ -40,13 +40,11 @@ export const shortenAddress = (address: string, numb?: number) => {
 };
 
 export const searchAlgoAssets = async (query: string, env: Environment) => {
-  const mainnetURL = `${
+  const baseUrl = `${
     query
-      ? `/algodex-mainnet/assets/search/${query}`
-      : "algodex-mainnet/assets/searchall"
+      ? `/algodex-${env}/assets/search/${query}`
+      : `algodex-${env}/assets/searchall`
   }`;
-  const baseUrl =
-    env === "mainnet" ? mainnetURL : "/algodex-testnet/asset_search.php";
   try {
     const response = await axios.get(
       baseUrl,
