@@ -14,7 +14,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -113,7 +119,6 @@ export const BotForm = () => {
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
   const [config, setConfig] = useState<null | BotConfig>();
-
   const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
@@ -205,6 +210,7 @@ export const BotForm = () => {
         validateWallet();
       } else if (walletAddr && mnemonic) {
         try {
+          postMessage(assetId);
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
             : "";
@@ -213,6 +219,7 @@ export const BotForm = () => {
             "market_maker_" +
             assetId +
             "_" +
+            new Date() +
             walletAddr.slice(0, 8).toLowerCase();
           const escrowDB = new PouchDB(fullPouchUrl);
           const api = initAPI(environment);
@@ -248,10 +255,9 @@ export const BotForm = () => {
       }
     }
   };
-
-  const stopBot = () => {
+  const stopBot = (callFn?: boolean) => {
     if (config) {
-      stopLoop({ config });
+      if (callFn) stopLoop({ config });
       setLoading(false);
     }
   };
@@ -432,11 +438,10 @@ export const BotForm = () => {
     //Listen to when the event logs a low balance error so the bot can stop on the UI
     events.on("running-bot", ({ content }: { content: string }) => {
       if (content === "Low balance!") {
-        setLoading(false);
         setASAError(content);
+        stopBot();
       }
     });
-
     return () => events.off("running-bot");
   }, []);
 
@@ -1295,7 +1300,7 @@ export const BotForm = () => {
                         backgroundColor: "error.dark",
                       },
                     }}
-                    onClick={stopBot}
+                    onClick={() => stopBot(true)}
                   >
                     Stop Bot
                   </Button>
