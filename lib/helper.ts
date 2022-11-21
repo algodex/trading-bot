@@ -46,10 +46,7 @@ export const searchAlgoAssets = async (query: string, env: Environment) => {
       : `algodex-${env}/assets/searchall`
   }`;
   try {
-    const response = await axios.get(
-      baseUrl,
-      env === "testnet" ? { params: { query } } : {}
-    );
+    const response = await axios.get(baseUrl);
     return response;
   } catch (error) {
     return error;

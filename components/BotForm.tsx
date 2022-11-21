@@ -14,7 +14,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -60,6 +66,7 @@ import events from "@/lib/events";
 import CustomNumberFormatter from "./Form/CustomNumberFormatter";
 import { AppContext } from "@/context/appContext";
 import { getTinymanPools } from "@/lib/getTinyman";
+import { storageKeys } from "@/lib/storage";
 
 const WalletButton: any = dynamic(
   () =>
@@ -113,7 +120,7 @@ export const BotForm = () => {
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
   const [config, setConfig] = useState<null | BotConfig>();
-
+  const [existingTabInfo, setExistingTabInfo] = useState<number[]>([]);
   const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
@@ -203,8 +210,9 @@ export const BotForm = () => {
         setOpenMnemonic("mnemonic");
       } else if (walletAddr && !mnemonic) {
         validateWallet();
-      } else if (walletAddr && mnemonic) {
+      } else if (walletAddr && mnemonic && !checkTabs(assetId)) {
         try {
+          postMessage(assetId);
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
             : "";
@@ -249,10 +257,11 @@ export const BotForm = () => {
     }
   };
 
-  const stopBot = () => {
+  const stopBot = (callFn?: boolean) => {
     if (config) {
-      stopLoop({ config });
+      if (callFn) stopLoop({ config });
       setLoading(false);
+      setExistingTabInfo(existingTabInfo.filter((id) => id !== config.assetId));
     }
   };
 
@@ -428,17 +437,61 @@ export const BotForm = () => {
     return false;
   };
 
+  const postMessage = useCallback((assetId: number) => {
+    const channel = new BroadcastChannel("app-data");
+    channel.postMessage(assetId);
+  }, []);
+
+  const handleListenToTab = useCallback(
+    (event: any) => {
+      console.log("this is the tab data", event.data);
+      console.log("listen", { existingTabInfo });
+      if (event.data) {
+        if (!existingTabInfo.includes(event.data)) {
+          setExistingTabInfo((prev) => [...prev, event.data]);
+        }
+      }
+    },
+    [existingTabInfo]
+  );
+
   useEffect(() => {
     //Listen to when the event logs a low balance error so the bot can stop on the UI
     events.on("running-bot", ({ content }: { content: string }) => {
+      if (config?.assetId) postMessage(config.assetId);
       if (content === "Low balance!") {
-        setLoading(false);
         setASAError(content);
+        stopBot();
       }
     });
-
     return () => events.off("running-bot");
+  }, [config]);
+
+  useEffect(() => {
+    const channel = new BroadcastChannel("app-data");
+    channel.onmessage = (event) => {
+      handleListenToTab(event);
+    };
+    return () => {
+      channel.close();
+    };
   }, []);
+
+  const checkTabs = useCallback(
+    (assetId: number) => {
+      console.log("check e", { assetId });
+      console.log("check e", { existingTabInfo });
+      if (existingTabInfo.includes(assetId) && !loading) {
+        setASAError(
+          "The bot is currently trading this asset on another tab! Please stop the bot to start a new trade."
+        );
+        return true;
+      }
+      console.log("absent");
+      return false;
+    },
+    [existingTabInfo, loading]
+  );
 
   return (
     <>
@@ -528,6 +581,7 @@ export const BotForm = () => {
                         setASAError("");
                         setASAWarning("");
                         if (assetId && assetDecimals) {
+                          checkTabs(assetId);
                           getAccount(
                             assetId,
                             assetDecimals,
@@ -1295,7 +1349,7 @@ export const BotForm = () => {
                         backgroundColor: "error.dark",
                       },
                     }}
-                    onClick={stopBot}
+                    onClick={() => stopBot(true)}
                   >
                     Stop Bot
                   </Button>
