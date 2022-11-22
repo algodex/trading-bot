@@ -14,7 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
@@ -24,6 +24,13 @@ import PropTypes from "prop-types";
 
 // Defaults
 import DefaultToolbar from "@/components/Nav/Toolbar";
+import Drawer from "./Nav/Drawer";
+
+// Icons
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import OutboxIcon from "@mui/icons-material/Outbox";
+import ArticleIcon from "@mui/icons-material/Article";
+import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 
 /**
  * Layout Component
@@ -37,13 +44,43 @@ import DefaultToolbar from "@/components/Nav/Toolbar";
  * @constructor
  * @component
  */
+
+const Links = [
+  {
+    text: "TRADE",
+    icon: <TrendingDownIcon  />,
+    link: "https://app.algodex.com/trade",
+  },
+  {
+    text: "DOCS",
+    icon: <ArticleIcon  />,
+    link: "https://docs.algodex.com",
+  },
+  {
+    text: "SUPPORT",
+    icon: <HelpCenterIcon  />,
+    link: "https://app.algodex.com/support",
+  },
+  {
+    text: "REWARDS",
+    icon: <OutboxIcon  />,
+    link: "https://rewards.algodex.com/",
+  },
+];
+
 export function Layout({ children, components, componentsProps }: any) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { Toolbar } = components;
   // Example for Changing Toolbar Height
   // const toolbarHeight = 200
   const toolbarHeight = undefined;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTab = useMediaQuery(theme.breakpoints.down("md"));
+
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
 
   // Example of a Responsive Layout with Fixed Viewport
   return (
@@ -56,17 +93,24 @@ export function Layout({ children, components, componentsProps }: any) {
       }}
     >
       <AppBar
-        data-testid="app-bar"
         position="static"
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar
           isMobile={isMobile}
+          toggleDrawer={toggleDrawer}
+          links={Links}
+          isTab={isTab}
           height={toolbarHeight}
           {...componentsProps.Toolbar}
         />
       </AppBar>
       <Box sx={{ display: "flex", flex: 1, overflow: "auto" }}>
+        <Drawer
+          open={drawerOpen && isMobile}
+          links={Links}
+          {...componentsProps.Drawer}
+        />
         {/* Display the Page Component */}
         <Container
           sx={{
