@@ -137,8 +137,6 @@ export const BotForm = () => {
     updateReducer,
     initialState
   );
-  // const [ASAError, setASAError] = useState("");
-  // const [ASAWarning, setASAWarning] = useState("");
   const [config, setConfig] = useState<null | BotConfig>();
   const { algoRate } = usePriceConversionHook({
     env: environment,
