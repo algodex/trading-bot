@@ -14,7 +14,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -60,6 +66,7 @@ import events from "@/lib/events";
 import CustomNumberFormatter from "./Form/CustomNumberFormatter";
 import { AppContext } from "@/context/appContext";
 import { getTinymanPools } from "@/lib/getTinyman";
+import { initialState, updateReducer } from "./Reducer/updateReducer";
 
 const WalletButton: any = dynamic(
   () =>
@@ -68,7 +75,7 @@ const WalletButton: any = dynamic(
     ssr: false,
   }
 );
-interface AssetSchema {
+export interface AssetSchema {
   "asset-id": number | string;
   amount: number;
   "is-frozen": boolean;
@@ -112,7 +119,6 @@ export const BotForm = () => {
   const [environment, setEnvironment] = useState<any | Environment>(
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
-  const [config, setConfig] = useState<null | BotConfig>();
   const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
@@ -127,9 +133,11 @@ export const BotForm = () => {
     mnemonic,
     setMnemonic,
   }: any = context;
-  const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
-  const [ASAError, setASAError] = useState("");
-  const [ASAWarning, setASAWarning] = useState("");
+  const [{ availableBalance, ASAError, ASAWarning }, dispatch] = useReducer(
+    updateReducer,
+    initialState
+  );
+  const [config, setConfig] = useState<null | BotConfig>();
   const { algoRate } = usePriceConversionHook({
     env: environment,
   });
@@ -251,7 +259,9 @@ export const BotForm = () => {
   };
   const stopBot = (callFn?: boolean) => {
     if (config) {
-      if (callFn) stopLoop({ config });
+      if (callFn) {
+        stopLoop({ config });
+      }
       setLoading(false);
     }
   };
@@ -259,9 +269,9 @@ export const BotForm = () => {
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     if (!loading) {
       formikRef.current.resetForm();
-      setASAError("");
+      dispatch({ type: "asaError", payload: "" });
       setEnvironment(value);
-      setAvailableBalance([]);
+      dispatch({ type: "balance", payload: [] });
     }
   };
 
@@ -280,7 +290,7 @@ export const BotForm = () => {
           assetId,
           decimals: assetDecimals,
           environment,
-          setASAError,
+          dispatch,
         })
       ) {
         try {
@@ -314,7 +324,7 @@ export const BotForm = () => {
             },
           ];
 
-          setAvailableBalance(val);
+          dispatch({ type: "balance", payload: val });
           if (loading) {
             events.emit("current-balance", {
               walletBalance: {
@@ -343,7 +353,7 @@ export const BotForm = () => {
         }, 5000);
       }
     } else {
-      setAvailableBalance([]);
+      dispatch({ type: "balance", payload: [] });
     }
   };
 
@@ -358,7 +368,7 @@ export const BotForm = () => {
           formikRef.current?.values?.assetPrice
         );
       } else if (!walletAddr || !formikRef.current?.values?.assetId) {
-        setAvailableBalance([]);
+        dispatch({ type: "balance", payload: [] });
       }
     }
   }, [walletAddr, environment, gettingAccount, ASAError]);
@@ -371,10 +381,10 @@ export const BotForm = () => {
   ) => {
     if (assetId && availableBalance.length > 0) {
       const found = availableBalance.find(
-        (asset) => asset["asset-id"] === assetId
+        (asset: AssetSchema) => asset["asset-id"] === assetId
       );
       const algoBal = availableBalance.find(
-        (asset) => asset["asset-id"] === "ALGO"
+        (asset: AssetSchema) => asset["asset-id"] === "ALGO"
       );
       if (found) {
         if (found.amount > 0 && algoBal && algoBal?.amount > 0) {
@@ -393,24 +403,35 @@ export const BotForm = () => {
               const amountToTrade = ladderTiers * algoRate * orderAlgoDepth;
               if (maxLiquidity) {
                 if (amountToTrade >= maxLiquidity * 0.5) {
-                  setASAError(
-                    "This ASA’s liquidity on Tinyman is too low and risky to use this bot, please reduce your order sizes or select a different ASA"
-                  );
+                  dispatch({
+                    type: "asaError",
+                    payload:
+                      "This ASA’s liquidity on Tinyman is too low and risky to use this bot, please reduce your order sizes or select a different ASA",
+                  });
                   return true;
                 } else if (amountToTrade > maxLiquidity * 0.1) {
-                  setASAWarning(
-                    "Warning, this ASA‘s liquidity is low on Tinyman"
-                  );
+                  dispatch({
+                    type: "asaWarning",
+                    payload: "Warning, this ASA‘s liquidity is low on Tinyman",
+                  });
                   return false;
                 }
               } else {
-                setASAError(
-                  "This ASA‘s liquidity is too low on Tinyman to use this bot"
-                );
+                dispatch({
+                  type: "asaError",
+                  payload:
+                    "This ASA‘s liquidity is too low on Tinyman to use this bot",
+                });
                 return true;
               }
-              setASAError("");
-              setASAWarning("");
+              dispatch({
+                type: "asaError",
+                payload: "",
+              });
+              dispatch({
+                type: "asaWarning",
+                payload: "",
+              });
               return false;
             } catch (error) {
               setTimeout(() => {
@@ -420,7 +441,10 @@ export const BotForm = () => {
           };
           return checkLiquidity();
         } else {
-          setASAError("This ASA or Algo balance is too low to use this bot");
+          dispatch({
+            type: "asaError",
+            payload: "This ASA or Algo balance is too low to use this bot",
+          });
           return true;
         }
       }
@@ -432,8 +456,11 @@ export const BotForm = () => {
     //Listen to when the event logs a low balance error so the bot can stop on the UI
     events.on("running-bot", ({ content }: { content: string }) => {
       if (content === "Low balance!") {
-        setASAError(content);
         stopBot();
+        dispatch({
+          type: "asaError",
+          payload: content,
+        });
       }
     });
     return () => events.off("running-bot");
@@ -524,8 +551,14 @@ export const BotForm = () => {
                         setFieldValue("assetDecimals", assetDecimals);
                         setFieldValue("assetName", assetName);
                         setFieldValue("assetPrice", assetPrice);
-                        setASAError("");
-                        setASAWarning("");
+                        dispatch({
+                          type: "asaError",
+                          payload: "",
+                        });
+                        dispatch({
+                          type: "asaWarning",
+                          payload: "",
+                        });
                         if (assetId && assetDecimals) {
                           getAccount(
                             assetId,
@@ -534,7 +567,7 @@ export const BotForm = () => {
                             assetPrice
                           );
                         } else {
-                          setAvailableBalance([]);
+                          dispatch({ type: "balance", payload: [] });
                         }
                       }}
                       environment={environment}
@@ -615,7 +648,7 @@ export const BotForm = () => {
                     <Typography marginBottom={"10px"}>
                       Available Balance
                     </Typography>
-                    {availableBalance.map((asset) => (
+                    {availableBalance.map((asset: AssetSchema) => (
                       <Box
                         key={asset["asset-id"]}
                         sx={{
@@ -738,7 +771,10 @@ export const BotForm = () => {
                             "orderAlgoDepth",
                             calculateLogValue(parseFloat(value), 1, 10000000)
                           );
-                          setASAError("");
+                          dispatch({
+                            type: "asaError",
+                            payload: "",
+                          });
                         }}
                       />
                       <Typography
@@ -810,7 +846,10 @@ export const BotForm = () => {
                               calculateReverseLogValue(_value, 1, 10000000)
                             );
                             setFieldValue("orderAlgoDepth", _value);
-                            setASAError("");
+                            dispatch({
+                              type: "asaError",
+                              payload: "",
+                            });
                           }}
                         />
 
