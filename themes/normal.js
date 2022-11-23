@@ -72,6 +72,7 @@ const theme = createTheme({
     grey: {
       100: "#D9D9D9",
       200: "#A1AEC0",
+      300: "#CAD1DA",
     },
     blue: {
       main: "#2d75d6",

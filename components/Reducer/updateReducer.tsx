@@ -20,12 +20,14 @@ interface State {
   ASAError: string;
   availableBalance: AssetSchema[];
   ASAWarning: string;
+  currentPrices: number[];
 }
 
 export const initialState = {
   ASAError: "",
   availableBalance: [],
   ASAWarning: "",
+  currentPrices: [],
 };
 
 export const updateReducer = (
@@ -40,6 +42,11 @@ export const updateReducer = (
       return { ...state, ASAWarning: payload };
     case "balance":
       return { ...state, availableBalance: payload };
+    case "currentPrice":
+      return {
+        ...state,
+        currentPrices: payload,
+      };
     default:
       return state;
   }
