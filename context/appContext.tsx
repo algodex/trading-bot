@@ -1,10 +1,12 @@
 import { PassPhrase } from "@/components/Form/CustomPasswordInput";
 import { getWallet } from "@/lib/storage";
+import { Environment } from "@/lib/types/config";
 import React, {
   createContext,
   ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -12,10 +14,15 @@ export const AppContext: any = createContext(null);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [walletAddr, setWalletAddr] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const formikRef = useRef<any>();
   const [mnemonic, setMnemonic] = useState("");
   const [openValidateModal, setOpenValidateModal] = useState(false);
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
   const [forgotPassphrase, setForgotPassphrase] = useState<boolean>(false);
+  const [environment, setEnvironment] = useState<any | Environment>(
+    process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
+  );
   const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
@@ -62,6 +69,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         clearPassphrase,
         forgotPassphrase,
         setForgotPassphrase,
+        environment,
+        setEnvironment,
+        formikRef,
+        loading,
+        setLoading,
       }}
     >
       {children}

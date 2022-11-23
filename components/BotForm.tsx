@@ -14,13 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, {
-  useContext,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -51,7 +45,7 @@ import { Note } from "./Note";
 import CustomRangeSlider from "./Form/CustomRangeSlider";
 import CustomTextInput from "./Form/CustomTextInput";
 import initAPI from "@/lib/initAPI";
-import { BotConfig, Environment } from "@/lib/types/config";
+import { BotConfig } from "@/lib/types/config";
 import { ValidateWallet } from "./Modals/validateWallet";
 import { AssetSearchInput } from "./Form/AssetSearchInput";
 import {
@@ -115,11 +109,6 @@ const percentStyles: any = {
 };
 
 export const BotForm = () => {
-  const [loading, setLoading] = useState(false);
-  const [environment, setEnvironment] = useState<any | Environment>(
-    process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
-  );
-  const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error("Must be inside of a App Provider");
@@ -132,6 +121,11 @@ export const BotForm = () => {
     setOpenMnemonic,
     mnemonic,
     setMnemonic,
+    environment,
+    setEnvironment,
+    formikRef,
+    loading,
+    setLoading,
   }: any = context;
   const [{ availableBalance, ASAError, ASAWarning, currentPrices }, dispatch] =
     useReducer(updateReducer, initialState);
