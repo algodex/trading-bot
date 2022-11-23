@@ -1,5 +1,21 @@
+/* 
+ * Algodex Trading Bot 
+ * Copyright (C) 2022 Algodex VASP (BVI) Corp.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import events from "@/lib/events";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 //MUI Components
 import Button from "@mui/material/Button";
@@ -13,14 +29,29 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Grid from "@mui/material/Grid";
 import Slider from "@mui/material/Slider";
 import TextField from "@mui/material/TextField";
+import LoadingButton from "@mui/lab/LoadingButton";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 
 //Custom styles
 import { cardStyles } from "./BotForm";
 import { storageKeys } from "@/lib/storage";
 
+//Context
+import { AppContext } from "@/context/appContext";
+
+import { cancelAssetOrders } from "@/lib/cancelAssetOrders";
+
 export const LogOutput = () => {
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error("Must be inside of a App Provider");
+  }
+  const { walletAddr, mnemonic, environment, formikRef, loading }: any =
+    context;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [delCount, setDelCount] = useState(0);
+  const [canceling, setCanceling] = useState(false);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     const _default = localStorage.getItem(storageKeys.logSetting);
@@ -58,6 +89,31 @@ export const LogOutput = () => {
     setDelCount(parseFloat(value));
     localStorage.setItem(storageKeys.logSetting, value);
   };
+
+  const cancelOrders = async () => {
+    if (formikRef.current.values.assetId) {
+      setStatus("");
+      try {
+        setCanceling(true);
+        const res = await cancelAssetOrders(
+          {
+            address: walletAddr,
+            mnemonic: mnemonic,
+          },
+          Number(formikRef.current.values.assetId),
+          environment
+        );
+        console.log({ res });
+        setCanceling(false);
+      } catch (error) {
+        console.error(error);
+        setCanceling(false);
+      }
+    } else {
+      setStatus("Please enter valid assetId");
+    }
+  };
+
   return (
     <>
       <TextareaAutosize
@@ -164,7 +220,31 @@ export const LogOutput = () => {
             </Grid>
           </AccordionDetails>
         </Accordion>
-        <Box sx={{ textAlign: "end" }}>
+        <Box
+          sx={{
+            justifyContent: "end",
+            display: "flex",
+            columnGap: "10px",
+            height: "fit-content",
+          }}
+        >
+          <LoadingButton
+            variant="outlined"
+            disabled={canceling || loading}
+            loading={canceling}
+            sx={{
+              marginBlock: "30px",
+              whiteSpace: "nowrap",
+              borderColor: "error.main",
+              color: "error.main",
+              "&:hover": {
+                backgroundColor: "error.main",
+              },
+            }}
+            onClick={cancelOrders}
+          >
+            CANCEL ALL ORDERS
+          </LoadingButton>
           <Button
             variant="outlined"
             sx={{ marginBlock: "30px", whiteSpace: "nowrap" }}
@@ -178,6 +258,25 @@ export const LogOutput = () => {
           </Button>
         </Box>
       </Box>
+      {status && (
+        <Typography
+          sx={{
+            color: "error.main",
+            fontSize: "12px",
+            display: "flex",
+            alignItems: "center",
+            columnGap: "5px",
+            justifyContent: "end",
+          }}
+        >
+          <InfoRoundedIcon
+            sx={{
+              fontSize: "12px",
+            }}
+          />
+          {status}
+        </Typography>
+      )}
     </>
   );
 };

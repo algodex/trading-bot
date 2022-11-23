@@ -14,13 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, {
-  useContext,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -46,14 +40,12 @@ import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import styled from "@emotion/styled";
 import HttpsIcon from "@mui/icons-material/Https";
 
-import { cancelAssetOrders } from "@/lib/cancelAssetOrders";
-
 // Custom components and hooks
 import { Note } from "./Note";
 import CustomRangeSlider from "./Form/CustomRangeSlider";
 import CustomTextInput from "./Form/CustomTextInput";
 import initAPI from "@/lib/initAPI";
-import { BotConfig, Environment } from "@/lib/types/config";
+import { BotConfig } from "@/lib/types/config";
 import { ValidateWallet } from "./Modals/validateWallet";
 import { AssetSearchInput } from "./Form/AssetSearchInput";
 import {
@@ -117,11 +109,6 @@ const percentStyles: any = {
 };
 
 export const BotForm = () => {
-  const [loading, setLoading] = useState(false);
-  const [environment, setEnvironment] = useState<any | Environment>(
-    process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
-  );
-  const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error("Must be inside of a App Provider");
@@ -134,6 +121,11 @@ export const BotForm = () => {
     setOpenMnemonic,
     mnemonic,
     setMnemonic,
+    environment,
+    setEnvironment,
+    formikRef,
+    loading,
+    setLoading,
   }: any = context;
   const [{ availableBalance, ASAError, ASAWarning, currentPrices }, dispatch] =
     useReducer(updateReducer, initialState);
@@ -189,12 +181,6 @@ export const BotForm = () => {
       .label("Spread")
       .required("Required"),
   });
-
-  const cancelAssetOrderCallback = (message:string) =>{
-    events.emit("canceling-asset-orders", {
-      message: message
-    });
-  }
 
   const handleStart = async (formValues: FormikValues) => {
     const _formValues = { ...formValues };
@@ -476,16 +462,6 @@ export const BotForm = () => {
       }
     });
     return () => events.off("running-bot");
-  }, []);
-
-  useEffect(() => {
-    //Listen to when the event logs a low balance error so the bot can stop on the UI
-    events.on("canceling-asset-orders", ({  message }: { message:string }) => {
-        setLoading(false);
-        setASAError(message);
-    });
-
-    return () => events.off("canceling-asset-orders");
   }, []);
 
   return (
@@ -1387,34 +1363,6 @@ export const BotForm = () => {
                     </Grid>
                   </AccordionDetails>
                 </Accordion>
-
-                <Button
-                  variant='contained'
-                  fullWidth
-                  type='button'
-                  sx={{
-                    py: '0.8rem',
-                    mt: '1rem',
-                    backgroundColor: 'error.dark',
-                    '&:hover': {
-                      backgroundColor: 'error.dark',
-                    },
-                  }}
-                  onClick={() =>
-                    cancelAssetOrders(
-                      {
-                        address:
-                          'WYWRYK42XADLY3O62N52BOLT27DMPRA3WNBT2OBRT65N6OEZQWD4OSH6PI',
-                        mnemonic: mnemonic,
-                      },
-                      Number(values.assetId),
-                      'testnet',
-                      cancelAssetOrderCallback
-                    )
-                  }
-                >
-                  Canel Open Orders
-                </Button>
 
                 {walletAddr && !mnemonic && (
                   <Typography

@@ -1,26 +1,23 @@
-import initAPI from './initAPI';
-import { Environment } from './types/config';
-import initWallet from './initWallet';
+import initAPI from "./initAPI";
+import { Environment } from "./types/config";
+import initWallet from "./initWallet";
 
 type Wallet = {
-    address: string,
-    mnemonic: string
-}
+  address: string;
+  mnemonic: string;
+};
 
 export const cancelAssetOrders = async (
   wallet: Wallet,
   assetId: number,
-  environment: Environment,
-  callbackFn: (message:string )=> void
+  environment: Environment
 ) => {
   const algodexApi = initAPI(environment);
   await initWallet(algodexApi, wallet.address, wallet.mnemonic);
-  console.log(algodexApi.wallet);
   const orders = await algodexApi.http.dexd.fetchOrders(
-    'wallet',
+    "wallet",
     wallet.address
   );
-  console.log(orders);
   const openAssetOrders = orders.filter(
     (order: any) => order.asset.id === assetId
   );
@@ -31,9 +28,8 @@ export const cancelAssetOrders = async (
 
   await Promise.all(
     mappedOpenAssetOrders.map((order: any) => {
-      algodexApi.closeOrder(order, callbackFn);
+      algodexApi.closeOrder(order);
     })
   );
-  //   console.log(openAssetOrders);
   return openAssetOrders;
 };
