@@ -15,15 +15,29 @@
  */
 
 import React from "react";
-import PropTypes from "prop-types";
 
 // MUI Components
 import MUIToolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 
 // Custom Language Selector
 import LocaleNavMenu from "@/components/Nav/LocaleNavMenu";
 import { Logo } from "../Logo";
+
+//Algodex
+import Link from "./Link";
+import { link } from "./Drawer";
+
+const styles = {
+  linkStyles: {
+    fontWeight: "700",
+    marginRight: "1.6rem",
+    textDecoration: "none",
+    color: (theme: any) => theme.palette.primary.dark,
+  },
+};
 
 /**
  * Toolbar
@@ -36,19 +50,53 @@ function Toolbar({
   height,
   onClick,
   isMobile,
+  isTab,
+  toggleDrawer,
+  links,
   ...rest
 }: {
   height?: number;
   onClick: () => void;
   isMobile: boolean;
+  isTab: boolean;
+  links: link[];
+  toggleDrawer: () => void;
 }) {
   return (
     <MUIToolbar sx={{ height, backgroundColor: "primary.main" }} {...rest}>
       <Box flex={1} display={"flex"} alignItems={"baseline"}>
-        <Logo isMobile={isMobile} />
+        <Logo isTab={isTab} />
       </Box>
+      {!isMobile && (
+        <Box
+          sx={{ display: "flex", alignItems: "center" }}
+          data-testid="toolbar-links"
+        >
+          {links.map((item) => (
+            <Link
+              key={item.link}
+              href={item.link}
+              target="_blanc"
+              sx={styles.linkStyles}
+            >
+              {item.text}
+            </Link>
+          ))}
+        </Box>
+      )}
       <LocaleNavMenu onClick={onClick} />
-      {/* TODO: Make Menu Collapsable*/}
+      {isMobile && (
+        <IconButton
+          size="large"
+          edge="start"
+          color="inherit"
+          aria-label="menu"
+          sx={{ ml: 2 }}
+          onClick={toggleDrawer}
+        >
+          <MenuIcon />
+        </IconButton>
+      )}
     </MUIToolbar>
   );
 }

@@ -51,22 +51,26 @@ const runLoop = async ({
   // environment, orderAlgoDepth} = config;
 
   if (!poolInfoAddr && !exitLoop && config.api) {
-    assetInfo = await getAssetInfo({
-      indexerClient: config.api.indexer,
-      assetId: config.assetId,
-    });
-
-    const poolInfo = await getTinymanPoolInfo(
-      config.environment,
-      config.assetId,
-      assetInfo.asset.params.decimals
-    );
-
-    if (poolInfo) {
-      poolInfoAddr = poolInfo?.addr;
-    } else {
-      stopLoop({ config });
-      return;
+    try {
+      assetInfo = await getAssetInfo({
+        indexerClient: config.api.indexer,
+        assetId: config.assetId,
+      });
+      
+      const poolInfo = await getTinymanPoolInfo(
+        config.environment,
+        config.assetId,
+        assetInfo.asset.params.decimals
+        );
+        
+        if (poolInfo) {
+          poolInfoAddr = poolInfo?.addr;
+        } else {
+          stopLoop({ config });
+          return;
+        }
+      } catch (error) {
+      console.error(error);
     }
   }
 

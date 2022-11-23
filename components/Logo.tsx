@@ -23,10 +23,10 @@ import Link from "./Nav/Link";
 
 export const Logo = ({
   styles,
-  isMobile,
+  isTab,
 }: {
   styles?: object;
-  isMobile: boolean;
+  isTab: boolean;
 }) => {
   return (
     <div style={styles}>
@@ -39,7 +39,7 @@ export const Logo = ({
           color: "#1A202C",
         }}
       >
-        {isMobile ? (
+        {isTab ? (
           <Image
             src="/algodex-icon.svg"
             alt="Algodex Icon Logo"
@@ -54,8 +54,17 @@ export const Logo = ({
             height="30"
           />
         )}
-        <Typography fontWeight={700} fontSize={"18px"} marginLeft={"10px"}>
-        Trading Bot
+        <Typography
+          fontWeight={700}
+          fontSize={"18px"}
+          marginLeft={"10px"}
+          sx={{
+            "@media (max-width:282px)": {
+              fontSize: "10px",
+            },
+          }}
+        >
+          Trading Bot
         </Typography>
       </Link>
     </div>

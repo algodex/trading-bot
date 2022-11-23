@@ -29,7 +29,7 @@ const rewrites = () => {
     },
     {
       source: "/algodex-testnet/:path*",
-      destination: "https://testnet.algodex.com/algodex-backend/:path*",
+      destination: "https://testnet.algodex.com/api/v2/:path*",
     },
   ];
 };

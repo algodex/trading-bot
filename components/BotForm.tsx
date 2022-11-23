@@ -14,7 +14,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -62,6 +68,7 @@ import events from "@/lib/events";
 import CustomNumberFormatter from "./Form/CustomNumberFormatter";
 import { AppContext } from "@/context/appContext";
 import { getTinymanPools } from "@/lib/getTinyman";
+import { initialState, updateReducer } from "./Reducer/updateReducer";
 
 const WalletButton: any = dynamic(
   () =>
@@ -70,7 +77,7 @@ const WalletButton: any = dynamic(
     ssr: false,
   }
 );
-interface AssetSchema {
+export interface AssetSchema {
   "asset-id": number | string;
   amount: number;
   "is-frozen": boolean;
@@ -114,8 +121,6 @@ export const BotForm = () => {
   const [environment, setEnvironment] = useState<any | Environment>(
     process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
   );
-  const [config, setConfig] = useState<null | BotConfig>();
-
   const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
@@ -130,9 +135,9 @@ export const BotForm = () => {
     mnemonic,
     setMnemonic,
   }: any = context;
-  const [availableBalance, setAvailableBalance] = useState<AssetSchema[]>([]);
-  const [ASAError, setASAError] = useState("");
-  const [ASAWarning, setASAWarning] = useState("");
+  const [{ availableBalance, ASAError, ASAWarning, currentPrices }, dispatch] =
+    useReducer(updateReducer, initialState);
+  const [config, setConfig] = useState<null | BotConfig>();
   const { algoRate } = usePriceConversionHook({
     env: environment,
   });
@@ -142,7 +147,6 @@ export const BotForm = () => {
     assetId: "",
     assetDecimals: "",
     assetName: "",
-    assetPrice: 0,
     orderAlgoDepth_range: calculateReverseLogValue(300, 1, 10000000),
     orderAlgoDepth: 300,
     ladderTiers: 3,
@@ -196,7 +200,6 @@ export const BotForm = () => {
     const _formValues = { ...formValues };
     delete _formValues.minSpreadPerc_range;
     delete _formValues.orderAlgoDepth_range;
-    delete _formValues.assetPrice;
     delete _formValues.assetDecimals;
     const assetId = formValues.assetId;
 
@@ -213,6 +216,7 @@ export const BotForm = () => {
         validateWallet();
       } else if (walletAddr && mnemonic) {
         try {
+          postMessage(assetId);
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
             : "";
@@ -221,6 +225,7 @@ export const BotForm = () => {
             "market_maker_" +
             assetId +
             "_" +
+            new Date() +
             walletAddr.slice(0, 8).toLowerCase();
           const escrowDB = new PouchDB(fullPouchUrl);
           const api = initAPI(environment);
@@ -256,10 +261,11 @@ export const BotForm = () => {
       }
     }
   };
-
-  const stopBot = () => {
+  const stopBot = (callFn?: boolean) => {
     if (config) {
-      stopLoop({ config });
+      if (callFn) {
+        stopLoop({ config });
+      }
       setLoading(false);
     }
   };
@@ -267,9 +273,9 @@ export const BotForm = () => {
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     if (!loading) {
       formikRef.current.resetForm();
-      setASAError("");
+      dispatch({ type: "asaError", payload: "" });
       setEnvironment(value);
-      setAvailableBalance([]);
+      dispatch({ type: "balance", payload: [] });
     }
   };
 
@@ -277,20 +283,22 @@ export const BotForm = () => {
   const getAccount = async (
     assetId: number,
     assetDecimals: number,
-    assetName: string,
-    assetPrice: number
+    assetName: string
   ) => {
     if (walletAddr && assetId) {
       setGettingAccount(true);
-      //Check if this asset has liquidity on tinyman
-      if (
-        await checkTinymanLiquidity({
-          assetId,
-          decimals: assetDecimals,
-          environment,
-          setASAError,
-        })
-      ) {
+
+      //Check if this asset has enough liquidity on tinyman
+      const latestPrice = await checkTinymanLiquidity({
+        assetId,
+        decimals: assetDecimals,
+        environment,
+      });
+      dispatch({
+        type: "currentPrice",
+        payload: [algoRate, (latestPrice || 0) * algoRate],
+      });
+      if (latestPrice && latestPrice > 0) {
         try {
           const res = await getAccountInfo(walletAddr, environment);
           const ASAs = res.data.assets;
@@ -317,12 +325,12 @@ export const BotForm = () => {
               amount: walletASA.amount / 10 ** assetDecimals,
               amountInUSD:
                 (walletASA.amount / 10 ** assetDecimals) *
-                assetPrice *
+                (latestPrice || 0) *
                 algoRate,
             },
           ];
 
-          setAvailableBalance(val);
+          dispatch({ type: "balance", payload: val });
           if (loading) {
             events.emit("current-balance", {
               walletBalance: {
@@ -346,12 +354,19 @@ export const BotForm = () => {
           }, 5000);
         }
       } else {
+        if (!loading) {
+          dispatch({
+            type: "asaError",
+            payload:
+              "This ASA‘s liquidity is too low on Tinyman to use this bot",
+          });
+        }
         setTimeout(() => {
           setGettingAccount(false);
         }, 5000);
       }
     } else {
-      setAvailableBalance([]);
+      dispatch({ type: "balance", payload: [] });
     }
   };
 
@@ -362,11 +377,10 @@ export const BotForm = () => {
         getAccount(
           formikRef.current?.values?.assetId,
           formikRef.current?.values?.assetDecimals,
-          formikRef.current?.values?.assetName,
-          formikRef.current?.values?.assetPrice
+          formikRef.current?.values?.assetName
         );
       } else if (!walletAddr || !formikRef.current?.values?.assetId) {
-        setAvailableBalance([]);
+        dispatch({ type: "balance", payload: [] });
       }
     }
   }, [walletAddr, environment, gettingAccount, ASAError]);
@@ -379,10 +393,10 @@ export const BotForm = () => {
   ) => {
     if (assetId && availableBalance.length > 0) {
       const found = availableBalance.find(
-        (asset) => asset["asset-id"] === assetId
+        (asset: AssetSchema) => asset["asset-id"] === assetId
       );
       const algoBal = availableBalance.find(
-        (asset) => asset["asset-id"] === "ALGO"
+        (asset: AssetSchema) => asset["asset-id"] === "ALGO"
       );
       if (found) {
         if (found.amount > 0 && algoBal && algoBal?.amount > 0) {
@@ -401,24 +415,35 @@ export const BotForm = () => {
               const amountToTrade = ladderTiers * algoRate * orderAlgoDepth;
               if (maxLiquidity) {
                 if (amountToTrade >= maxLiquidity * 0.5) {
-                  setASAError(
-                    "This ASA’s liquidity on Tinyman is too low and risky to use this bot, please reduce your order sizes or select a different ASA"
-                  );
+                  dispatch({
+                    type: "asaError",
+                    payload:
+                      "This ASA’s liquidity on Tinyman is too low and risky to use this bot, please reduce your order sizes or select a different ASA",
+                  });
                   return true;
                 } else if (amountToTrade > maxLiquidity * 0.1) {
-                  setASAWarning(
-                    "Warning, this ASA‘s liquidity is low on Tinyman"
-                  );
+                  dispatch({
+                    type: "asaWarning",
+                    payload: "Warning, this ASA‘s liquidity is low on Tinyman",
+                  });
                   return false;
                 }
               } else {
-                setASAError(
-                  "This ASA‘s liquidity is too low on Tinyman to use this bot"
-                );
+                dispatch({
+                  type: "asaError",
+                  payload:
+                    "This ASA‘s liquidity is too low on Tinyman to use this bot",
+                });
                 return true;
               }
-              setASAError("");
-              setASAWarning("");
+              dispatch({
+                type: "asaError",
+                payload: "",
+              });
+              dispatch({
+                type: "asaWarning",
+                payload: "",
+              });
               return false;
             } catch (error) {
               setTimeout(() => {
@@ -428,7 +453,10 @@ export const BotForm = () => {
           };
           return checkLiquidity();
         } else {
-          setASAError("This ASA or Algo balance is too low to use this bot");
+          dispatch({
+            type: "asaError",
+            payload: "This ASA or Algo balance is too low to use this bot",
+          });
           return true;
         }
       }
@@ -440,11 +468,13 @@ export const BotForm = () => {
     //Listen to when the event logs a low balance error so the bot can stop on the UI
     events.on("running-bot", ({ content }: { content: string }) => {
       if (content === "Low balance!") {
-        setLoading(false);
-        setASAError(content);
+        stopBot();
+        dispatch({
+          type: "asaError",
+          payload: content,
+        });
       }
     });
-
     return () => events.off("running-bot");
   }, []);
 
@@ -535,25 +565,24 @@ export const BotForm = () => {
                       setFieldValue={(
                         val: string,
                         assetDecimals: number,
-                        assetName: string,
-                        assetPrice: number
+                        assetName: string
                       ) => {
                         const assetId = val ? parseInt(val) : "";
                         setFieldValue("assetId", assetId);
                         setFieldValue("assetDecimals", assetDecimals);
                         setFieldValue("assetName", assetName);
-                        setFieldValue("assetPrice", assetPrice);
-                        setASAError("");
-                        setASAWarning("");
+                        dispatch({
+                          type: "asaError",
+                          payload: "",
+                        });
+                        dispatch({
+                          type: "asaWarning",
+                          payload: "",
+                        });
                         if (assetId && assetDecimals) {
-                          getAccount(
-                            assetId,
-                            assetDecimals,
-                            assetName,
-                            assetPrice
-                          );
+                          getAccount(assetId, assetDecimals, assetName);
                         } else {
-                          setAvailableBalance([]);
+                          dispatch({ type: "balance", payload: [] });
                         }
                       }}
                       environment={environment}
@@ -624,62 +653,155 @@ export const BotForm = () => {
                     sx={{
                       border: "2px solid",
                       borderColor: "secondary.contrastText",
-                      padding: "15px 20px",
                       borderRadius: "3px",
                       marginTop: "40px",
                       marginBottom: "20px",
                       background: "transparent",
                     }}
                   >
-                    <Typography marginBottom={"10px"}>
-                      Available Balance
-                    </Typography>
-                    {availableBalance.map((asset) => (
+                    <Box
+                      sx={{
+                        padding: "15px 20px",
+                      }}
+                    >
                       <Box
-                        key={asset["asset-id"]}
                         sx={{
                           display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: "2px",
-                          paddingInline: "30px",
+                          justifyContent: "end",
+                          textAlign: "center",
                         }}
                       >
-                        <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
-                          {asset.name || asset["asset-id"]}:
+                        <Typography
+                          sx={{
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            width: "34%",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          Price (USD)
                         </Typography>
 
-                        <Box>
-                          <Typography
-                            sx={{
-                              textAlign: "end",
-                              fontSize: "18px",
-                              fontWeight: 700,
-                            }}
-                          >
-                            {asset.amount.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </Typography>
-                          <Typography
-                            sx={{
-                              textAlign: "end",
-                              fontSize: "14px",
-                              fontWeight: 700,
-                              color: "grey.200",
-                            }}
-                          >
-                            $
-                            {asset.amountInUSD.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </Typography>
-                        </Box>
+                        <Typography
+                          sx={{
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            width: "36%",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          Available Balance
+                        </Typography>
                       </Box>
-                    ))}
+                      {availableBalance.map(
+                        (asset: AssetSchema, index: number) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginBottom: "2px",
+                              borderBottom: "0.2px solid",
+                              borderColor:
+                                index === 0
+                                  ? "secondary.contrastText"
+                                  : "transparent",
+                              paddingInline: "30px",
+                              "@media(max-width:400px)": {
+                                paddingInline: "10px",
+                              },
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                fontSize: "18px",
+                                fontWeight: 700,
+                                width: "30%",
+                              }}
+                            >
+                              {asset.name || asset["asset-id"]}
+                            </Typography>
+                            <Box
+                              sx={{
+                                borderRight: "0.2px solid",
+                                borderLeft: "0.2px solid",
+                                borderColor: "secondary.contrastText",
+                                width: "34%",
+                                textAlign: "center",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontSize: "18px",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                $
+                                {currentPrices[index].toLocaleString(
+                                  undefined,
+                                  {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  }
+                                )}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ width: "36%", textAlign: "center" }}>
+                              <Typography
+                                sx={{
+                                  fontSize: "18px",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {asset.amount.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  color: "grey.200",
+                                }}
+                              >
+                                $
+                                {asset.amountInUSD.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        )
+                      )}
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        color: "secondary.dark",
+                        backgroundColor: "grey.300",
+                        padding: "10px 20px",
+                      }}
+                    >
+                      Look up prices and market activity at{" "}
+                      <Link
+                        href="https://vestige.fi"
+                        target={"_blanc"}
+                        sx={{
+                          color: "accent.dark",
+                          alignItems: "center",
+                          display: "inline-flex",
+                        }}
+                      >
+                        vestige.fi
+                        <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
+                      </Link>
+                    </Typography>
                   </Box>
                 )}
+
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"8px"}>
                     Order Size (in ALGOs)
@@ -757,7 +879,10 @@ export const BotForm = () => {
                             "orderAlgoDepth",
                             calculateLogValue(parseFloat(value), 1, 10000000)
                           );
-                          setASAError("");
+                          dispatch({
+                            type: "asaError",
+                            payload: "",
+                          });
                         }}
                       />
                       <Typography
@@ -829,7 +954,10 @@ export const BotForm = () => {
                               calculateReverseLogValue(_value, 1, 10000000)
                             );
                             setFieldValue("orderAlgoDepth", _value);
-                            setASAError("");
+                            dispatch({
+                              type: "asaError",
+                              payload: "",
+                            });
                           }}
                         />
 
@@ -1341,7 +1469,7 @@ export const BotForm = () => {
                         backgroundColor: "error.dark",
                       },
                     }}
-                    onClick={stopBot}
+                    onClick={() => stopBot(true)}
                   >
                     Stop Bot
                   </Button>

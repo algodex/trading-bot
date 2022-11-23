@@ -15,10 +15,10 @@
  */
 
 import algosdk from "algosdk";
-import axios from "axios";
 import { getTinymanPoolInfo } from "./getTinyman";
 import getTinymanPrice from "./getTinymanPrice";
 import { Environment } from "./types/config";
+const axios = require("axios");
 
 const algodToken = "";
 const algodServer = "https://node.algoexplorerapi.io/";
@@ -40,18 +40,13 @@ export const shortenAddress = (address: string, numb?: number) => {
 };
 
 export const searchAlgoAssets = async (query: string, env: Environment) => {
-  const mainnetURL = `${
+  const baseUrl = `${
     query
-      ? `/algodex-mainnet/assets/search/${query}`
-      : "algodex-mainnet/assets/searchall"
+      ? `/algodex-${env}/assets/search/${query}`
+      : `algodex-${env}/assets/searchall`
   }`;
-  const baseUrl =
-    env === "mainnet" ? mainnetURL : "/algodex-testnet/asset_search.php";
   try {
-    const response = await axios.get(
-      baseUrl,
-      env === "testnet" ? { params: { query } } : {}
-    );
+    const response = await axios.get(baseUrl);
     return response;
   } catch (error) {
     return error;
@@ -114,39 +109,27 @@ export const checkTinymanLiquidity = async ({
   assetId,
   decimals,
   environment,
-  setASAError,
 }: {
   assetId: number;
   decimals: number;
   environment: Environment;
-  setASAError: any;
 }) => {
   try {
     const poolInfo = await getTinymanPoolInfo(environment, assetId, decimals);
     if (poolInfo) {
-      const latestPrice = await getTinymanPrice(
+      return await getTinymanPrice(
         assetId,
         environment,
         decimals,
         poolInfo.addr
       );
-      if (latestPrice && latestPrice > 0) {
-        return true;
-      } else {
-        setASAError(
-          "This ASA‘s liquidity is too low on Tinyman to use this bot"
-        );
-        return false;
-      }
     }
-    return false;
   } catch (error) {
     setTimeout(() => {
       return checkTinymanLiquidity({
         assetId,
         decimals,
         environment,
-        setASAError,
       });
     }, 5000);
   }
