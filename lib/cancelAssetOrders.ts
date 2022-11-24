@@ -26,9 +26,9 @@ export const cancelAssetOrders = async (
     return { ...order, wallet: algodexApi.wallet };
   });
 
-  await Promise.all(
+   await Promise.all(
     mappedOpenAssetOrders.map((order: any) => {
-      algodexApi.closeOrder(order);
+     return algodexApi.closeOrder(order);
     })
   );
   return openAssetOrders;
