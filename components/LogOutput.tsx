@@ -95,7 +95,7 @@ export const LogOutput = () => {
       setStatus("");
       try {
         setCanceling(true);
-        const res = await cancelAssetOrders(
+        await cancelAssetOrders(
           {
             address: walletAddr,
             mnemonic: mnemonic,
@@ -103,10 +103,11 @@ export const LogOutput = () => {
           Number(formikRef.current.values.assetId),
           environment
         );
-        console.log({ res });
+        // console.log({ res });
         setCanceling(false);
       } catch (error) {
         console.error(error);
+        setStatus("Sorry, an error occurred");
         setCanceling(false);
       }
     } else {
