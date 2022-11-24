@@ -522,7 +522,6 @@ export const BotForm = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleStart}
-        validateOnBlur={true}
       >
         {({
           handleSubmit,
@@ -1088,6 +1087,10 @@ export const BotForm = () => {
                             ? 5
                             : parseFloat(value);
                           setFieldValue(
+                            "nearestNeighborKeep",
+                            _value ? _value / 2 : 0
+                          );
+                          setFieldValue(
                             "minSpreadPerc_range",
                             parseFloat(
                               calculateReverseLogValue(_value, 0.01, 5).toFixed(
@@ -1096,10 +1099,6 @@ export const BotForm = () => {
                             )
                           );
                           setFieldValue("minSpreadPerc", _value);
-                          setFieldValue(
-                            "nearestNeighborKeep",
-                            _value ? _value / 2 : 0
-                          );
                         }}
                       />
                       <span style={percentStyles}>%</span>
