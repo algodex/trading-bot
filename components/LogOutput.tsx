@@ -31,6 +31,7 @@ import Slider from "@mui/material/Slider";
 import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 
 //Custom styles
 import { cardStyles } from "./BotForm";
@@ -51,7 +52,7 @@ export const LogOutput = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [delCount, setDelCount] = useState(0);
   const [canceling, setCanceling] = useState(false);
-  const [status, setStatus] = useState("");
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     const _default = localStorage.getItem(storageKeys.logSetting);
@@ -94,7 +95,7 @@ export const LogOutput = () => {
 
   const cancelOrders = async () => {
     if (formikRef.current.values.assetId) {
-      setStatus("");
+      setNote("");
       try {
         setCanceling(true);
         await cancelAssetOrders(
@@ -109,11 +110,11 @@ export const LogOutput = () => {
         setCanceling(false);
       } catch (error) {
         console.error(error);
-        setStatus("Sorry, an error occurred");
+        setNote("Sorry, an error occurred");
         setCanceling(false);
       }
     } else {
-      setStatus("Please enter valid assetId");
+      setNote("Please enter valid assetId");
     }
   };
 
@@ -231,26 +232,52 @@ export const LogOutput = () => {
             height: "fit-content",
           }}
         >
-          <LoadingButton
+          <Box
+            sx={{
+              marginBlock: "30px",
+            }}
+          >
+            <LoadingButton
+              variant="outlined"
+              disabled={canceling || loading}
+              loading={canceling}
+              sx={{
+                whiteSpace: "nowrap",
+                borderColor: "error.main",
+                color: "error.main",
+                marginBottom: "3px",
+                "&:hover": {
+                  backgroundColor: "error.main",
+                },
+              }}
+              onClick={cancelOrders}
+            >
+              CANCEL ALL ORDERS
+            </LoadingButton>
+            <Typography
+              fontSize={"12px"}
+              fontWeight={500}
+              sx={{ maxWidth: "198px", lineHeight: 1, display: "flex" }}
+            >
+              <InfoOutlined
+                sx={{
+                  marginRight: "2px",
+                  fontSize: "11px",
+                  color: "secondary.dark",
+                  cursor: "pointer",
+                }}
+              />
+              This button cancels all orders only for the currently selected
+              asset
+            </Typography>
+          </Box>
+          <Button
             variant="outlined"
-            disabled={canceling || loading}
-            loading={canceling}
             sx={{
               marginBlock: "30px",
               whiteSpace: "nowrap",
-              borderColor: "error.main",
-              color: "error.main",
-              "&:hover": {
-                backgroundColor: "error.main",
-              },
+              height: "fit-content",
             }}
-            onClick={cancelOrders}
-          >
-            CANCEL ALL ORDERS
-          </LoadingButton>
-          <Button
-            variant="outlined"
-            sx={{ marginBlock: "30px", whiteSpace: "nowrap" }}
             onClick={() => {
               if (textareaRef.current) {
                 textareaRef.current.value = "";
@@ -261,7 +288,7 @@ export const LogOutput = () => {
           </Button>
         </Box>
       </Box>
-      {status && (
+      {note && (
         <Typography
           sx={{
             color: "error.main",
@@ -277,7 +304,7 @@ export const LogOutput = () => {
               fontSize: "12px",
             }}
           />
-          {status}
+          {note}
         </Typography>
       )}
     </>
