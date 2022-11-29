@@ -78,7 +78,7 @@ export const WalletButton = ({ loading }: { loading: boolean }) => {
         <Typography sx={{ fontWeight: 600, fontSize: "17px" }}>
           Connected Wallet:
         </Typography>
-        <Button variant="outlined" onClick={handleOpenModal} disabled={loading}>
+        <Button variant="outlined" onClick={handleOpenModal} disabled={loading} focusRipple={false} >
           {walletAddr ? shortenAddress(walletAddr || "") : "Input Mnemonic"}
         </Button>
       </Box>
