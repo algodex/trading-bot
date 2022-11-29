@@ -64,15 +64,17 @@ export const LogOutput = () => {
       ({ status, content }: { status: string; content: string }) => {
         if (textareaRef.current) {
           const value = textareaRef.current.value;
-          //the space before the \n ensures it picks the next line and with the space before it
+          //the space before the \n ensures it picks the next line and the space before it
           const total = value.split(" \n").length;
           if (delCount > 0 && total > delCount) {
             textareaRef.current.value = `${value
               .split(" \n")
               .slice(delCount)
-              .join("")} \n${status} ${content ? `\n${content}` : ""}`;
+              .join("")} \n${new Date().toLocaleString()}: ${status} ${
+              content ? `\n${content}` : ""
+            }`;
           } else {
-            textareaRef.current.value = `${value} \n${status} ${
+            textareaRef.current.value = `${value} \n${new Date().toLocaleString()}: ${status} ${
               content ? `\n${content}` : ""
             }`;
           }
