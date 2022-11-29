@@ -245,7 +245,7 @@ export const LogOutput = () => {
                 whiteSpace: "nowrap",
                 borderColor: "error.main",
                 color: "error.main",
-                marginBottom:'3px',
+                marginBottom: "3px",
                 "&:hover": {
                   backgroundColor: "error.main",
                 },
@@ -257,7 +257,7 @@ export const LogOutput = () => {
             <Typography
               fontSize={"12px"}
               fontWeight={500}
-              sx={{ maxWidth: "198px", lineHeight:1 }}
+              sx={{ maxWidth: "198px", lineHeight: 1, display: "flex" }}
             >
               <InfoOutlined
                 sx={{
