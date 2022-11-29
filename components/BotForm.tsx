@@ -762,7 +762,7 @@ export const BotForm = () => {
                     >
                       Look up prices and market activity at{" "}
                       <Link
-                        href="https://vestige.fi"
+                        href={`https://vestige.fi/asset/${values.assetId}`}
                         target={"_blanc"}
                         sx={{
                           color: "accent.dark",
