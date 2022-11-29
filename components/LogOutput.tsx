@@ -128,7 +128,7 @@ export const LogOutput = () => {
       />
       <Box
         sx={{
-          "@media(min-width:1200px)": {
+          "@media(min-width:1426px)": {
             display: "flex",
             justifyContent: "space-between",
             gap: "20px",
