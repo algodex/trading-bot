@@ -56,7 +56,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!environment) {
       setEnvironment(router.asPath.split("/")[1]);
     } else if (currentPath !== environment) {
-      router.push(`/${environment}`);
+      router.push(`/${router.locale}/${environment}`);
     }
   }, [router, environment]);
 

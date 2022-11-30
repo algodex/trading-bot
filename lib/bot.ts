@@ -17,7 +17,7 @@
 /* Usage:
  *
  * cp .env.testnet.example .env
- * node lib/bot.ts --assetId=<assetId>
+ * node lib/bot.ts --assetId=<assetId> --ladderTiers=<ladderTiers> --spreadPercentage=<spreadPercentage> --orderAlgoDepth=<orderAlgoDepth>
  *
  */
 
@@ -40,6 +40,17 @@ import runLoop from "./runLoop";
 // app.set('host', '127.0.0.1');
 if (args.assetId == undefined || args.assetId.length === 0) {
   throw new Error("assetId is not set in the args!");
+}
+
+if (args.ladderTiers == undefined || args.ladderTiers.length === 0) {
+  throw new Error("ladderTiers is not set in the args!");
+}
+
+if (args.spreadPercentage == undefined || args.spreadPercentage.length === 0) {
+  throw new Error("spreadPercentage is not set in the args!");
+}
+if (args.orderAlgoDepth == undefined || args.orderAlgoDepth.length === 0) {
+  throw new Error("orderAlgoDepth is not set in the args!");
 }
 
 if (
@@ -75,7 +86,7 @@ if (!process.env.ALGODEX_ASA_ESCROW_APP) {
 if (!process.env.ORDER_ALGO_DEPTH) {
   throw new Error("ORDER_ALGO_DEPTH not set in .env!");
 }
-const minSpreadPerc = parseFloat(process.env.SPREAD_PERCENTAGE!) || 0.0065; // FIXME
+const minSpreadPerc = parseFloat(args.spreadPercentage);
 const nearestNeighborKeep =
   parseFloat(process.env.NEAREST_NEIGHBOR_KEEP!) || 0.0035; // FIXME
 // const escrowDB = new PouchDB('escrows');
@@ -94,14 +105,14 @@ const fullPouchUrl =
   "_" +
   walletAddr.slice(0, 8).toLowerCase();
 const escrowDB = new PouchDB(fullPouchUrl);
-const ladderTiers = parseInt(process.env.LADDER_TIERS!) || 3;
+const ladderTiers = parseInt(args.ladderTiers);
 const useTinyMan =
   (process.env.USE_TINYMAN &&
     process.env.USE_TINYMAN.toLowerCase() !== "false") ||
   false;
 const environment =
   process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet" ? "mainnet" : "testnet";
-const orderAlgoDepth = parseInt(process.env.ORDER_ALGO_DEPTH!);
+const orderAlgoDepth = parseInt(args.orderAlgoDepth);
 
 const api = initAPI(environment);
 
