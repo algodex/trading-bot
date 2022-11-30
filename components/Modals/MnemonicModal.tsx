@@ -378,7 +378,8 @@ export const MnemonicModal = ({
                 </Typography>
               )}
               <Box sx={{ marginTop: "20px" }}>
-                <FormControlLabel sx={{alignItems:'flex-start'}}
+                <FormControlLabel
+                  sx={{ alignItems: "flex-start" }}
                   control={
                     <Checkbox
                       color={"dark600" as any}
@@ -388,7 +389,7 @@ export const MnemonicModal = ({
                       }}
                     />
                   }
-                  label="I understand that I am using open source software released without any warranty under the GNU Affero General Public License, and Algodex, its operators, development team, and Algodex (BVI) Corp are not responsible for lost funds for any reason, including market volatility, network connectivity, loss of the wallet mnemonic, or defects in the software."
+                  label="I understand that I am using open source software released without any warranty under the GNU Affero General Public License, and that Algodex, its operators, development team, and Algodex (BVI) Corp are not responsible for lost funds for any reason, including market volatility, network connectivity, loss of the wallet mnemonic, or defects in the software."
                 />
               </Box>
               <Box sx={{ textAlign: "center", marginBlock: "40px" }}>
