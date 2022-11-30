@@ -668,6 +668,41 @@ export const BotForm = () => {
                           }}
                         >
                           Available Balance
+                          <HtmlTooltip
+                            title={
+                              <Box
+                                sx={{
+                                  width: "300px",
+                                  maxWidth: "100%",
+                                  padding: ".3rem",
+                                }}
+                              >
+                                <Typography
+                                  fontWeight={700}
+                                  marginBottom={"6px"}
+                                  fontSize={"12px"}
+                                >
+                                  Available Balance is your current balance
+                                  available to place new orders. It does not
+                                  include any assets currently in placed orders.
+                                </Typography>
+                              </Box>
+                            }
+                            placement="top"
+                            arrow
+                            sx={{
+                              cursor: "pointer",
+                            }}
+                          >
+                            <InfoRoundedIcon
+                              sx={{
+                                marginLeft: "5px",
+                                fontSize: "13px",
+                                color: "secondary.dark",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </HtmlTooltip>
                         </Typography>
                       </Box>
                       {availableBalance.map(
