@@ -36,8 +36,6 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Button from "@mui/material/Button";
-import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
-import styled from "@emotion/styled";
 import HttpsIcon from "@mui/icons-material/Https";
 
 // Custom components and hooks
@@ -61,6 +59,8 @@ import CustomNumberFormatter from "./Form/CustomNumberFormatter";
 import { AppContext } from "@/context/appContext";
 import { getTinymanPools } from "@/lib/getTinyman";
 import { initialState, updateReducer } from "./Reducer/updateReducer";
+import { AvailableBalance } from "./AvailableBalance";
+import { HtmlTooltip } from "./HtmlTooltip";
 
 const WalletButton: any = dynamic(
   () =>
@@ -77,14 +77,6 @@ export interface AssetSchema {
   amountInUSD: number;
   decimals: number;
 }
-
-const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }}></Tooltip>
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: (theme as any).palette.secondary.dark,
-  },
-}));
 
 const environmentLinks = ["testnet", "mainnet"];
 
@@ -211,7 +203,6 @@ export const BotForm = () => {
             "market_maker_" +
             assetId +
             "_" +
-            new Date() +
             walletAddr.slice(0, 8).toLowerCase();
           const escrowDB = new PouchDB(fullPouchUrl);
           const api = initAPI(environment);
@@ -247,6 +238,7 @@ export const BotForm = () => {
       }
     }
   };
+
   const stopBot = (callFn?: boolean) => {
     if (config) {
       if (callFn) {
@@ -625,194 +617,11 @@ export const BotForm = () => {
                     {ASAError || ASAWarning}
                   </Typography>
                 )}
-                {availableBalance.length > 0 && (
-                  <Box
-                    sx={{
-                      border: "2px solid",
-                      borderColor: "secondary.contrastText",
-                      borderRadius: "3px",
-                      marginTop: "40px",
-                      marginBottom: "20px",
-                      background: "transparent",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        padding: "15px 20px",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "end",
-                          textAlign: "center",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            width: "34%",
-                            marginBottom: "10px",
-                          }}
-                        >
-                          Price (USD)
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            width: "36%",
-                            marginBottom: "10px",
-                          }}
-                        >
-                          Available Balance
-                          <HtmlTooltip
-                            title={
-                              <Box
-                                sx={{
-                                  width: "300px",
-                                  maxWidth: "100%",
-                                  padding: ".3rem",
-                                }}
-                              >
-                                <Typography
-                                  fontWeight={700}
-                                  marginBottom={"6px"}
-                                  fontSize={"12px"}
-                                >
-                                  Available Balance is your current balance
-                                  available to place new orders. It does not
-                                  include any assets currently in placed orders.
-                                </Typography>
-                              </Box>
-                            }
-                            placement="top"
-                            arrow
-                            sx={{
-                              cursor: "pointer",
-                            }}
-                          >
-                            <InfoRoundedIcon
-                              sx={{
-                                marginLeft: "5px",
-                                fontSize: "13px",
-                                color: "secondary.dark",
-                                cursor: "pointer",
-                              }}
-                            />
-                          </HtmlTooltip>
-                        </Typography>
-                      </Box>
-                      {availableBalance.map(
-                        (asset: AssetSchema, index: number) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginBottom: "2px",
-                              borderBottom: "0.2px solid",
-                              borderColor:
-                                index === 0
-                                  ? "secondary.contrastText"
-                                  : "transparent",
-                              paddingInline: "30px",
-                              "@media(max-width:400px)": {
-                                paddingInline: "10px",
-                              },
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                width: "30%",
-                              }}
-                            >
-                              {asset.name || asset["asset-id"]}
-                            </Typography>
-                            <Box
-                              sx={{
-                                borderRight: "0.2px solid",
-                                borderLeft: "0.2px solid",
-                                borderColor: "secondary.contrastText",
-                                width: "34%",
-                                textAlign: "center",
-                              }}
-                            >
-                              <Typography
-                                sx={{
-                                  fontSize: "18px",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                $
-                                {currentPrices[index].toLocaleString(
-                                  undefined,
-                                  {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  }
-                                )}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ width: "36%", textAlign: "center" }}>
-                              <Typography
-                                sx={{
-                                  fontSize: "18px",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {asset.amount.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </Typography>
-                              <Typography
-                                sx={{
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  color: "grey.200",
-                                }}
-                              >
-                                $
-                                {asset.amountInUSD.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        )
-                      )}
-                    </Box>
-                    <Typography
-                      sx={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        color: "secondary.dark",
-                        backgroundColor: "grey.300",
-                        padding: "10px 20px",
-                      }}
-                    >
-                      Look up prices and market activity at{" "}
-                      <Link
-                        href={`https://vestige.fi/asset/${values.assetId}`}
-                        target={"_blanc"}
-                        sx={{
-                          color: "accent.dark",
-                          alignItems: "center",
-                          display: "inline-flex",
-                        }}
-                      >
-                        vestige.fi
-                        <LaunchIcon sx={{ fontSize: "14px", ml: "5px" }} />
-                      </Link>
-                    </Typography>
-                  </Box>
-                )}
+                <AvailableBalance
+                  availableBalance={availableBalance}
+                  currentPrices={currentPrices}
+                  assetId={values.assetId}
+                />
 
                 <Box sx={cardStyles}>
                   <Typography marginBottom={"8px"}>
@@ -1143,7 +952,7 @@ export const BotForm = () => {
                   </Grid>
                   <Note
                     note={`These settings ${
-                      values.minSpreadPerc > 1 ? "DO NOT " : ""
+                      values.minSpreadPerc > 5 ? "DO NOT " : ""
                     }qualify for ALGX Rewards.`}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
