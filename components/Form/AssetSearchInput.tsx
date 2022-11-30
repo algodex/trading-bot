@@ -65,7 +65,7 @@ export const AssetSearchInput = ({
       setLoading(true);
       const res: any = await searchAlgoAssets(query.trim(), environment);
       setLoading(false);
-      if (res.data) {
+      if (res?.data) {
         const assets: AssetSchema[] = res.data;
         const list = [...assets].filter((asset) => !asset.destroyed);
         if (list.length == 1) {

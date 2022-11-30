@@ -31,6 +31,24 @@ const rewrites = () => {
       source: "/algodex-testnet/:path*",
       destination: "https://testnet.algodex.com/api/v2/:path*",
     },
+    {
+      source: "/testnet",
+      destination: "/",
+    },
+    {
+      source: "/mainnet",
+      destination: "/",
+    },
+  ];
+};
+
+const redirects = () => {
+  return [
+    {
+      source: "/",
+      destination: "/mainnet",
+      permanent: true,
+    },
   ];
 };
 
@@ -38,6 +56,7 @@ const nextConfig = {
   reactStrictMode: true,
   i18n,
   rewrites,
+  redirects,
   swcMinify: true,
 };
 
