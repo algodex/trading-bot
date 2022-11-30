@@ -40,6 +40,7 @@ export const shortenAddress = (address: string, numb?: number) => {
 };
 
 export const searchAlgoAssets = async (query: string, env: Environment) => {
+  if (!env) return;
   const baseUrl = `${
     query
       ? `/algodex-${env}/assets/search/${query}`

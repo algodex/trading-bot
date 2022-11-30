@@ -1,6 +1,7 @@
 import { PassPhrase } from "@/components/Form/CustomPasswordInput";
 import { getWallet } from "@/lib/storage";
 import { Environment } from "@/lib/types/config";
+import { useRouter } from "next/router";
 import React, {
   createContext,
   ReactNode,
@@ -13,6 +14,7 @@ import React, {
 export const AppContext: any = createContext(null);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
   const [walletAddr, setWalletAddr] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const formikRef = useRef<any>();
@@ -20,9 +22,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [openValidateModal, setOpenValidateModal] = useState(false);
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
   const [forgotPassphrase, setForgotPassphrase] = useState<boolean>(false);
-  const [environment, setEnvironment] = useState<any | Environment>(
-    process.env.NEXT_PUBLIC_ENVIRONMENT || "testnet"
-  );
+  const [environment, setEnvironment] = useState<any | Environment>();
   const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
@@ -50,6 +50,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setForgotPassphrase(false);
     setPassphrase((prev: PassPhrase) => ({ ...prev, password: "" }));
   };
+
+  useEffect(() => {
+    const currentPath = router.asPath.split("/")[1];
+    if (!environment) {
+      setEnvironment(router.asPath.split("/")[1]);
+    } else if (currentPath !== environment) {
+      router.push(`/${environment}`);
+    }
+  }, [router, environment]);
 
   return (
     <AppContext.Provider
