@@ -17,16 +17,16 @@
 import { AssetSchema } from "../BotForm";
 
 interface State {
-  ASAError: string;
+  ASAError: string | null;
   availableBalance: AssetSchema[];
-  ASAWarning: string;
+  ASAWarning: string | null;
   currentPrices: number[];
 }
 
 export const initialState = {
-  ASAError: "",
+  ASAError: null,
   availableBalance: [],
-  ASAWarning: "",
+  ASAWarning: null,
   currentPrices: [],
 };
 

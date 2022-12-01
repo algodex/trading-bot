@@ -101,7 +101,7 @@ export const AssetSearchInput = ({
       <>
         {verified ? (
           <VerifiedUserIcon
-            sx={{ marginLeft: 2, color: "info.main", fontSize: "15px" }}
+            sx={{ marginLeft: 2, color: "info.main", fontSize: "14px" }}
           />
         ) : null}
       </>
