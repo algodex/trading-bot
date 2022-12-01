@@ -14,19 +14,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from "react";
+import React, { ReactNode } from "react";
 
 // Material UI components
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import Link from "./Nav/Link";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
+//Custom components
+import Link from "./Nav/Link";
 interface NoteSchema {
   link?: { url: string; title: string };
   icon?: any;
-  note: string;
+  note: string | ReactNode;
   styles?: object;
+  isPositive?: boolean;
 }
 
 export const Note = ({
@@ -34,6 +37,7 @@ export const Note = ({
   icon: IconComponent,
   note,
   styles,
+  isPositive,
 }: NoteSchema) => {
   return (
     <Box
@@ -48,14 +52,22 @@ export const Note = ({
         ...styles,
       }}
     >
-      {IconComponent == "Empty" ? (
+      {IconComponent === "Empty" ? (
         <></>
       ) : IconComponent ? (
         <IconComponent />
       ) : (
-        <CheckCircleOutlineRoundedIcon
-          sx={{ marginRight: "5px", fontSize: "15px", marginTop:'3px' }}
-        />
+        <>
+          {isPositive ? (
+            <CheckCircleOutlineRoundedIcon
+              sx={{ marginRight: "5px", fontSize: "15px", marginTop: "3px" }}
+            />
+          ) : (
+            <ErrorOutlineIcon
+              sx={{ marginRight: "5px", fontSize: "15px", marginTop: "3px" }}
+            />
+          )}
+        </>
       )}
       <Box>
         {note && (

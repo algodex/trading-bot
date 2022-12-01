@@ -794,12 +794,19 @@ export const BotForm = () => {
                     </Grid>
                   </Grid>
                   <Note
-                    note={`These settings ${
-                      values.orderAlgoDepth * algoRate < 100 ? "DO NOT " : ""
-                    }qualify for ALGX Rewards.`}
+                    note={
+                      <>
+                        <span>These settings</span>{" "}
+                        {values.orderAlgoDepth * algoRate < 100 ? (
+                          <u>DO NOT</u>
+                        ) : null}{" "}
+                        <span>qualify for ALGX Rewards.</span>
+                      </>
+                    }
+                    isPositive={values.orderAlgoDepth * algoRate >= 100}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
-                      title: "Read about Rewards Calcuations",
+                      title: "Read about Rewards Calculations",
                     }}
                   />
                 </Box>
@@ -951,12 +958,17 @@ export const BotForm = () => {
                     </Grid>
                   </Grid>
                   <Note
-                    note={`These settings ${
-                      values.minSpreadPerc > 5 ? "DO NOT " : ""
-                    }qualify for ALGX Rewards.`}
+                    note={
+                      <>
+                        <span>These settings</span>{" "}
+                        {values.minSpreadPerc > 5 ? <u>DO NOT</u> : null}{" "}
+                        <span>qualify for ALGX Rewards.</span>
+                      </>
+                    }
+                    isPositive={values.minSpreadPerc <= 5}
                     link={{
                       url: "https://docs.algodex.com/rewards-program/algx-liquidity-rewards-program",
-                      title: "Read about Rewards Calcuations",
+                      title: "Read about Rewards Calculations",
                     }}
                   />
                 </Box>
