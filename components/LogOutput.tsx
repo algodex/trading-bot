@@ -139,7 +139,12 @@ export const LogOutput = () => {
         }}
       >
         <Accordion
-          sx={{ ...cardStyles, marginBlock: "20px !important", width: "100%" }}
+          sx={{
+            ...cardStyles,
+            marginBlock: "20px !important",
+            width: "100%",
+            height: "fit-content",
+          }}
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
