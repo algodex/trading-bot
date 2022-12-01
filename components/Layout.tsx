@@ -31,7 +31,7 @@ import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import OutboxIcon from "@mui/icons-material/Outbox";
 import ArticleIcon from "@mui/icons-material/Article";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import { Socials } from "./socials";
+import { Footer } from "./footer";
 
 /**
  * Layout Component
@@ -106,28 +106,26 @@ export function Layout({ children, components, componentsProps }: any) {
           {...componentsProps.Toolbar}
         />
       </AppBar>
-      <Box>
-        <Box sx={{ display: "flex", flex: 1, overflow: "auto" }}>
-          <Drawer
-            open={drawerOpen && isMobile}
-            links={Links}
-            {...componentsProps.Drawer}
-          />
-          {/* Display the Page Component */}
-          <Container
-            sx={{
-              "@media (min-width:1200px)": {
-                maxWidth: "95vw !important",
-              },
-              // "@media (min-width:1600px)": {
-              //   maxWidth: "80vw !important",
-              // },
-            }}
-          >
-            {children}
-          </Container>
-        </Box>
-        <Socials />
+      <Box sx={{ display: "flex", flex: 1, overflow: "auto" }}>
+        <Drawer
+          open={drawerOpen && isMobile}
+          links={Links}
+          {...componentsProps.Drawer}
+        />
+        {/* Display the Page Component */}
+        <Container
+          sx={{
+            "@media (min-width:1200px)": {
+              maxWidth: "95vw !important",
+            },
+            // "@media (min-width:1600px)": {
+            //   maxWidth: "80vw !important",
+            // },
+          }}
+        >
+          <Box sx={{ paddingBottom: "40px" }}>{children}</Box>
+          <Footer />
+        </Container>
       </Box>
     </Box>
   );
