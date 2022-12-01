@@ -15,8 +15,10 @@
  */
 
 import React from "react";
+import Image from "next/image";
 
 //MUI components
+import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RedditIcon from "@mui/icons-material/Reddit";
@@ -25,48 +27,56 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 
 //Algodex
 import Link from "./Nav/Link";
-import Image from "next/image";
 
 export const Footer = () => {
   return (
     <Box
       sx={{
+        width: "100%",
         backgroundColor: "primary.main",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "16px 17px",
         position: "absolute",
         bottom: 0,
         right: 0,
-        width: "100%",
-        flexWrap: "wrap",
-        // "@media(max-width:600px)": {
-        //   flexDirection: "column-reverse",
-        //   alignItems: "end",
-        // },
       }}
     >
-      <Box
+      <Container
         sx={{
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: "13px",
+          padding: "16px 17px",
+          width: "100%",
+          flexWrap: "wrap",
+          "@media (min-width:1200px)": {
+            maxWidth: "95vw !important",
+          },
+          // "@media(max-width:600px)": {
+          //   flexDirection: "column-reverse",
+          //   alignItems: "end",
+          // },
         }}
       >
-        <Link
-          href="http://t.me/algodex"
-          target="_blank"
-          rel="noreferrer"
+        <Box
           sx={{
-            color: "secondary.contrastText",
-            fontWeight: 600,
-            fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "13px",
           }}
         >
-          © Algonaut Capital 2022
-        </Link>
-        {/* <Link
+          <Link
+            href="http://t.me/algodex"
+            target="_blank"
+            rel="noreferrer"
+            sx={{
+              color: "secondary.contrastText",
+              fontWeight: 600,
+              fontSize: "14px",
+            }}
+          >
+            © Algonaut Capital 2022
+          </Link>
+
+          {/* | <Link
           href="http://t.me/algodex"
           target="_blank"
           rel="noreferrer"
@@ -77,7 +87,7 @@ export const Footer = () => {
           }}
         >
           Disclosures
-        </Link>
+        </Link> | 
         <Link
           href="http://t.me/algodex"
           target="_blank"
@@ -90,48 +100,56 @@ export const Footer = () => {
         >
           Privacy Policy
         </Link> */}
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: "13px",
-          lineHeight: 0,
-        }}
-      >
-        <Link href="http://t.me/algodex" target="_blank" rel="noreferrer">
-          <TelegramIcon sx={{ fontSize: "1.5rem", color: "secondary.dark" }} />
-        </Link>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "13px",
+            lineHeight: 0,
+          }}
+        >
+          <Link href="http://t.me/algodex" target="_blank" rel="noreferrer">
+            <TelegramIcon
+              sx={{ fontSize: "1.5rem", color: "secondary.dark" }}
+            />
+          </Link>
 
-        <Link
-          href="https://discord.gg/qS3Q7AqwF6"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <Image src="/discord.svg" alt="Discord Logo" width="17" height="17" />
-        </Link>
-        <Link
-          href="https://github.com/algodex/trading-bot/issues"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <GitHubIcon sx={{ fontSize: "1.3rem", color: "secondary.dark" }} />
-        </Link>
-        <Link
-          href="https://www.reddit.com/r/Algodex/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <RedditIcon sx={{ fontSize: "1.6rem", color: "secondary.dark" }} />
-        </Link>
-        <Link
-          href="https://twitter.com/AlgodexOfficial"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <TwitterIcon sx={{ fontSize: "1.4rem", color: "secondary.dark" }} />
-        </Link>
-      </Box>
+          <Link
+            href="https://discord.gg/qS3Q7AqwF6"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Image
+              src="/discord.svg"
+              alt="Discord Logo"
+              width="17"
+              height="17"
+            />
+          </Link>
+          <Link
+            href="https://github.com/algodex/trading-bot/issues"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <GitHubIcon sx={{ fontSize: "1.3rem", color: "secondary.dark" }} />
+          </Link>
+          <Link
+            href="https://www.reddit.com/r/Algodex/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <RedditIcon sx={{ fontSize: "1.6rem", color: "secondary.dark" }} />
+          </Link>
+          <Link
+            href="https://twitter.com/AlgodexOfficial"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <TwitterIcon sx={{ fontSize: "1.4rem", color: "secondary.dark" }} />
+          </Link>
+        </Box>
+      </Container>
     </Box>
   );
 };
