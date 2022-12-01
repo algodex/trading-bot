@@ -251,7 +251,7 @@ export const BotForm = () => {
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
     if (!loading) {
       formikRef.current.resetForm();
-      dispatch({ type: "asaError", payload: "" });
+      dispatch({ type: "asaError", payload: null });
       setEnvironment(value);
       dispatch({ type: "balance", payload: [] });
     }
@@ -416,11 +416,11 @@ export const BotForm = () => {
               }
               dispatch({
                 type: "asaError",
-                payload: "",
+                payload: null,
               });
               dispatch({
                 type: "asaWarning",
-                payload: "",
+                payload: null,
               });
               return false;
             } catch (error) {
@@ -537,22 +537,22 @@ export const BotForm = () => {
                         assetName: string
                       ) => {
                         const assetId = val ? parseInt(val) : "";
-                        setFieldValue("assetId", assetId);
-                        setFieldValue("assetDecimals", assetDecimals);
-                        setFieldValue("assetName", assetName);
                         dispatch({
                           type: "asaError",
-                          payload: "",
+                          payload: null,
                         });
                         dispatch({
                           type: "asaWarning",
-                          payload: "",
+                          payload: null,
                         });
                         if (assetId && assetDecimals) {
                           getAccount(assetId, assetDecimals, assetName);
                         } else {
                           dispatch({ type: "balance", payload: [] });
                         }
+                        setFieldValue("assetDecimals", assetDecimals);
+                        setFieldValue("assetName", assetName);
+                        setFieldValue("assetId", assetId);
                       }}
                       environment={environment}
                     />
@@ -702,7 +702,7 @@ export const BotForm = () => {
                           );
                           dispatch({
                             type: "asaError",
-                            payload: "",
+                            payload: null,
                           });
                         }}
                       />
@@ -777,7 +777,7 @@ export const BotForm = () => {
                             setFieldValue("orderAlgoDepth", _value);
                             dispatch({
                               type: "asaError",
-                              payload: "",
+                              payload: null,
                             });
                           }}
                         />
@@ -1254,7 +1254,7 @@ export const BotForm = () => {
                       loading ||
                       !isValid ||
                       !values.assetId ||
-                      ASAError !== "" ||
+                      ASAError ||
                       (walletAddr && !mnemonic)
                     }
                     sx={{ py: "0.8rem", mt: "1rem" }}
