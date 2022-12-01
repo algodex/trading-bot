@@ -82,9 +82,9 @@ if (!process.env.ALGODEX_ASA_ESCROW_APP) {
 // if (!process.env.NEXT_PUBLIC_INDEXER_PORT) {
 //   throw new Error('NEXT_PUBLIC_INDEXER_PORT not set!');
 // }
-if (!process.env.ORDER_ALGO_DEPTH) {
-  throw new Error("ORDER_ALGO_DEPTH not set in .env!");
-}
+// if (!process.env.ORDER_ALGO_DEPTH) {
+//   throw new Error("ORDER_ALGO_DEPTH not set in .env!");
+// }
 const minSpreadPerc = parseFloat(args.spreadPercentage);
 const nearestNeighborKeep =
   parseFloat(process.env.NEAREST_NEIGHBOR_KEEP!) || 0.0035; // FIXME
