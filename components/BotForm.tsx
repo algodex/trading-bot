@@ -240,12 +240,8 @@ export const BotForm = () => {
   };
 
   const stopBot = (callFn?: boolean) => {
-    if (config) {
-      if (callFn) {
-        stopLoop({ config });
-      }
-      setLoading(false);
-    }
+    setLoading(false);
+    if (config && callFn) stopLoop({ config });
   };
 
   const handleChange = ({ target: { value } }: SelectChangeEvent<string>) => {
