@@ -14,6 +14,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { BotConfig } from "@/lib/types/config";
 import { AssetSchema } from "../BotForm";
 
 interface State {
@@ -21,6 +22,7 @@ interface State {
   availableBalance: AssetSchema[];
   ASAWarning: string | null;
   currentPrices: number[];
+  config: null | BotConfig;
 }
 
 export const initialState = {
@@ -28,6 +30,7 @@ export const initialState = {
   availableBalance: [],
   ASAWarning: null,
   currentPrices: [],
+  config: null,
 };
 
 export const updateReducer = (
@@ -46,6 +49,11 @@ export const updateReducer = (
       return {
         ...state,
         currentPrices: payload,
+      };
+    case "config":
+      return {
+        ...state,
+        config: payload,
       };
     default:
       return state;

@@ -19,6 +19,7 @@ export const storageKeys = {
   wallet: "algodex_tb_wallet_address",
   mnemonic: "ag_m_s_x",
   logSetting: "log_setting",
+  assets: "current_assets", //assets that are currenting trading on the bot, via single or multiple tabs.
 };
 
 export const getWallet = () => {
