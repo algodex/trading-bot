@@ -144,8 +144,6 @@ const getCurrent = () => {
 
 export const currentlyTrading = (assetId: number | string, dispatch: any) => {
   //Check if the assetId is present in the current trades; opened via multiple tabs
-  console.log("checking", assetId);
-  console.log("current 1", getCurrent());
   if (getCurrent().includes(assetId)) {
     dispatch({
       type: "asaError",
@@ -157,7 +155,6 @@ export const currentlyTrading = (assetId: number | string, dispatch: any) => {
 };
 
 export const addToTradeList = (assetId: number) => {
-  console.log("current 2", getCurrent());
   const current = getCurrent();
   if (!current.includes(assetId)) {
     localStorage.setItem(
@@ -168,7 +165,6 @@ export const addToTradeList = (assetId: number) => {
 };
 
 export const removeFromTradeList = (assetId?: number) => {
-  console.log("current 3", getCurrent());
   if (assetId) {
     const copy = [...getCurrent()];
     const currIndex = copy.findIndex((id: number) => assetId === id);

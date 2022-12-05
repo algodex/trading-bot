@@ -28,6 +28,7 @@ import { cancelOrders } from "./cancelOrders";
 import * as events from "./events";
 import { getTinymanPoolInfo } from "./getTinyman";
 import getAssetInfo from "./getAssetInfo";
+import { removeFromTradeList } from "./helper";
 
 export interface RunLoopInput {
   assetInfo: any;
@@ -219,5 +220,6 @@ export const stopLoop = async ({
         content: errorStatus,
       });
     }
+    removeFromTradeList(config.assetId);
   }
 };

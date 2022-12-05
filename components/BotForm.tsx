@@ -197,6 +197,7 @@ export const BotForm = () => {
       } else if (walletAddr && !mnemonic) {
         validateWallet();
       } else if (walletAddr && mnemonic) {
+        if (currentlyTrading(assetId, dispatch)) return;
         try {
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
