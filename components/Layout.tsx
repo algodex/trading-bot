@@ -55,7 +55,7 @@ const Links = [
   {
     text: "DOCS",
     icon: <ArticleIcon />,
-    link: "https://docs.algodex.com",
+    link: "https://docs.algodex.com/algodex/trading-bot-guide",
   },
   {
     text: "SUPPORT",
