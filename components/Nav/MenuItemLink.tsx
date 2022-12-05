@@ -69,6 +69,9 @@ function MenuItemLink({
     <MenuItem
       component={renderLink}
       selected={activeNav === to}
+      sx={{
+        padding: "6px 13px",
+      }}
     >
       {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
       <ListItemText primary={primary} />

@@ -64,7 +64,7 @@ function Toolbar({
 }) {
   return (
     <MUIToolbar sx={{ height, backgroundColor: "primary.main" }} {...rest}>
-      <Box flex={1} display={"flex"} alignItems={"baseline"}>
+      <Box flex={1}>
         <Logo isTab={isTab} />
       </Box>
       {!isMobile && (

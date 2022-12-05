@@ -34,7 +34,7 @@ export const Logo = ({
         href="/"
         sx={{
           display: "flex",
-          alignItems: "baseline",
+          alignItems: "end",
           textDecoration: "none",
           color: "#1A202C",
         }}

@@ -19,7 +19,7 @@ const defaults = ['common']
 module.exports = {
   defaults,
   i18n: {
-    locales: ['en', 'es'],
+    locales: ['en'],
     defaultLocale: 'en',
     pages: {
       '*': defaults,

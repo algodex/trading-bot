@@ -161,6 +161,7 @@ export const LocaleNavMenu = () => {
                   id="composition-menu"
                   aria-labelledby="composition-button"
                   onKeyDown={handleListKeyDown}
+                  sx={{ paddingBlock: "0" }}
                 >
                   {i18n.locales
                     .filter((localeCd) => localeCd !== locale)

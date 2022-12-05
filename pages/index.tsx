@@ -50,7 +50,7 @@ const RegisterPage = () => {
         }}
       >
         <Grid item xs={12} sm={10} marginX="auto" md={6} lg={6} xl={6}>
-          <Box sx={{ maxWidth: "1015px" }}>
+          <Box sx={{ maxWidth: "906px" }}>
             <BotForm />
           </Box>
         </Grid>
