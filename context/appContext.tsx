@@ -7,7 +7,6 @@ import React, {
   ReactNode,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -17,7 +16,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const [walletAddr, setWalletAddr] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const formikRef = useRef<any>();
+  const [formValues, setFormValues] = useState({});
   const [mnemonic, setMnemonic] = useState("");
   const [openValidateModal, setOpenValidateModal] = useState(false);
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
@@ -80,9 +79,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setForgotPassphrase,
         environment,
         setEnvironment,
-        formikRef,
         loading,
         setLoading,
+        formValues,
+        setFormValues,
       }}
     >
       {children}
