@@ -122,7 +122,7 @@ export const LogOutput = () => {
       />
       <Box
         sx={{
-          "@media(min-width:1426px)": {
+          "@media(min-width:1552px)": {
             display: "flex",
             justifyContent: "space-between",
             gap: "20px",
@@ -156,14 +156,7 @@ export const LogOutput = () => {
                 },
             }}
           >
-            <Typography
-              sx={{
-                fontSize: "20px",
-                fontWeight: 500,
-              }}
-            >
-              Logs Settings
-            </Typography>
+            <Typography fontWeight={500}>Logs Settings</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography marginBottom={"20px"}>

@@ -105,8 +105,8 @@ export const cardStyles = {
 
 const percentStyles: any = {
   position: "absolute",
-  right: "4px",
-  top: "9px",
+  right: "7px",
+  top: "10px",
   fontSize: "12px",
 };
 
@@ -771,9 +771,9 @@ export const BotForm = () => {
                           step={0.01}
                           required
                           sx={{
-                            maxWidth: "111px",
+                            maxWidth: "116px",
                             input: {
-                              padding: "6.5px 18px 6.5px 14px",
+                              padding: "6.5px 22px 6.5px 14px",
                               width: "100%",
                               textAlign: "end",
                             },
@@ -942,11 +942,14 @@ export const BotForm = () => {
                         step={0.01}
                         required
                         sx={{
-                          maxWidth: "111px",
+                          maxWidth: "115px",
                           input: {
-                            padding: "6.5px 14px 6.5px 14px",
+                            padding: "6.5px 11px 6.5px 14px",
                             width: "100%",
                             textAlign: "end",
+                            "@media(max-width:900px)": {
+                              paddingRight: "22px",
+                            },
                           },
                         }}
                         onChange={({
@@ -1117,14 +1120,7 @@ export const BotForm = () => {
                         },
                     }}
                   >
-                    <Typography
-                      sx={{
-                        fontSize: "20px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      Advanced Options
-                    </Typography>
+                    <Typography fontWeight={500}>Advanced Options</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Typography marginBottom={"20px"}>
@@ -1216,9 +1212,12 @@ export const BotForm = () => {
                           sx={{
                             maxWidth: "111px",
                             input: {
-                              padding: "6.5px 14px 6.5px 14px",
+                              padding: "6.5px 11px 6.5px 14px",
                               width: "100%",
                               textAlign: "end",
+                              "@media(max-width:900px)": {
+                                paddingRight: "22px",
+                              },
                             },
                           }}
                           onChange={({
@@ -1277,7 +1276,7 @@ export const BotForm = () => {
                       ASAError !== null ||
                       (walletAddr && !mnemonic)
                     }
-                    sx={{ py: "0.8rem", mt: "1rem" }}
+                    sx={{ py: "0.8rem", mt: "1rem", fontWeight: "bold" }}
                   >
                     Start Bot
                   </LoadingButton>
@@ -1289,6 +1288,7 @@ export const BotForm = () => {
                     sx={{
                       py: "0.8rem",
                       mt: "1rem",
+                      fontWeight: "bold",
                       backgroundColor: "error.dark",
                       "&:hover": {
                         backgroundColor: "error.dark",
