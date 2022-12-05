@@ -17,6 +17,7 @@
 import algosdk from "algosdk";
 import { getTinymanPoolInfo } from "./getTinyman";
 import getTinymanPrice from "./getTinymanPrice";
+import { storageKeys } from "./storage";
 import { Environment } from "./types/config";
 const axios = require("axios");
 
@@ -133,5 +134,43 @@ export const checkTinymanLiquidity = async ({
         environment,
       });
     }, 5000);
+  }
+};
+
+const getCurrent = () => {
+  const prev = localStorage.getItem(storageKeys.assets);
+  return prev ? JSON.parse(prev) : [];
+};
+
+export const currentlyTrading = (assetId: number | string, dispatch: any) => {
+  //Check if the assetId is present in the current trades; opened via multiple tabs
+  if (getCurrent().includes(assetId)) {
+    dispatch({
+      type: "asaError",
+      payload: "This asset is currently trading on another tab!",
+    });
+    return true;
+  }
+  return false;
+};
+
+export const addToTradeList = (assetId: number) => {
+  const current = getCurrent();
+  if (!current.includes(assetId)) {
+    localStorage.setItem(
+      storageKeys.assets,
+      JSON.stringify([...current, assetId])
+    );
+  }
+};
+
+export const removeFromTradeList = (assetId?: number) => {
+  if (assetId) {
+    const copy = [...getCurrent()];
+    const currIndex = copy.findIndex((id: number) => assetId === id);
+    copy.splice(currIndex, 1);
+    localStorage.setItem(storageKeys.assets, JSON.stringify(copy));
+  } else {
+    localStorage.removeItem(storageKeys.assets);
   }
 };

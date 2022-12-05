@@ -43,7 +43,6 @@ import { Note } from "./Note";
 import CustomRangeSlider from "./Form/CustomRangeSlider";
 import CustomTextInput from "./Form/CustomTextInput";
 import initAPI from "@/lib/initAPI";
-import { BotConfig } from "@/lib/types/config";
 import { ValidateWallet } from "./Modals/validateWallet";
 import { AssetSearchInput } from "./Form/AssetSearchInput";
 import {
@@ -51,6 +50,9 @@ import {
   calculateLogValue,
   calculateReverseLogValue,
   checkTinymanLiquidity,
+  currentlyTrading,
+  addToTradeList,
+  removeFromTradeList,
 } from "@/lib/helper";
 import { usePriceConversionHook } from "@/hooks/usePriceConversionHook";
 import Image from "next/image";
@@ -61,6 +63,7 @@ import { getTinymanPools } from "@/lib/getTinyman";
 import { initialState, updateReducer } from "./Reducer/updateReducer";
 import { AvailableBalance } from "./AvailableBalance";
 import { HtmlTooltip } from "./HtmlTooltip";
+import { storageKeys } from "@/lib/storage";
 
 const WalletButton: any = dynamic(
   () =>
@@ -119,9 +122,10 @@ export const BotForm = () => {
     loading,
     setLoading,
   }: any = context;
-  const [{ availableBalance, ASAError, ASAWarning, currentPrices }, dispatch] =
-    useReducer(updateReducer, initialState);
-  const [config, setConfig] = useState<null | BotConfig>();
+  const [
+    { availableBalance, ASAError, ASAWarning, currentPrices, config },
+    dispatch,
+  ] = useReducer(updateReducer, initialState);
   const { algoRate } = usePriceConversionHook({
     env: environment,
   });
@@ -193,8 +197,8 @@ export const BotForm = () => {
       } else if (walletAddr && !mnemonic) {
         validateWallet();
       } else if (walletAddr && mnemonic) {
+        if (currentlyTrading(assetId, dispatch)) return;
         try {
-          postMessage(assetId);
           const pouchUrl = process.env.NEXT_PUBLIC_POUCHDB_URL
             ? process.env.NEXT_PUBLIC_POUCHDB_URL + "/"
             : "";
@@ -218,9 +222,8 @@ export const BotForm = () => {
           };
           _config.minSpreadPerc = _config.minSpreadPerc / 100;
           _config.nearestNeighborKeep = _config.nearestNeighborKeep / 100;
-
+          dispatch({ type: "config", payload: _config });
           stopLoop({ resetExit: true });
-          setConfig(_config);
           setLoading(true);
           runLoop({
             config: _config,
@@ -241,6 +244,7 @@ export const BotForm = () => {
 
   const stopBot = (callFn?: boolean) => {
     setLoading(false);
+    removeFromTradeList(config?.assetId);
     if (config && callFn) stopLoop({ config });
   };
 
@@ -439,8 +443,19 @@ export const BotForm = () => {
   };
 
   useEffect(() => {
-    //Listen to when the event logs a low balance error so the bot can stop on the UI
+    // Remove the asset list on page load
+    if (!loading && !config) {
+      localStorage.removeItem(storageKeys.assets);
+    }
+
+    // Listen to running bot events
     events.on("running-bot", ({ content }: { content: string }) => {
+      //Update tradelist
+      if (config && loading) {
+        addToTradeList(config.assetId);
+      }
+
+      // If low balance error, stop the bot on the UI
       if (content === "Low balance!") {
         stopBot();
         dispatch({
@@ -449,8 +464,7 @@ export const BotForm = () => {
         });
       }
     });
-    return () => events.off("running-bot");
-  }, []);
+  }, [config, loading]);
 
   return (
     <>
@@ -541,6 +555,7 @@ export const BotForm = () => {
                           type: "asaWarning",
                           payload: null,
                         });
+                        currentlyTrading(assetId, dispatch);
                         if (assetId && assetDecimals) {
                           getAccount(assetId, assetDecimals, assetName);
                         } else {
@@ -1250,7 +1265,7 @@ export const BotForm = () => {
                       loading ||
                       !isValid ||
                       !values.assetId ||
-                      ASAError ||
+                      ASAError !== null ||
                       (walletAddr && !mnemonic)
                     }
                     sx={{ py: "0.8rem", mt: "1rem" }}
