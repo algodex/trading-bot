@@ -14,7 +14,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { Field, Form, Formik, FormikValues } from "formik";
 import * as yup from "yup";
 import runLoop, { stopLoop } from "@/lib/runLoop";
@@ -64,6 +70,7 @@ import { initialState, updateReducer } from "./Reducer/updateReducer";
 import { AvailableBalance } from "./AvailableBalance";
 import { HtmlTooltip } from "./HtmlTooltip";
 import { storageKeys } from "@/lib/storage";
+import { UseFormik } from "@/hooks/useFormik";
 
 const WalletButton: any = dynamic(
   () =>
@@ -104,6 +111,7 @@ const percentStyles: any = {
 };
 
 export const BotForm = () => {
+  const formikRef = useRef<any>();
   const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error("Must be inside of a App Provider");
@@ -118,10 +126,10 @@ export const BotForm = () => {
     setMnemonic,
     environment,
     setEnvironment,
-    formikRef,
     loading,
     setLoading,
   }: any = context;
+
   const [
     { availableBalance, ASAError, ASAWarning, currentPrices, config },
     dispatch,
@@ -538,6 +546,7 @@ export const BotForm = () => {
           return (
             <Form onSubmit={handleSubmit}>
               <>
+                <UseFormik />
                 <Grid container sx={{ alignItems: "center", rowGap: "5px" }}>
                   <Grid item md={7} xs={12}>
                     <AssetSearchInput

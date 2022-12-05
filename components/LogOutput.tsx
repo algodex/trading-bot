@@ -43,12 +43,8 @@ import { AppContext } from "@/context/appContext";
 import { cancelAssetOrders } from "@/lib/cancelAssetOrders";
 
 export const LogOutput = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error("Must be inside of a App Provider");
-  }
-  const { walletAddr, mnemonic, environment, formikRef, loading }: any =
-    context;
+  const { walletAddr, mnemonic, environment, formValues, loading }: any =
+    useContext(AppContext);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [delCount, setDelCount] = useState(0);
   const [canceling, setCanceling] = useState(false);
@@ -94,27 +90,22 @@ export const LogOutput = () => {
   };
 
   const cancelOrders = async () => {
-    if (formikRef.current.values.assetId) {
-      setNote("");
-      try {
-        setCanceling(true);
-        await cancelAssetOrders(
-          {
-            address: walletAddr,
-            mnemonic: mnemonic,
-          },
-          Number(formikRef.current.values.assetId),
-          environment
-        );
-        // console.log({ res });
-        setCanceling(false);
-      } catch (error) {
-        console.error(error);
-        setNote("Sorry, an error occurred");
-        setCanceling(false);
-      }
-    } else {
-      setNote("Please enter valid assetId");
+    if (!formValues.assetId) return;
+    setNote("");
+    try {
+      setCanceling(true);
+      await cancelAssetOrders(
+        {
+          address: walletAddr,
+          mnemonic: mnemonic,
+        },
+        Number(formValues.assetId),
+        environment
+      );
+      setCanceling(false);
+    } catch (error) {
+      setNote("Sorry, an error occurred");
+      setCanceling(false);
     }
   };
 
@@ -244,7 +235,7 @@ export const LogOutput = () => {
           >
             <LoadingButton
               variant="outlined"
-              disabled={canceling || loading}
+              disabled={canceling || loading || !formValues.assetId}
               loading={canceling}
               sx={{
                 whiteSpace: "nowrap",
