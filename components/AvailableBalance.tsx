@@ -24,6 +24,30 @@ import { HtmlTooltip } from "./HtmlTooltip";
 import Link from "./Nav/Link";
 import { AssetSchema } from "./BotForm";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableRow from "@mui/material/TableRow";
+
+const tableStyles = {
+  ".MuiTableCell-root, .MuiTableRow-root:last-child td, .MuiTableRow-root:last-child th":
+    {
+      padding: "13px",
+      border: "0.2px solid",
+      borderTop: "none",
+      borderColor: "secondary.contrastText",
+    },
+  "th.MuiTableCell-root, .MuiTableRow-root:last-child th ": {
+    borderLeft: "none",
+  },
+  ".MuiTableCell-root:last-child, .MuiTableRow-root:last-child td": {
+    borderRight: "none",
+  },
+  ".MuiTableRow-root:last-child th, .MuiTableRow-root:last-child td ": {
+    borderBottom: "none",
+  },
+};
 
 export const AvailableBalance = ({
   availableBalance,
@@ -115,81 +139,71 @@ export const AvailableBalance = ({
             </HtmlTooltip>
           </Typography>
         </Box>
-        {availableBalance.map((asset: AssetSchema, index: number) => (
-          <Box
-            key={index}
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "2px",
-              borderBottom: "0.2px solid",
-              borderColor:
-                index === 0 ? "secondary.contrastText" : "transparent",
-              paddingInline: "30px",
-              "@media(max-width:400px)": {
-                paddingInline: "10px",
-              },
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: "18px",
-                fontWeight: 700,
-                width: "30%",
-              }}
-            >
-              {asset.name || asset["asset-id"]}
-            </Typography>
-            <Box
-              sx={{
-                borderRight: "0.2px solid",
-                borderLeft: "0.2px solid",
-                borderColor: "secondary.contrastText",
-                width: "34%",
-                textAlign: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "18px",
-                  fontWeight: 700,
-                }}
-              >
-                $
-                {currentPrices[index].toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </Typography>
-            </Box>
-            <Box sx={{ width: "36%", textAlign: "center" }}>
-              <Typography
-                sx={{
-                  fontSize: "18px",
-                  fontWeight: 700,
-                }}
-              >
-                {asset.amount.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: "grey.200",
-                }}
-              >
-                $
-                {asset.amountInUSD.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </Typography>
-            </Box>
-          </Box>
-        ))}
+        <TableContainer>
+          <Table sx={tableStyles}>
+            <TableBody>
+              {availableBalance.map((asset: AssetSchema, index: number) => (
+                <TableRow
+                  key={index}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row" width={"100px"}>
+                    <Typography
+                      sx={{
+                        fontSize: "18px",
+                        fontWeight: 700,
+                        width: "30%",
+                      }}
+                    >
+                      {asset.name || asset["asset-id"]}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        fontSize: "18px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      $
+                      {currentPrices[index].toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        fontSize: "18px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {asset.amount.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        color: "grey.200",
+                      }}
+                    >
+                      $
+                      {asset.amountInUSD.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
       <Typography
         sx={{

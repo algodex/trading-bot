@@ -7,10 +7,9 @@ type Wallet = {
   mnemonic: string;
 };
 
-export const cancelAssetOrders = async (
-  wallet: Wallet,
-  assetId: number,
-  environment: Environment
+export const fetchOpenOrders = async (
+  environment: Environment,
+  wallet: Wallet
 ) => {
   const algodexApi = initAPI(environment);
   await initWallet(algodexApi, wallet.address, wallet.mnemonic);
@@ -18,6 +17,15 @@ export const cancelAssetOrders = async (
     "wallet",
     wallet.address
   );
+  return { orders, algodexApi };
+};
+
+export const cancelAssetOrders = async (
+  wallet: Wallet,
+  assetId: number,
+  environment: Environment
+) => {
+  const { orders, algodexApi } = await fetchOpenOrders(environment, wallet);
   const openAssetOrders = orders.filter(
     (order: any) => order.asset.id === assetId
   );
@@ -26,9 +34,9 @@ export const cancelAssetOrders = async (
     return { ...order, wallet: algodexApi.wallet };
   });
 
-   await Promise.all(
+  await Promise.all(
     mappedOpenAssetOrders.map((order: any) => {
-     return algodexApi.closeOrder(order);
+      return algodexApi.closeOrder(order);
     })
   );
   return openAssetOrders;

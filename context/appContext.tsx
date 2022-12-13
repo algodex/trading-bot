@@ -1,4 +1,5 @@
 import { PassPhrase } from "@/components/Form/CustomPasswordInput";
+import { openOrderSchema } from "@/components/OpenOrders/ordersTable";
 import { getWallet } from "@/lib/storage";
 import { Environment } from "@/lib/types/config";
 import { useRouter } from "next/router";
@@ -22,6 +23,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [openMnemonic, setOpenMnemonic] = useState<string | null>(null);
   const [forgotPassphrase, setForgotPassphrase] = useState<boolean>(false);
   const [environment, setEnvironment] = useState<any | Environment>();
+  const [openOrders, setOpenOrders] = useState<openOrderSchema[]>([]);
   const [passphrase, setPassphrase] = useState<PassPhrase>({
     password: "",
     show: false,
@@ -83,6 +85,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setLoading,
         formValues,
         setFormValues,
+        openOrders,
+        setOpenOrders,
       }}
     >
       {children}

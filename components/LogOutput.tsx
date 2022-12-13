@@ -37,14 +37,20 @@ import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { cardStyles } from "./BotForm";
 import { storageKeys } from "@/lib/storage";
 
-//Context
+//Algodex
 import { AppContext } from "@/context/appContext";
-
 import { cancelAssetOrders } from "@/lib/cancelAssetOrders";
+import { OrdersTable } from "./OpenOrders/ordersTable";
 
 export const LogOutput = () => {
-  const { walletAddr, mnemonic, environment, formValues, loading }: any =
-    useContext(AppContext);
+  const {
+    walletAddr,
+    mnemonic,
+    environment,
+    formValues,
+    loading,
+    setOpenOrders,
+  }: any = useContext(AppContext);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [delCount, setDelCount] = useState(0);
   const [canceling, setCanceling] = useState(false);
@@ -102,6 +108,7 @@ export const LogOutput = () => {
         Number(formValues.assetId),
         environment
       );
+      setOpenOrders([]);
       setCanceling(false);
     } catch (error) {
       setNote("Sorry, an error occurred");
@@ -296,6 +303,7 @@ export const LogOutput = () => {
           {note}
         </Typography>
       )}
+      <OrdersTable />
     </>
   );
 };
