@@ -37,10 +37,10 @@ import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { cardStyles } from "./BotForm";
 import { storageKeys } from "@/lib/storage";
 
-//Context
+//Algodex
 import { AppContext } from "@/context/appContext";
-
 import { cancelAssetOrders } from "@/lib/cancelAssetOrders";
+import { OrdersTable } from "./OpenOrders/ordersTable";
 
 export const LogOutput = () => {
   const { walletAddr, mnemonic, environment, formValues, loading }: any =
@@ -296,6 +296,7 @@ export const LogOutput = () => {
           {note}
         </Typography>
       )}
+      <OrdersTable />
     </>
   );
 };
