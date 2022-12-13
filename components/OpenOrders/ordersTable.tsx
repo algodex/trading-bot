@@ -87,8 +87,9 @@ export const OrdersTable = () => {
     mnemonic,
     formValues: { assetId, assetName },
     environment,
+    openOrders,
+    setOpenOrders,
   }: any = useContext(AppContext);
-  const [openOrders, setOpenOrders] = useState<openOrderSchema[]>([]);
   const [activeCurrency, setActiveCurrency] = useState<"ALGO" | "USD">("ALGO");
 
   const getOpenOrders = useCallback(async () => {
@@ -98,6 +99,7 @@ export const OrdersTable = () => {
     });
     if (orders)
       setOpenOrders(orders.filter((order: any) => order.asset.id === assetId));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assetId, walletAddr, mnemonic, environment]);
 
   useEffect(() => {
@@ -106,7 +108,7 @@ export const OrdersTable = () => {
     } else {
       setOpenOrders([]);
     }
-  }, [assetId, walletAddr, environment, getOpenOrders]);
+  }, [assetId, walletAddr, environment, getOpenOrders, setOpenOrders]);
 
   if (openOrders.length < 1) return null;
   return (
@@ -185,13 +187,17 @@ export const OrdersTable = () => {
           <Table sx={tableStyles}>
             <TableBody>
               <OrderRow
-                openOrders={openOrders.filter((order) => order.type === "sell")}
+                openOrders={openOrders.filter(
+                  (order: openOrderSchema) => order.type === "sell"
+                )}
                 activeCurrency={activeCurrency}
                 assetName={assetName}
                 environment={environment}
               />
               <OrderRow
-                openOrders={openOrders.filter((order) => order.type === "buy")}
+                openOrders={openOrders.filter(
+                  (order: openOrderSchema) => order.type === "buy"
+                )}
                 activeCurrency={activeCurrency}
                 assetName={assetName}
                 environment={environment}

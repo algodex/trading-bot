@@ -73,7 +73,6 @@ export const OrderRow = ({
               color: `${order.type === "sell" ? "error.main" : "accent.dark"}`,
             }}
           >
-            {activeCurrency === "USD" && "$ "}
             {(
               order.price * (activeCurrency === "USD" ? algoRate : 1)
             ).toLocaleString(undefined, {
@@ -126,7 +125,6 @@ export const OrderRow = ({
               fontSize: "12px",
             }}
           >
-            {activeCurrency === "USD" && "$ "}
             {(
               order.total * (activeCurrency === "USD" ? algoRate : 1)
             ).toLocaleString(undefined, {
