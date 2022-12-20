@@ -30,12 +30,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Edit the .env file to your Algorand node and indexer endpoints, and add in your wallet mnemonic (without commas).
 
 ```
-yarn run compile-and-start-cli --assetId=insert_assetId --ladderTiers=insert_ladderTiers --spreadPercentage=insert_spreadPercentage --orderAlgoDepth=insert_orderAlgoDepth
+yarn run compile-and-start-cli --assetId=insert_assetId --ladderTiers=insert_ladderTiers --spreadPercentage=insert_spreadPercentage --orderAlgoDepth=insert_orderAlgoDepth --nearestNeighborKeep=insert_nearestNeighborKeep
 ```
-- *assetId* is the Id of the asset you want to trade on the bot
-- *ladderTiers* is the number of orders to place on either side of the spread
-- *spreadPercentage* is the distance between each order. Lower gets more rewards
-- *orderAlgoDepth* is the order depth in algos. I.e. each order will be worth X algos
+
+- _assetId_ is the Id of the asset you want to trade on the bot
+- _ladderTiers_ is the number of orders to place on either side of the spread
+- _spreadPercentage_ is the distance between each order. Lower gets more rewards
+- _nearestNeighborKeep_ is the tolerance for the bot to cancel and replace orders as the price is changing. If your current orders are within the percentage set here, the bot will not cancel and replace until they go above this tolerance. This setting defaults to half of the set spread percentage
+- _orderAlgoDepth_ is the order depth in algos. I.e. each order will be worth X algos
+
 ## Testing
 
 ```
