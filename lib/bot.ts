@@ -49,6 +49,7 @@ if (args.ladderTiers == undefined || args.ladderTiers.length === 0) {
 if (args.spreadPercentage == undefined || args.spreadPercentage.length === 0) {
   throw new Error("spreadPercentage is not set in the args!");
 }
+
 if (args.orderAlgoDepth == undefined || args.orderAlgoDepth.length === 0) {
   throw new Error("orderAlgoDepth is not set in the args!");
 }
@@ -88,7 +89,7 @@ if (!process.env.ALGODEX_ASA_ESCROW_APP) {
 // }
 const minSpreadPerc = parseFloat(args.spreadPercentage);
 const nearestNeighborKeep =
-  parseFloat(process.env.NEAREST_NEIGHBOR_KEEP!) || 0.0035; // FIXME
+  parseFloat(args.nearestNeighborKeep) || minSpreadPerc / 2;
 // const escrowDB = new PouchDB('escrows');
 // const escrowDB = new PouchDB('http://admin:dex@127.0.0.1:5984/market_maker');
 const assetId = parseInt(args.assetId);
